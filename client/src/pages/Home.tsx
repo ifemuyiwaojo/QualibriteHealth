@@ -7,31 +7,35 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-primary/10 to-background py-20">
+      <section className="relative bg-gradient-to-b from-primary/10 via-primary/5 to-background py-24">
         <div className="container">
-          <div className="grid gap-8 md:grid-cols-2 md:gap-12">
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                QUALITY MENTAL HEALTH CARE WITHOUT A WAIT!
+          <div className="grid gap-12 md:grid-cols-2">
+            <div className="flex flex-col justify-center space-y-6">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  QUALITY MENTAL HEALTH CARE
+                </span>
+                <br />
+                <span className="text-foreground">WITHOUT A WAIT!</span>
               </h1>
-              <p className="mt-4 text-lg text-muted-foreground">
+              <p className="text-xl font-medium text-primary">
                 For Adults & Children
               </p>
-              <div className="mt-4 text-muted-foreground">
+              <div className="space-y-2 text-lg text-muted-foreground">
                 <p>Monday - Saturday: 7:00AM - 5:00PM</p>
                 <p>Sunday: 7:00AM - 4:00PM</p>
               </div>
-              <div className="mt-8 flex gap-4">
-                <Button asChild size="lg">
+              <div className="flex gap-4">
+                <Button asChild size="lg" className="text-lg">
                   <Link href="/contact">Schedule Now</Link>
                 </Button>
               </div>
             </div>
             <div className="relative hidden md:block">
               <img
-                src="https://images.unsplash.com/photo-1666214280391-8b0c1a9c1252"
-                alt="Mental Health Care"
-                className="rounded-lg object-cover shadow-lg"
+                src="https://images.unsplash.com/photo-1573497620053-ea5300f94f21"
+                alt="Mental Health Support"
+                className="rounded-2xl object-cover shadow-2xl"
               />
             </div>
           </div>
@@ -39,15 +43,15 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20">
+      <section className="py-24">
         <div className="container">
-          <div className="mb-12 text-center">
+          <div className="mb-16 text-center">
             <img
               src="/excellence-badge.png"
               alt="Excellence in Mental Health Care"
-              className="mx-auto h-32 w-32"
+              className="mx-auto h-32 w-32 drop-shadow-md"
             />
-            <h2 className="mt-6 text-2xl font-bold">Excellence in Mental Health Care</h2>
+            <h2 className="mt-8 text-3xl font-bold">Excellence in Mental Health Care</h2>
           </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -72,11 +76,11 @@ export default function Home() {
                 description: "Comprehensive mental health care",
               },
             ].map((feature, index) => (
-              <Card key={index}>
-                <CardContent className="flex flex-col items-center p-6 text-center">
+              <Card key={index} className="transition-all hover:shadow-lg">
+                <CardContent className="flex flex-col items-center p-8 text-center">
                   <feature.icon className="h-12 w-12 text-primary" />
-                  <h3 className="mt-4 font-semibold">{feature.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <h3 className="mt-6 text-xl font-semibold">{feature.title}</h3>
+                  <p className="mt-4 text-muted-foreground">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -87,22 +91,25 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-gray-50 py-24">
         <div className="container">
-          <div className="grid gap-8 md:grid-cols-2">
-            <div>
-              <h2 className="text-3xl font-bold">About Us</h2>
-              <p className="mt-4 text-muted-foreground">
+          <div className="grid gap-12 md:grid-cols-2">
+            <div className="space-y-6">
+              <h2 className="text-4xl font-bold">About Us</h2>
+              <p className="text-lg leading-relaxed text-muted-foreground">
                 At QualiBrite Family Psychiatry, we take your mental health very seriously. We understand the
                 challenges our patients face and we are committed to providing comprehensive mental health services
                 within the local San Antonio area.
               </p>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/about">Learn More About Us</Link>
+              </Button>
             </div>
             <div>
               <img
-                src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d"
+                src="https://images.unsplash.com/photo-1576091160550-2173dba999ef"
                 alt="Mental Health Professional"
-                className="rounded-lg shadow-lg"
+                className="rounded-2xl object-cover shadow-xl"
               />
             </div>
           </div>
