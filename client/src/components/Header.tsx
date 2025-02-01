@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 
@@ -8,6 +8,7 @@ const navigation = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
   { name: "Services", href: "/services" },
+  { name: "FAQ", href: "/faq" },
   { name: "Contact", href: "/contact" },
 ];
 
@@ -20,7 +21,7 @@ export default function Header() {
       <nav className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">QualiBrite Health</span>
+            <span className="text-xl font-bold text-primary">QUALIBRITE FAMILY PSYCHIATRY</span>
           </Link>
           <div className="flex gap-6">
             {navigation.map((item) => (
@@ -64,7 +65,7 @@ export default function Header() {
 
         <div className="flex flex-1 items-center justify-between md:justify-end">
           <Link href="/" className="md:hidden">
-            <span className="text-xl font-bold text-primary">QualiBrite Health</span>
+            <span className="text-xl font-bold text-primary">QUALIBRITE FAMILY PSYCHIATRY</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild variant="default" className="hidden md:inline-flex">
