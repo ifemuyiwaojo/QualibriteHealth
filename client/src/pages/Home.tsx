@@ -11,7 +11,7 @@ export default function Home() {
         <div className="container">
           <div className="grid gap-12 md:grid-cols-2">
             <div className="flex flex-col justify-center space-y-6">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
                 <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                   QUALITY MENTAL HEALTH CARE
                 </span>
