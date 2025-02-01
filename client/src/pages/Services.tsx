@@ -1,36 +1,46 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Stethoscope, Brain, Baby, Activity, Microscope } from "lucide-react";
+import { 
+  Users, 
+  UserCheck, 
+  Pill, 
+  Video, 
+  PhoneCall, 
+  ClipboardCheck,
+  ArrowRight
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 const services = [
   {
-    icon: Heart,
-    title: "Cardiology",
-    description: "Comprehensive heart care services including diagnostics and treatment.",
+    icon: UserCheck,
+    title: "Individual Therapy",
+    description: "One-on-one therapy sessions tailored to your unique needs. Our experienced therapists provide a safe, confidential space to work through personal challenges.",
   },
   {
-    icon: Brain,
-    title: "Neurology",
-    description: "Expert care for neurological conditions and disorders.",
+    icon: Users,
+    title: "Group Therapy",
+    description: "Supportive group sessions where participants can share experiences and learn from others facing similar challenges in a structured, therapeutic environment.",
   },
   {
-    icon: Baby,
-    title: "Pediatrics",
-    description: "Specialized healthcare services for children and adolescents.",
+    icon: Pill,
+    title: "Medication Management",
+    description: "Expert psychiatric medication management and monitoring to ensure optimal treatment outcomes with regular follow-up care.",
   },
   {
-    icon: Activity,
-    title: "Internal Medicine",
-    description: "Primary care and management of adult medical conditions.",
+    icon: Video,
+    title: "Telepsychiatry Sessions",
+    description: "Convenient online psychiatric care from the comfort of your home, maintaining the same high quality of in-person sessions.",
   },
   {
-    icon: Stethoscope,
-    title: "Family Medicine",
-    description: "Comprehensive healthcare for patients of all ages.",
+    icon: PhoneCall,
+    title: "Crisis Intervention",
+    description: "24/7 emergency mental health support and intervention services for urgent situations requiring immediate attention.",
   },
   {
-    icon: Microscope,
-    title: "Laboratory Services",
-    description: "Advanced diagnostic testing and laboratory services.",
+    icon: ClipboardCheck,
+    title: "Psychological Assessments",
+    description: "Comprehensive psychological evaluations and testing to provide accurate diagnoses and guide treatment planning.",
   },
 ];
 
@@ -43,8 +53,8 @@ export default function Services() {
           <div className="mx-auto max-w-2xl text-center">
             <h1 className="text-4xl font-bold tracking-tight">Our Services</h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Comprehensive healthcare services delivered by experienced professionals
-              using state-of-the-art technology.
+              Comprehensive mental health services delivered by experienced professionals
+              using evidence-based approaches.
             </p>
           </div>
         </div>
@@ -71,37 +81,21 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Image Section */}
-      <section className="bg-gray-50 py-20">
+      {/* CTA Section */}
+      <section className="bg-primary/5 py-20">
         <div className="container">
-          <div className="grid gap-8 md:grid-cols-2">
-            <img
-              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef"
-              alt="Patient Care"
-              className="rounded-lg object-cover shadow-lg"
-            />
-            <div className="flex flex-col justify-center">
-              <h2 className="text-3xl font-bold">Quality Patient Care</h2>
-              <p className="mt-4 text-muted-foreground">
-                Our commitment to excellence in healthcare extends beyond just medical
-                treatment. We provide comprehensive care that considers the whole
-                person, ensuring the best possible outcomes for our patients.
-              </p>
-              <ul className="mt-6 space-y-4">
-                <li className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-primary" />
-                  <span>Personalized treatment plans</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-primary" />
-                  <span>Regular health monitoring</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Stethoscope className="h-5 w-5 text-primary" />
-                  <span>Expert medical consultation</span>
-                </li>
-              </ul>
-            </div>
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold">Ready to Get Started?</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Take the first step towards better mental health. Schedule a consultation
+              with our experienced mental health professionals.
+            </p>
+            <Button asChild size="lg" className="mt-8">
+              <Link href="/contact" className="group">
+                Schedule Consultation
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
