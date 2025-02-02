@@ -135,4 +135,61 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
   }
 });
 
+// Session creation endpoint
+router.post('/session', authenticateToken, async (req, res) => {
+  try {
+    const { userId, role } = req.body;
+    console.log('Creating new session for user:', userId, 'with role:', role);
+
+    // Generate a unique session ID
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create a VSee room using their API
+    const response = await axios.post(`${VSEE_BASE_URL}/rooms`, {
+      room_id: sessionId,
+      api_key: VSEE_API_KEY,
+      max_participants: 2,
+      room_type: 'meeting'
+    });
+
+    if (!response.data?.success) {
+      throw new Error('Failed to create VSee room');
+    }
+
+    console.log('Session created successfully:', sessionId);
+
+    res.json({
+      success: true,
+      sessionId,
+      roomData: response.data
+    });
+  } catch (error) {
+    console.error('Error creating session:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create session'
+    });
+  }
+});
+
+// Active session retrieval endpoint
+router.get('/active-session', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    // For now, we'll return no active session
+    // In a full implementation, this would check the database for active sessions
+    res.json({
+      success: true,
+      session: null
+    });
+  } catch (error) {
+    console.error('Error fetching active session:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch active session'
+    });
+  }
+});
+
 export default router;
