@@ -11,8 +11,8 @@ export interface AuthRequest extends Request {
     id: number;
     email: string;
     role: string;
-    isSuperadmin?: boolean;
-    changePasswordRequired?: boolean;
+    isSuperadmin: boolean;
+    changePasswordRequired: boolean;
   };
 }
 
@@ -46,8 +46,8 @@ export const authenticateToken = async (
       id: user.id,
       email: user.email,
       role: user.role,
-      isSuperadmin: user.isSuperadmin,
-      changePasswordRequired: user.changePasswordRequired,
+      isSuperadmin: user.isSuperadmin || false,
+      changePasswordRequired: user.changePasswordRequired || false,
     };
 
     next();
@@ -58,9 +58,32 @@ export const authenticateToken = async (
 
 export const authorizeRoles = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    // Allow superadmin access to everything
+    if (req.user.isSuperadmin) {
+      return next();
+    }
+
+    // For non-superadmins, check role permissions
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({ message: "Access denied" });
     }
+
     next();
   };
+};
+
+// Add a superadmin check middleware
+export const requireSuperadmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user?.isSuperadmin) {
+    return res.status(403).json({ message: "Superadmin access required" });
+  }
+  next();
 };

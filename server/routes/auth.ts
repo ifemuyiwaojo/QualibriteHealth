@@ -226,7 +226,7 @@ router.post("/create-admin", authenticateToken, authorizeRoles("admin"), async (
       where: eq(users.id, req.user.id),
     });
 
-    if (!requestingUser?.is_superadmin) {
+    if (!requestingUser?.isSuperadmin) {
       return res.status(403).json({ 
         message: "Only superadmins can create new admin users" 
       });
@@ -236,20 +236,34 @@ router.post("/create-admin", authenticateToken, authorizeRoles("admin"), async (
     const temporaryPassword = `Admin${Math.random().toString(36).slice(2)}#${new Date().getFullYear()}`;
     const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
 
+    // Check if email already exists
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
     const [newAdmin] = await db.insert(users).values({
       email,
       passwordHash: hashedPassword,
       role: 'admin',
-      change_password_required: true,
-      is_superadmin: false,
+      changePasswordRequired: true, // Ensure password change is required
+      isSuperadmin: false,
     }).returning();
 
     await auditLog(req.user.id, 'admin_user_creation', 'users', newAdmin.id, req);
 
     res.status(201).json({
       message: "Admin user created successfully",
-      temporaryPassword,
-      admin: { id: newAdmin.id, email: newAdmin.email, role: newAdmin.role },
+      temporaryPassword, // This will be shown only once to the superadmin
+      admin: { 
+        id: newAdmin.id, 
+        email: newAdmin.email, 
+        role: newAdmin.role,
+        requiresPasswordChange: newAdmin.changePasswordRequired,
+      },
     });
   } catch (error: any) {
     console.error("Admin creation error:", error);
