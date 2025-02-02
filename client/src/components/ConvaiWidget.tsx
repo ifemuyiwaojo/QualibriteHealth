@@ -33,8 +33,13 @@ export function ConvaiWidget() {
   }, []);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <elevenlabs-convai agent-id="6UB9cwbWARvQibbuT9bk"></elevenlabs-convai>
-    </div>
+    <>
+      <div className="fixed bottom-4 right-4 z-50">
+        <elevenlabs-convai agent-id="6UB9cwbWARvQibbuT9bk"></elevenlabs-convai>
+      </div>
+      <div className="fixed bottom-4 left-4 z-50">
+        <charla-widget p="d0638494-03d5-4284-94a4-9b11afb19fde"></charla-widget>
+      </div>
+    </>
   );
 }
