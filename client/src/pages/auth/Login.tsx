@@ -24,6 +24,15 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+interface LoginResponse {
+  message: string;
+  user: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
 export default function Login() {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
@@ -44,15 +53,17 @@ export default function Login() {
     try {
       setIsSubmitting(true);
       console.log("Attempting login...");
-      const response = await login(data.email, data.password);
+      const response = await login(data.email, data.password) as LoginResponse;
       console.log("Login successful");
 
-      if (response.user) {
+      if (response?.user) {
         setLocation("/dashboard");
         toast({
           title: "Login Successful",
           description: "Welcome back!",
         });
+      } else {
+        throw new Error("Invalid response format");
       }
     } catch (error) {
       console.error("Login failed:", error);

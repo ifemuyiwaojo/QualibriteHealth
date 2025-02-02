@@ -2,25 +2,54 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "@db";
-import { users, insertUserSchema } from "@db/schema";
+import { users, auditLogs, insertUserSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-// Get current user
-router.get("/me", authenticateToken, (req, res) => {
+// Audit logging middleware
+const auditLog = async (userId: number, action: string, resourceType: string, resourceId: number, req: any) => {
+  try {
+    await db.insert(auditLogs).values({
+      userId,
+      action,
+      resourceType,
+      resourceId,
+      details: {
+        method: req.method,
+        path: req.path,
+        body: req.body
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent')
+    });
+  } catch (error) {
+    console.error('Audit logging failed:', error);
+  }
+};
+
+// Get current user with enhanced security
+router.get("/me", authenticateToken, async (req: any, res) => {
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated" });
   }
+
+  await auditLog(req.user.id, 'user_check', 'users', req.user.id, req);
   res.json({ user: req.user });
 });
 
-// Register new user
+// Register new user with enhanced security and audit
 router.post("/register", async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
+
+    // For admin registration, require a special token
+    if (validatedData.role === 'admin' && req.headers['x-admin-token'] !== process.env.ADMIN_REGISTRATION_TOKEN) {
+      return res.status(403).json({ message: "Unauthorized admin registration attempt" });
+    }
+
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, validatedData.email),
     });
@@ -48,6 +77,9 @@ router.post("/register", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
+    // Log the registration
+    await auditLog(user.id, 'user_registration', 'users', user.id, req);
+
     res.status(201).json({
       message: "User registered successfully",
       user: { id: user.id, email: user.email, role: user.role },
@@ -58,7 +90,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login
+// Login with enhanced security and audit
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -72,6 +104,8 @@ router.post("/login", async (req, res) => {
 
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {
+      // Log failed login attempt
+      await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -88,7 +122,9 @@ router.post("/login", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
-    // Send back minimal user data
+    // Log successful login
+    await auditLog(user.id, 'successful_login', 'users', user.id, req);
+
     const userData = {
       id: user.id,
       email: user.email,
@@ -105,8 +141,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Logout
-router.post("/logout", authenticateToken, (req, res) => {
+// Logout with audit
+router.post("/logout", authenticateToken, async (req: any, res) => {
+  if (req.user) {
+    await auditLog(req.user.id, 'logout', 'users', req.user.id, req);
+  }
   res.clearCookie("token");
   res.json({ message: "Logged out successfully" });
 });
