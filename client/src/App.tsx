@@ -16,8 +16,12 @@ import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import NotFound from "@/pages/not-found";
 
 function DashboardRouter() {
-  const { user } = useAuthProvider();
+  const { user, isLoading } = useAuthProvider();
   const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!user) {
     setLocation("/auth/login");
