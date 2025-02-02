@@ -21,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { TelehealthSession } from "@/components/TelehealthSession";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 const scheduleFormSchema = z.object({
@@ -54,17 +55,20 @@ export default function AppointmentsPage() {
         body: JSON.stringify({
           patientIds: [user?.id.toString()],
           patientNames: [user?.email],
-          providerId: "provider-1", // This should be dynamic based on provider selection
-          providerName: "Dr. Smith", // This should be dynamic based on provider selection
+          providerId: "provider-1",
+          providerName: "Dr. Smith",
           scheduledTime: values.scheduledTime.toISOString(),
           duration: parseInt(values.duration),
           isGroupSession: values.isGroupSession,
+          visitType: values.isGroupSession ? 'GROUP' : 'VIDEO',
+          reasonForVisit: "Scheduled Visit",
+          maxParticipants: values.isGroupSession ? 8 : 2
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to schedule appointment");
+        throw new Error(error.error || "Failed to schedule appointment");
       }
 
       return response.json();
@@ -158,10 +162,7 @@ export default function AppointmentsPage() {
             <CardTitle>Upcoming Appointments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {/* We'll reuse the TelehealthSession component here */}
-              <p>Your scheduled appointments will appear here</p>
-            </div>
+            <TelehealthSession isProvider={false} />
           </CardContent>
         </Card>
       </div>
