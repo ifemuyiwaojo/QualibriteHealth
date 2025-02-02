@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, Redirect } from "wouter";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -26,6 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function Login() {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,6 +39,7 @@ export default function Login() {
 
   async function onSubmit(data: LoginFormValues) {
     try {
+      setIsSubmitting(true);
       await login(data.email, data.password);
       toast({
         title: "Login Successful",
@@ -48,6 +51,8 @@ export default function Login() {
         description: "Please check your credentials and try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -102,8 +107,8 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Sign in
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Signing in..." : "Sign in"}
               </Button>
             </form>
           </Form>
