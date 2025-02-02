@@ -3,6 +3,7 @@ import { AuthContext, useAuthProvider } from "./lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { ConvaiWidget } from "@/components/ConvaiWidget";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Services from "@/pages/Services";
@@ -177,6 +178,7 @@ const Router = memo(function Router() {
         </Switch>
       </main>
       <Footer />
+      <ConvaiWidget />
     </div>
   );
 });
