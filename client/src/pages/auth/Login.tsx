@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, Redirect } from "wouter";
-import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useState, useCallback } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -28,6 +28,7 @@ export default function Login() {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,15 +38,19 @@ export default function Login() {
     },
   });
 
-  async function onSubmit(data: LoginFormValues) {
+  const handleSubmit = useCallback(async (data: LoginFormValues) => {
     try {
       setIsSubmitting(true);
+      console.log("Attempting login...");
       await login(data.email, data.password);
+      console.log("Login successful, redirecting...");
+      setLocation("/dashboard");
       toast({
         title: "Login Successful",
         description: "Welcome back!",
       });
     } catch (error) {
+      console.error("Login failed:", error);
       toast({
         title: "Login Failed",
         description: "Please check your credentials and try again.",
@@ -54,7 +59,7 @@ export default function Login() {
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [login, toast, setLocation]);
 
   if (isLoading) {
     return (
@@ -65,7 +70,8 @@ export default function Login() {
   }
 
   if (user) {
-    return <Redirect to="/dashboard" />;
+    console.log("User already logged in, redirecting to dashboard...");
+    return <Link href="/dashboard" replace />;
   }
 
   return (
@@ -76,7 +82,7 @@ export default function Login() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="email"
