@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { useState, useCallback } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -49,7 +49,9 @@ export default function Login() {
 
     try {
       setIsSubmitting(true);
+      console.log("Attempting login with:", data.email);
       const response = await login(data.email, data.password, data.rememberMe);
+      console.log("Login response:", response);
 
       if (response?.user) {
         if (response.user.changePasswordRequired) {
@@ -73,10 +75,14 @@ export default function Login() {
         description: "Invalid credentials. Please check your email and password.",
         variant: "destructive",
       });
+      form.setError("password", {
+        type: "manual",
+        message: "Invalid email or password"
+      });
     } finally {
       setIsSubmitting(false);
     }
-  }, [login, toast, isSubmitting, setLocation]);
+  }, [login, toast, isSubmitting, setLocation, form]);
 
   if (user) {
     return <Link href="/dashboard" replace />;
@@ -157,7 +163,14 @@ export default function Login() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Signing in..." : "Sign in"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
               </Button>
             </form>
           </Form>
