@@ -6,65 +6,86 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 
 interface TelehealthSessionProps {
-  sessionId?: string;
+  visitId?: string;
   isProvider?: boolean;
 }
 
 export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
-  sessionId,
+  visitId,
   isProvider = false,
 }) => {
   const { toast } = useToast();
 
-  const { data: session, isLoading, error } = useQuery({
-    queryKey: ['telehealth-session', sessionId],
+  const { data: visit, isLoading, error } = useQuery({
+    queryKey: ['telehealth-visit', visitId],
     queryFn: async () => {
-      if (!sessionId) return null;
-      const response = await fetch(`/api/telehealth/session/${sessionId}`);
+      if (!visitId) return null;
+      const response = await fetch(`/api/telehealth/visit/${visitId}`);
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch session');
+        throw new Error(errorData.error || 'Failed to fetch visit');
       }
       return response.json();
     },
-    enabled: !!sessionId,
+    enabled: !!visitId,
   });
 
-  const { data: upcomingSessions } = useQuery({
-    queryKey: ['telehealth-sessions-upcoming'],
+  const { data: upcomingVisits } = useQuery({
+    queryKey: ['telehealth-visits-upcoming'],
     queryFn: async () => {
-      const response = await fetch('/api/telehealth/sessions/upcoming');
+      const response = await fetch('/api/telehealth/visits/upcoming');
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch upcoming sessions');
+        throw new Error(errorData.error || 'Failed to fetch upcoming visits');
       }
       return response.json();
     },
   });
 
-  const joinSession = async () => {
-    if (!session?.session?.join_url && !session?.session?.host_url) {
+  const joinVisitMutation = useMutation({
+    mutationFn: async (visitId: string) => {
+      const response = await fetch(`/api/telehealth/visit/${visitId}/join`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to join visit');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.roomUrl) {
+        window.open(data.roomUrl, '_blank', 'width=1280,height=720');
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Room URL not available',
+          variant: 'destructive',
+        });
+      }
+    },
+    onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: 'Session URL not available',
+        description: error.message || 'Failed to join visit',
         variant: 'destructive',
       });
-      return;
-    }
+    },
+  });
 
-    // Open VSee session in a new window
-    window.open(
-      isProvider ? session.session.host_url : session.session.join_url,
-      '_blank',
-      'width=1280,height=720'
-    );
+  const joinVisit = async (visitId: string) => {
+    try {
+      await joinVisitMutation.mutateAsync(visitId);
+    } catch (error) {
+      // Error is handled by the mutation callbacks
+    }
   };
 
   if (error) {
     return (
       <Card className="p-6">
         <div className="text-red-500">
-          Error loading session: {error instanceof Error ? error.message : 'Unknown error'}
+          Error loading visit: {error instanceof Error ? error.message : 'Unknown error'}
         </div>
       </Card>
     );
@@ -84,33 +105,47 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
 
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Telehealth Session</h2>
-      {session?.session ? (
+      <h2 className="text-2xl font-bold mb-4">Telehealth Visit</h2>
+      {visit?.visit ? (
         <div className="space-y-4">
-          <p>Session ID: {session.session.id}</p>
-          <p>Status: {session.session.status}</p>
-          {session.session.scheduled_time && (
-            <p>Scheduled: {new Date(session.session.scheduled_time).toLocaleString()}</p>
+          <p>Visit ID: {visit.visit.id}</p>
+          <p>Status: {visit.visit.status}</p>
+          {visit.visit.scheduled_time && (
+            <p>Scheduled: {new Date(visit.visit.scheduled_time).toLocaleString()}</p>
           )}
-          {session.session.duration_minutes && (
-            <p>Duration: {session.session.duration_minutes} minutes</p>
+          {visit.visit.duration_minutes && (
+            <p>Duration: {visit.visit.duration_minutes} minutes</p>
           )}
-          <Button onClick={joinSession}>
-            {isProvider ? 'Start Session' : 'Join Session'}
+          <Button 
+            onClick={() => joinVisit(visit.visit.id)}
+            disabled={joinVisitMutation.isPending}
+          >
+            {joinVisitMutation.isPending ? 'Connecting...' : isProvider ? 'Start Visit' : 'Join Visit'}
           </Button>
         </div>
       ) : (
         <div>
-          <p className="mb-4">No active session</p>
-          {upcomingSessions?.sessions && upcomingSessions.sessions.length > 0 && (
+          <p className="mb-4">No active visit</p>
+          {upcomingVisits?.visits && upcomingVisits.visits.length > 0 && (
             <div>
-              <h3 className="text-xl font-semibold mb-2">Upcoming Sessions</h3>
+              <h3 className="text-xl font-semibold mb-2">Upcoming Visits</h3>
               <div className="space-y-2">
-                {upcomingSessions.sessions.map((session: any) => (
-                  <div key={session.id} className="p-3 border rounded">
-                    <p>Date: {new Date(session.scheduled_time).toLocaleString()}</p>
-                    <p>Duration: {session.duration_minutes} minutes</p>
-                    <p>Status: {session.status}</p>
+                {upcomingVisits.visits.map((visit: any) => (
+                  <div key={visit.id} className="p-3 border rounded">
+                    <p>Date: {new Date(visit.scheduled_time).toLocaleString()}</p>
+                    <p>Duration: {visit.duration_minutes} minutes</p>
+                    <p>Status: {visit.status}</p>
+                    {visit.status === 'SCHEDULED' && (
+                      <Button 
+                        onClick={() => joinVisit(visit.id)}
+                        disabled={joinVisitMutation.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                      >
+                        {joinVisitMutation.isPending ? 'Connecting...' : isProvider ? 'Start Visit' : 'Join Visit'}
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
