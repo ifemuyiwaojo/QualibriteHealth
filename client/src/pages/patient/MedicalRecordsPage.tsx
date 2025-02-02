@@ -12,9 +12,12 @@ export default function MedicalRecordsPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
-  const { data: records, isLoading } = useQuery<SelectMedicalRecord[]>({
+  const { data: records, isLoading, error } = useQuery<SelectMedicalRecord[]>({
     queryKey: ["/api/patient/medical-records"],
     enabled: !!user,
+    onError: (error) => {
+      console.error("Error fetching medical records:", error);
+    },
   });
 
   if (isLoading) {
@@ -25,7 +28,25 @@ export default function MedicalRecordsPage() {
     );
   }
 
+  if (error) {
+    console.error("Medical records error:", error);
+    return (
+      <div className="container py-10">
+        <Button
+          variant="outline"
+          className="mb-4"
+          onClick={() => setLocation("/dashboard")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Dashboard
+        </Button>
+        <div className="text-red-500">Error loading medical records: {error.message}</div>
+      </div>
+    );
+  }
+
   if (!records || records.length === 0) {
+    console.log("No medical records found for user:", user?.id);
     return (
       <div className="container py-10">
         <Button

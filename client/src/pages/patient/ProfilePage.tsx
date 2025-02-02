@@ -22,9 +22,12 @@ export default function PatientProfilePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
-  const { data: profile, isLoading } = useQuery<SelectPatient>({
+  const { data: profile, isLoading, error } = useQuery<SelectPatient>({
     queryKey: ["/api/patient/profile"],
     enabled: !!user,
+    onError: (error) => {
+      console.error("Error fetching profile:", error);
+    },
   });
 
   const updateProfileMutation = useMutation({
@@ -55,6 +58,7 @@ export default function PatientProfilePage() {
   }
 
   if (!profile) {
+    console.error("No profile data:", { user, error });
     return (
       <div className="container py-10">
         <Button
@@ -65,7 +69,7 @@ export default function PatientProfilePage() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
-        <div>Error loading profile</div>
+        <div>Error loading profile. Please try again later.</div>
       </div>
     );
   }

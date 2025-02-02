@@ -4,10 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function TelehealthPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+    const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
@@ -63,6 +66,14 @@ export default function TelehealthPage() {
 
   return (
     <div className="container py-10">
+       <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => setLocation("/dashboard")}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
       <h1 className="text-3xl font-bold mb-8">Video Visit</h1>
 
       {currentSessionId ? (

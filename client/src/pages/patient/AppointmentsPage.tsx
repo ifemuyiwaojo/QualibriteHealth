@@ -24,6 +24,8 @@ import {
 import { TelehealthSession } from "@/components/TelehealthSession";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 
 const scheduleFormSchema = z.object({
   scheduledTime: z.date({
@@ -36,6 +38,7 @@ const scheduleFormSchema = z.object({
 export default function AppointmentsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const form = useForm<z.infer<typeof scheduleFormSchema>>({
     resolver: zodResolver(scheduleFormSchema),
@@ -95,6 +98,15 @@ export default function AppointmentsPage() {
 
   return (
     <div className="container py-10">
+      <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => setLocation("/dashboard")}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+
       <h1 className="text-3xl font-bold mb-8">Schedule Appointment</h1>
 
       <div className="grid gap-6 md:grid-cols-2">
