@@ -7,19 +7,19 @@ import { setTimeout } from 'timers/promises';
 
 const router = express.Router();
 
-// VSee API configuration with connection validation
+// VSee API configuration
 const VSEE_API_KEY = process.env.VSEE_API_KEY;
 const VSEE_API_SECRET = process.env.VSEE_API_SECRET;
-const VSEE_BASE_URL = 'https://clinic-api.vsee.com/api/v2';
+const VSEE_BASE_URL = 'https://api.vsee.com/clinic/v2'; // Updated API endpoint
 
 if (!VSEE_API_KEY || !VSEE_API_SECRET) {
-  console.error('VSee API credentials are missing or invalid');
+  console.error('VSee API credentials are missing');
 }
 
-// Axios instance with extended configuration and better error handling
+// Configure axios instance
 const vseeApi = axios.create({
   baseURL: VSEE_BASE_URL,
-  timeout: 30000,
+  timeout: 10000, // Reduced timeout for faster error detection
   headers: {
     'Authorization': `Bearer ${VSEE_API_KEY}`,
     'X-VSee-Secret': VSEE_API_SECRET,
@@ -27,43 +27,43 @@ const vseeApi = axios.create({
   }
 });
 
-// Enhanced error handling for VSee API
+// Enhanced error handling
 const handleVSeeError = (error: any) => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
+    console.error('VSee API Error Details:', {
+      code: axiosError.code,
+      message: axiosError.message,
+      response: axiosError.response?.data
+    });
 
     if (axiosError.code === 'ENOTFOUND' || axiosError.code === 'ECONNREFUSED') {
-      throw new Error('Unable to connect to telehealth service. Please try again later.');
+      return new Error('Network connectivity issue. Please check your connection and try again.');
     }
 
     if (axiosError.response?.status === 401) {
-      console.error('VSee API authentication failed:', axiosError.response.data);
-      throw new Error('Telehealth service authentication failed. Please verify API credentials.');
+      return new Error('Authentication failed. Please verify your API credentials.');
     }
 
-    if (axiosError.response?.status === 403) {
-      throw new Error('Access to telehealth service denied. Please verify API permissions.');
-    }
-
-    const errorMessage = axiosError.response?.data?.error || axiosError.message;
-    console.error('VSee API error:', errorMessage);
-    throw new Error(`Telehealth service error: ${errorMessage}`);
+    return new Error(axiosError.response?.data?.message || 'Telehealth service error. Please try again.');
   }
-  throw error;
+  return error;
 };
 
-// Validate VSee API connection
+// Validate VSee connection
 const validateVSeeConnection = async () => {
   try {
-    await vseeApi.get('/health-check');
+    console.log('Attempting to validate VSee API connection...');
+    const response = await vseeApi.get('/ping');
+    console.log('VSee API connection successful:', response.data);
     return true;
   } catch (error) {
-    console.error('VSee API connection validation failed:', error);
+    console.error('VSee API connection failed:', error);
     return false;
   }
 };
 
-// Schema for creating a visit
+// Create visit schema
 const createVisitSchema = z.object({
   patientIds: z.array(z.string()),
   providerId: z.string(),
@@ -77,18 +77,20 @@ const createVisitSchema = z.object({
   isGroupSession: z.boolean().default(false),
 });
 
-// Create a new visit with enhanced error handling
+// Create a new visit
 router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
+  console.log('Creating new telehealth visit...');
+
   try {
     const visitData = createVisitSchema.parse(req.body);
+    console.log('Visit data validated:', visitData);
 
-    // Validate API connection before proceeding
+    // Test connection before proceeding
     const isConnected = await validateVSeeConnection();
     if (!isConnected) {
-      throw new Error('Telehealth service is currently unavailable. Please try again later.');
+      throw new Error('Unable to connect to telehealth service. Please try again later.');
     }
 
-    // Prepare participants data
     const participants = visitData.patientIds.map((id, index) => ({
       id,
       name: visitData.patientNames[index],
@@ -101,48 +103,49 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
       role: 'PROVIDER'
     });
 
-    try {
-      const vseeResponse = await vseeApi.post('/visits', {
-        participants,
-        scheduled_at: visitData.scheduledTime,
-        duration_minutes: visitData.duration,
-        visit_type: visitData.visitType,
-        reason_for_visit: visitData.reasonForVisit || 'Scheduled Visit',
-        status: 'SCHEDULED',
-        settings: {
-          max_participants: visitData.maxParticipants,
-          is_group_session: visitData.isGroupSession,
-          enable_waiting_room: true,
-          allow_group_chat: true
-        }
-      });
+    const response = await vseeApi.post('/visits', {
+      participants,
+      scheduled_at: visitData.scheduledTime,
+      duration_minutes: visitData.duration,
+      visit_type: visitData.visitType,
+      reason_for_visit: visitData.reasonForVisit || 'Scheduled Visit',
+      status: 'SCHEDULED',
+      settings: {
+        max_participants: visitData.maxParticipants,
+        is_group_session: visitData.isGroupSession,
+        enable_waiting_room: true,
+        allow_group_chat: true
+      }
+    });
 
-      res.json({
-        success: true,
-        visit: vseeResponse.data
-      });
-    } catch (error) {
-      handleVSeeError(error);
-    }
+    console.log('Visit created successfully:', response.data);
+
+    res.json({
+      success: true,
+      visit: response.data
+    });
   } catch (error: any) {
-    console.error('Error creating telehealth visit:', error);
+    const handledError = handleVSeeError(error);
+    console.error('Failed to create visit:', handledError.message);
+
     res.status(400).json({
       success: false,
-      error: error.message || 'Failed to create telehealth visit'
+      error: handledError.message
     });
   }
 });
 
-// Get upcoming visits with enhanced error handling
+// Get upcoming visits
 router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
   try {
-    // Validate API connection first
+    console.log('Fetching upcoming visits...');
+
     const isConnected = await validateVSeeConnection();
     if (!isConnected) {
-      throw new Error('Telehealth service is currently unavailable. Please try again later.');
+      throw new Error('Unable to connect to telehealth service. Please try again later.');
     }
 
-    const params: any = {
+    const params = {
       status: 'SCHEDULED',
       sort: 'scheduled_at',
       order: 'asc'
@@ -154,20 +157,20 @@ router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'pa
       params.provider_id = req.user.id;
     }
 
-    try {
-      const vseeResponse = await vseeApi.get('/visits', { params });
-      res.json({
-        success: true,
-        visits: vseeResponse.data.visits || []
-      });
-    } catch (error) {
-      handleVSeeError(error);
-    }
+    const response = await vseeApi.get('/visits', { params });
+    console.log('Visits fetched successfully');
+
+    res.json({
+      success: true,
+      visits: response.data.visits || []
+    });
   } catch (error: any) {
-    console.error('Error fetching upcoming visits:', error);
+    const handledError = handleVSeeError(error);
+    console.error('Failed to fetch visits:', handledError.message);
+
     res.status(400).json({
       success: false,
-      error: error.message || 'Failed to fetch upcoming visits'
+      error: handledError.message
     });
   }
 });
