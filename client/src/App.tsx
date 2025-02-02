@@ -16,7 +16,8 @@ import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import NotFound from "@/pages/not-found";
-import { memo, lazy } from "react";
+import { memo, lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
 import SecurityCenterPage from "@/pages/admin/SecurityCenterPage";
@@ -33,15 +34,17 @@ const ProviderPatientsPage = lazy(() => import("@/pages/provider/PatientsPage"))
 const ProviderRecordsPage = lazy(() => import("@/pages/provider/RecordsPage"));
 const ProviderProfilePage = lazy(() => import("@/pages/provider/ProfilePage"));
 
+const LazyLoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <Loader2 className="h-8 w-8 animate-spin" />
+  </div>
+);
+
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
+    return <LazyLoadingSpinner />;
   }
 
   if (!user) {
@@ -73,11 +76,7 @@ const AuthenticatedRoute = memo(function AuthenticatedRoute({
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
+    return <LazyLoadingSpinner />;
   }
 
   if (!user) {
@@ -100,11 +99,7 @@ const AdminRoute = memo(function AdminRoute({
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
+    return <LazyLoadingSpinner />;
   }
 
   if (!user || user.role !== "admin") {
@@ -118,11 +113,7 @@ const Router = memo(function Router() {
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
+    return <LazyLoadingSpinner />;
   }
 
   return (
@@ -184,16 +175,40 @@ const Router = memo(function Router() {
 
           {/* Provider Routes */}
           <Route path="/provider/schedule">
-            {!user ? <Redirect to="/auth/login" /> : <ProviderSchedulePage />}
+            {!user ? (
+              <Redirect to="/auth/login" />
+            ) : (
+              <Suspense fallback={<LazyLoadingSpinner />}>
+                <ProviderSchedulePage />
+              </Suspense>
+            )}
           </Route>
           <Route path="/provider/patients">
-            {!user ? <Redirect to="/auth/login" /> : <ProviderPatientsPage />}
+            {!user ? (
+              <Redirect to="/auth/login" />
+            ) : (
+              <Suspense fallback={<LazyLoadingSpinner />}>
+                <ProviderPatientsPage />
+              </Suspense>
+            )}
           </Route>
           <Route path="/provider/records">
-            {!user ? <Redirect to="/auth/login" /> : <ProviderRecordsPage />}
+            {!user ? (
+              <Redirect to="/auth/login" />
+            ) : (
+              <Suspense fallback={<LazyLoadingSpinner />}>
+                <ProviderRecordsPage />
+              </Suspense>
+            )}
           </Route>
           <Route path="/provider/profile">
-            {!user ? <Redirect to="/auth/login" /> : <ProviderProfilePage />}
+            {!user ? (
+              <Redirect to="/auth/login" />
+            ) : (
+              <Suspense fallback={<LazyLoadingSpinner />}>
+                <ProviderProfilePage />
+              </Suspense>
+            )}
           </Route>
 
           <Route component={NotFound} />
