@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, useLocation } from "wouter";
-import { useEffect } from "react";
+import { Link, Redirect } from "wouter";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,7 +26,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function Login() {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -36,12 +34,6 @@ export default function Login() {
       password: "",
     },
   });
-
-  useEffect(() => {
-    if (!isLoading && user) {
-      setLocation("/dashboard");
-    }
-  }, [user, isLoading, setLocation]);
 
   async function onSubmit(data: LoginFormValues) {
     try {
@@ -61,6 +53,10 @@ export default function Login() {
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (user) {
+    return <Redirect to="/dashboard" />;
   }
 
   return (

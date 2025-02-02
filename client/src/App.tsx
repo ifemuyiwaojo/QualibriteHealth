@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { AuthContext, useAuthProvider } from "./lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
@@ -23,7 +23,7 @@ function DashboardRouter() {
   }
 
   if (!user) {
-    return <Login />;
+    return <Redirect to="/auth/login" />;
   }
 
   switch (user.role) {
