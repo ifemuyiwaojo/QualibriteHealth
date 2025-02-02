@@ -9,24 +9,26 @@ export function ConvaiWidget() {
     elevenLabsScript.type = "text/javascript";
     document.body.appendChild(elevenLabsScript);
 
-    // Add Charla widget
-    window.addEventListener('load', () => {
-      const widgetElement = document.createElement('charla-widget');
-      widgetElement.setAttribute("p", "d0638494-03d5-4284-94a4-9b11afb19fde");
-      document.body.appendChild(widgetElement);
-      const widgetCode = document.createElement('script');
-      widgetCode.src = 'https://app.getcharla.com/widget/widget.js';
-      document.body.appendChild(widgetCode);
-    });
+    // Add Charla widget with independent initialization
+    const charlaWidget = document.createElement('charla-widget');
+    charlaWidget.setAttribute("p", "d0638494-03d5-4284-94a4-9b11afb19fde");
+    charlaWidget.style.position = "fixed";
+    charlaWidget.style.left = "20px";
+    charlaWidget.style.bottom = "20px";
+    charlaWidget.style.zIndex = "50";
+    document.body.appendChild(charlaWidget);
+
+    const charlaScript = document.createElement('script');
+    charlaScript.src = 'https://app.getcharla.com/widget/widget.js';
+    charlaScript.type = "text/javascript";
+    document.body.appendChild(charlaScript);
 
     return () => {
       // Cleanup on unmount
       document.body.removeChild(elevenLabsScript);
-      const charlaWidget = document.querySelector("charla-widget");
       if (charlaWidget?.parentNode) {
         charlaWidget.parentNode.removeChild(charlaWidget);
       }
-      const charlaScript = document.querySelector("script[src='https://app.getcharla.com/widget/widget.js']");
       if (charlaScript?.parentNode) {
         charlaScript.parentNode.removeChild(charlaScript);
       }
