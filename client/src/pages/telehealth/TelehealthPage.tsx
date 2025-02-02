@@ -3,9 +3,12 @@ import { VSeeVideo } from "@/components/VSeeVideo";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TelehealthPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   // Fetch active session if exists
@@ -15,6 +18,9 @@ export default function TelehealthPage() {
   });
 
   const startSession = async () => {
+    if (!user) return;
+
+    setIsLoading(true);
     try {
       const response = await fetch('/api/telehealth/session', {
         method: 'POST',
@@ -22,8 +28,8 @@ export default function TelehealthPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user?.id,
-          role: user?.role,
+          userId: user.id,
+          role: user.role,
         }),
       });
 
@@ -33,8 +39,19 @@ export default function TelehealthPage() {
 
       const data = await response.json();
       setSessionId(data.sessionId);
+      toast({
+        title: "Success",
+        description: "Video session started successfully",
+      });
     } catch (error) {
       console.error('Error starting session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start video session",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,8 +73,16 @@ export default function TelehealthPage() {
       ) : (
         <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Start Video Session</h2>
-          <Button onClick={startSession}>
-            {user.role === 'provider' ? 'Start Session' : 'Join Session'}
+          <Button 
+            onClick={startSession} 
+            disabled={isLoading}
+            className="min-w-[200px]"
+          >
+            {isLoading ? (
+              "Loading..."
+            ) : (
+              user.role === 'provider' ? 'Start Session' : 'Join Session'
+            )}
           </Button>
         </div>
       )}
