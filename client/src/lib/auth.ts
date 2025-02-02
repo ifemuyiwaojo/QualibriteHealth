@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
 
@@ -34,10 +34,14 @@ export function useAuthProvider() {
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (!res.ok) return null;
+        if (!res.ok) {
+          setUser(null);
+          return null;
+        }
         const data = await res.json();
-        setUser(data.user || null);
-        return data.user;
+        const userData = data.user || null;
+        setUser(userData);
+        return userData;
       } catch (error) {
         setUser(null);
         return null;
@@ -78,11 +82,16 @@ export function useAuthProvider() {
     setUser(null);
   }, []);
 
-  return {
-    user,
-    isLoading,
-    login,
-    logout,
-    register,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      isLoading,
+      login,
+      logout,
+      register,
+    }),
+    [user, isLoading, login, logout, register]
+  );
+
+  return value;
 }

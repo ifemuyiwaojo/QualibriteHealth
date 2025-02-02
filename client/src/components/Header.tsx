@@ -1,8 +1,8 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { useAuth } from "@/lib/auth";
 
 const navigation = [
@@ -13,18 +13,19 @@ const navigation = [
   { name: "Contact", href: "/contact" },
 ];
 
-export default function Header() {
+function HeaderComponent() {
   const [open, setOpen] = useState(false);
   const { user, logout, isLoading } = useAuth();
+  const [, navigate] = useLocation();
 
   const handleLogout = useCallback(async () => {
     try {
       await logout();
-      window.location.href = "/";
+      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  }, [logout]);
+  }, [logout, navigate]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -106,3 +107,5 @@ export default function Header() {
     </header>
   );
 }
+
+export default memo(HeaderComponent);

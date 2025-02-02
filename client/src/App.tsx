@@ -14,8 +14,9 @@ import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import NotFound from "@/pages/not-found";
+import { memo } from "react";
 
-function DashboardRouter() {
+const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
@@ -36,9 +37,9 @@ function DashboardRouter() {
     default:
       return <NotFound />;
   }
-}
+});
 
-function Router() {
+const Router = memo(function Router() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -58,9 +59,9 @@ function Router() {
       <Footer />
     </div>
   );
-}
+});
 
-export default function App() {
+function App() {
   const auth = useAuthProvider();
 
   return (
@@ -70,3 +71,5 @@ export default function App() {
     </AuthContext.Provider>
   );
 }
+
+export default memo(App);
