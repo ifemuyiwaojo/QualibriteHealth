@@ -40,7 +40,7 @@ router.get("/me", authenticateToken, async (req: any, res) => {
   res.json({ user: req.user });
 });
 
-// Authentication routes
+// Register new user with enhanced security and audit
 router.post("/register", async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
@@ -79,17 +79,21 @@ router.post("/register", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(validatedData.passwordHash, 10);
+
+    // Create user
     const [user] = await db.insert(users).values({
       ...validatedData,
       passwordHash: hashedPassword,
     }).returning();
 
+    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "24h" }
     );
 
+    // Set HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

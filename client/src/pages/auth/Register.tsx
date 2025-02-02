@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 const registerSchema = z.object({
@@ -72,30 +72,33 @@ export default function Register() {
     },
   });
 
-  async function onSubmit(data: RegisterFormValues) {
+  const onSubmit = useCallback(async (data: RegisterFormValues) => {
     if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       console.log("Starting registration process...");
 
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
+      const headers: Record<string, string> = {};
 
       if (data.role === "admin" && data.adminToken) {
         console.log("Registering admin user with token");
-        headers["x-admin-token"] = data.adminToken;
+        headers["X-Admin-Token"] = data.adminToken;
       }
 
-      const result = await register(data.email, data.password, data.role, headers);
+      const { email, password, role } = data;
+      const result = await register(email, password, role, headers);
       console.log("Registration response:", result);
 
-      setLocation("/dashboard");
-      toast({
-        title: "Registration Successful",
-        description: "Welcome to QualiBrite Health!",
-      });
+      if (result?.user) {
+        setLocation("/dashboard");
+        toast({
+          title: "Registration Successful",
+          description: "Welcome to QualiBrite Health!",
+        });
+      } else {
+        throw new Error("Invalid response format");
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       const errorMessage = error.message || 
@@ -110,7 +113,7 @@ export default function Register() {
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [register, toast, isSubmitting, setLocation]);
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
