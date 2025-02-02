@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 
 // Sample patient data
-const samplePatients = [
+export const samplePatients = [
   {
     id: 1,
     name: "John Smith",
