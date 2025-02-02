@@ -28,19 +28,14 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-interface LoginResponse {
-  message: string;
-  user: {
-    id: number;
-    email: string;
-    role: string;
-    requiresPasswordChange: boolean;
-    isSuperadmin: boolean;
-  };
-}
+// Sample credentials for testing:
+// Admin: admin@qualibrite.health / admin123456
+// Provider: provider@qualibrite.health / provider123
+// Patient: patient@qualibrite.health / patient123
+// Superadmin: superadmin@qualibrite.health / superadmin123
 
 export default function Login() {
-  const { login, user, isLoading } = useAuth();
+  const { login, user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -60,9 +55,7 @@ export default function Login() {
 
     try {
       setIsSubmitting(true);
-      console.log("Attempting login...");
       const response = await login(data.email, data.password, data.rememberMe);
-      console.log("Login successful");
 
       if (response?.user) {
         if (response.user.requiresPasswordChange) {
@@ -71,7 +64,9 @@ export default function Login() {
           setLocation("/dashboard");
           toast({
             title: "Login Successful",
-            description: "Welcome back!",
+            description: `Welcome ${response.user.role === 'superadmin' ? 'Super Administrator' : 
+              response.user.role === 'admin' ? 'Administrator' : 
+              response.user.role === 'provider' ? 'Healthcare Provider' : 'Patient'}!`,
           });
         }
       } else {
@@ -89,16 +84,7 @@ export default function Login() {
     }
   }, [login, toast, isSubmitting, setLocation]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
   if (user) {
-    console.log("User already logged in, redirecting to dashboard");
     return <Link href="/dashboard" replace />;
   }
 
