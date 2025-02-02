@@ -25,6 +25,7 @@ import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
+import PatientProfilePage from "@/pages/patient/ProfilePage";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -172,7 +173,7 @@ const Router = memo(function Router() {
             {!user ? <Redirect to="/auth/login" /> : <div>Medical Records Page</div>}
           </Route>
           <Route path="/patient/profile">
-            {!user ? <Redirect to="/auth/login" /> : <div>Patient Profile Page</div>}
+            {!user ? <Redirect to="/auth/login" /> : <PatientProfilePage />}
           </Route>
           <Route component={NotFound} />
         </Switch>
