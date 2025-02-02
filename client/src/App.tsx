@@ -19,7 +19,8 @@ function DashboardRouter() {
   const { user } = useAuthProvider();
 
   if (!user) {
-    return <NotFound />;
+    window.location.href = "/auth/login";
+    return null;
   }
 
   switch (user.role) {
@@ -35,6 +36,8 @@ function DashboardRouter() {
 }
 
 function Router() {
+  const { user } = useAuthProvider();
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
