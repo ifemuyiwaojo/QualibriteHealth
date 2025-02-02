@@ -3,11 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 import type { SelectMedicalRecord } from "@db/schema";
 
 export default function MedicalRecordsPage() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: records, isLoading } = useQuery<SelectMedicalRecord[]>({
     queryKey: ["/api/patient/medical-records"],
@@ -23,7 +26,19 @@ export default function MedicalRecordsPage() {
   }
 
   if (!records || records.length === 0) {
-    return <div className="container py-10">No medical records found</div>;
+    return (
+      <div className="container py-10">
+        <Button
+          variant="outline"
+          className="mb-4"
+          onClick={() => setLocation("/dashboard")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Dashboard
+        </Button>
+        <div>No medical records found</div>
+      </div>
+    );
   }
 
   const diagnoses = records.filter(record => record.type === "diagnosis");
@@ -37,6 +52,15 @@ export default function MedicalRecordsPage() {
 
   return (
     <div className="container py-10">
+      <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => setLocation("/dashboard")}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+
       <h1 className="text-3xl font-bold mb-8">Medical Records</h1>
 
       <Tabs defaultValue="diagnoses" className="w-full">

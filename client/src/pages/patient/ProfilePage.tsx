@@ -2,7 +2,9 @@ import { useAuth } from "@/lib/auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { ProfileCard } from "@/components/ui/profile-card";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 import type { SelectPatient } from "@db/schema";
 
 const patientProfileSchema = z.object({
@@ -18,6 +20,7 @@ const patientProfileSchema = z.object({
 
 export default function PatientProfilePage() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: profile, isLoading } = useQuery<SelectPatient>({
     queryKey: ["/api/patient/profile"],
@@ -33,12 +36,12 @@ export default function PatientProfilePage() {
         },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to update profile");
       }
-      
+
       return response.json();
     },
   });
@@ -52,7 +55,19 @@ export default function PatientProfilePage() {
   }
 
   if (!profile) {
-    return <div>Error loading profile</div>;
+    return (
+      <div className="container py-10">
+        <Button
+          variant="outline"
+          className="mb-4"
+          onClick={() => setLocation("/dashboard")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Dashboard
+        </Button>
+        <div>Error loading profile</div>
+      </div>
+    );
   }
 
   const profileFields = [
@@ -68,6 +83,15 @@ export default function PatientProfilePage() {
 
   return (
     <div className="container py-10">
+      <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => setLocation("/dashboard")}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+
       <h1 className="text-3xl font-bold mb-8">Patient Profile</h1>
       <div className="max-w-2xl mx-auto">
         <ProfileCard
