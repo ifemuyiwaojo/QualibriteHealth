@@ -221,11 +221,14 @@ export default function Register() {
                       <FormLabel>Admin Registration Token</FormLabel>
                       <FormControl>
                         <Input
-                          type="password"
+                          type="text"
                           placeholder="Enter admin token"
                           {...field}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Please enter the admin registration token provided by the system administrator
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
