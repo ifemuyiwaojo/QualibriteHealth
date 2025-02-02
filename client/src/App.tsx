@@ -16,6 +16,12 @@ import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import NotFound from "@/pages/not-found";
 import { memo } from "react";
+import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import AuditLogsPage from "@/pages/admin/AuditLogsPage";
+import SecurityCenterPage from "@/pages/admin/SecurityCenterPage";
+import CompliancePage from "@/pages/admin/CompliancePage";
+import SettingsPage from "@/pages/admin/SettingsPage";
+import ProvidersPage from "@/pages/admin/ProvidersPage";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -49,10 +55,10 @@ const DashboardRouter = memo(function DashboardRouter() {
   }
 });
 
-const AuthenticatedRoute = memo(function AuthenticatedRoute({ 
-  component: Component 
-}: { 
-  component: React.ComponentType 
+const AuthenticatedRoute = memo(function AuthenticatedRoute({
+  component: Component
+}: {
+  component: React.ComponentType
 }) {
   const { user, isLoading } = useAuthProvider();
 
@@ -71,6 +77,28 @@ const AuthenticatedRoute = memo(function AuthenticatedRoute({
   // Force password change for authenticated routes as well
   if (user.changePasswordRequired) {
     return <Redirect to="/auth/change-password" />;
+  }
+
+  return <Component />;
+});
+
+const AdminRoute = memo(function AdminRoute({
+  component: Component,
+}: {
+  component: React.ComponentType;
+}) {
+  const { user, isLoading } = useAuthProvider();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") {
+    return <Redirect to="/dashboard" />;
   }
 
   return <Component />;
@@ -121,6 +149,14 @@ const Router = memo(function Router() {
           <Route path="/dashboard">
             {!user ? <Redirect to="/auth/login" /> : <DashboardRouter />}
           </Route>
+
+          {/* Admin Routes */}
+          <Route path="/admin/users" component={() => <AdminRoute component={AdminUsersPage} />} />
+          <Route path="/admin/providers" component={() => <AdminRoute component={ProvidersPage} />} />
+          <Route path="/admin/audit-logs" component={() => <AdminRoute component={AuditLogsPage} />} />
+          <Route path="/admin/settings" component={() => <AdminRoute component={SettingsPage} />} />
+          <Route path="/admin/compliance" component={() => <AdminRoute component={CompliancePage} />} />
+          <Route path="/admin/security" component={() => <AdminRoute component={SecurityCenterPage} />} />
 
           <Route component={NotFound} />
         </Switch>

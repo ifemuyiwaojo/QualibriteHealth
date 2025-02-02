@@ -8,7 +8,8 @@ import {
   ActivitySquare, 
   Shield, 
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  UserPlus
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -24,18 +25,39 @@ export default function AdminDashboard() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2">
-            <Shield className="h-4 w-4" />
-            Security Status
+          <Button variant="outline" asChild className="gap-2">
+            <Link href="/admin/security">
+              <Shield className="h-4 w-4" />
+              Security Status
+            </Link>
           </Button>
-          <Button variant="destructive" size="sm" className="gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            Emergency Access
+          <Button variant="destructive" size="sm" asChild className="gap-2">
+            <Link href="/admin/security">
+              <AlertTriangle className="h-4 w-4" />
+              Emergency Access
+            </Link>
           </Button>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {user.isSuperadmin && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Admin Management</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create and manage admin accounts
+              </p>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/admin/users">Manage Admins</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">User Management</CardTitle>
