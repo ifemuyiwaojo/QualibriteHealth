@@ -9,30 +9,26 @@ export function ConvaiWidget() {
     elevenLabsScript.type = "text/javascript";
     document.body.appendChild(elevenLabsScript);
 
-    // Create and append the Charla widget script
-    const charlaScript = document.createElement("script");
-    charlaScript.src = "https://app.getcharla.com/widget/widget.js";
-    charlaScript.type = "text/javascript";
-    charlaScript.charset = "utf-8";
-    document.body.appendChild(charlaScript);
-
-    charlaScript.onload = () => {
-      const charlaWidgetElement = document.createElement("charla-widget");
-      charlaWidgetElement.setAttribute("p", "d0638494-03d5-4284-94a4-9b11afb19fde");
-      charlaWidgetElement.style.position = "fixed";
-      charlaWidgetElement.style.left = "20px";
-      charlaWidgetElement.style.bottom = "20px";
-      charlaWidgetElement.style.zIndex = "50";
-      document.body.appendChild(charlaWidgetElement);
-    };
+    // Add Charla widget
+    window.addEventListener('load', () => {
+      const widgetElement = document.createElement('charla-widget');
+      widgetElement.setAttribute("p", "d0638494-03d5-4284-94a4-9b11afb19fde");
+      document.body.appendChild(widgetElement);
+      const widgetCode = document.createElement('script');
+      widgetCode.src = 'https://app.getcharla.com/widget/widget.js';
+      document.body.appendChild(widgetCode);
+    });
 
     return () => {
       // Cleanup on unmount
       document.body.removeChild(elevenLabsScript);
-      document.body.removeChild(charlaScript);
       const charlaWidget = document.querySelector("charla-widget");
       if (charlaWidget?.parentNode) {
         charlaWidget.parentNode.removeChild(charlaWidget);
+      }
+      const charlaScript = document.querySelector("script[src='https://app.getcharla.com/widget/widget.js']");
+      if (charlaScript?.parentNode) {
+        charlaScript.parentNode.removeChild(charlaScript);
       }
     };
   }, []);
