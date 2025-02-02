@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -42,6 +43,7 @@ export default function ChangePassword() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const form = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -73,11 +75,17 @@ export default function ChangePassword() {
         throw new Error(error.message || "Failed to change password");
       }
 
+      const result = await response.json();
+
+      // Update auth state with the new user data
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+
       toast({
         title: "Password Changed",
         description: "Your password has been updated successfully.",
       });
 
+      // Redirect to dashboard
       setLocation("/dashboard");
     } catch (error: any) {
       toast({
@@ -90,7 +98,12 @@ export default function ChangePassword() {
     }
   };
 
-  if (!user?.changePasswordRequired) {
+  if (!user) {
+    setLocation("/auth/login");
+    return null;
+  }
+
+  if (!user.changePasswordRequired) {
     setLocation("/dashboard");
     return null;
   }

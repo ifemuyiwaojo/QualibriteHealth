@@ -286,23 +286,33 @@ router.post("/change-password", authenticateToken, async (req: any, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await db
+    const [updatedUser] = await db
       .update(users)
       .set({ 
         passwordHash: hashedPassword,
-        change_password_required: false 
+        changePasswordRequired: false 
       })
-      .where(eq(users.id, req.user.id));
+      .where(eq(users.id, req.user.id))
+      .returning();
 
     await auditLog(req.user.id, 'password_change', 'users', req.user.id, req);
 
-    res.json({ message: "Password changed successfully" });
+    // Return updated user data
+    res.json({ 
+      message: "Password changed successfully",
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        requiresPasswordChange: updatedUser.changePasswordRequired,
+        isSuperadmin: updatedUser.isSuperadmin
+      }
+    });
   } catch (error) {
     console.error("Password change error:", error);
     res.status(400).json({ message: "Failed to change password" });
   }
 });
-
 
 
 // Logout
