@@ -1,8 +1,6 @@
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
 import { AuthContext, useAuthProvider } from "./lib/auth";
+import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
@@ -62,11 +60,9 @@ export default function App() {
   const auth = useAuthProvider();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={auth}>
-        <Router />
-        <Toaster />
-      </AuthContext.Provider>
-    </QueryClientProvider>
+    <AuthContext.Provider value={auth}>
+      <Router />
+      <Toaster />
+    </AuthContext.Provider>
   );
 }
