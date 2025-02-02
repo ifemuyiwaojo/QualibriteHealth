@@ -16,25 +16,23 @@ export function ConvaiWidget() {
     charlaScript.charset = "utf-8";
     document.body.appendChild(charlaScript);
 
-
-    // Add Charla widget element after script is loaded
-      setTimeout(() => {
-        const charlaWidgetElement = document.createElement("charla-widget");
-        charlaWidgetElement.setAttribute("p", "d0638494-03d5-4284-94a4-9b11afb19fde");
-        charlaWidgetElement.style.position = "fixed";
-        charlaWidgetElement.style.left = "20px";
-        charlaWidgetElement.style.bottom = "20px";
-        charlaWidgetElement.style.zIndex = "50";
-        document.body.appendChild(charlaWidgetElement);
-      }, 1000);
+    charlaScript.onload = () => {
+      const charlaWidgetElement = document.createElement("charla-widget");
+      charlaWidgetElement.setAttribute("p", "d0638494-03d5-4284-94a4-9b11afb19fde");
+      charlaWidgetElement.style.position = "fixed";
+      charlaWidgetElement.style.left = "20px";
+      charlaWidgetElement.style.bottom = "20px";
+      charlaWidgetElement.style.zIndex = "50";
+      document.body.appendChild(charlaWidgetElement);
+    };
 
     return () => {
       // Cleanup on unmount
       document.body.removeChild(elevenLabsScript);
       document.body.removeChild(charlaScript);
-       const charlaWidget = document.querySelector("charla-widget");
+      const charlaWidget = document.querySelector("charla-widget");
       if (charlaWidget?.parentNode) {
-        document.body.removeChild(charlaWidget);
+        charlaWidget.parentNode.removeChild(charlaWidget);
       }
     };
   }, []);
