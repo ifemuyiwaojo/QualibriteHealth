@@ -75,10 +75,10 @@ export default function Register() {
         title: "Registration Successful",
         description: "Welcome to QualiBrite Health!",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Registration Failed",
-        description: "Please try again with different credentials.",
+        description: error.message || "Please try again with different credentials.",
         variant: "destructive",
       });
     }
@@ -150,6 +150,9 @@ export default function Register() {
                       onValueChange={(value) => {
                         field.onChange(value);
                         setShowAdminToken(value === "admin");
+                        if (value !== "admin") {
+                          form.setValue("adminToken", "");
+                        }
                       }} 
                       defaultValue={field.value}
                     >

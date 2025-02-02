@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { apiRequest } from '@/lib/queryClient';
 
 interface User {
   id: number;
@@ -17,7 +16,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,24 +35,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const response = await apiRequest('POST', '/api/auth/login', { email, password });
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Login failed');
+    }
+
     const data = await response.json();
     setUser(data.user);
     return data;
   }, []);
 
-  const register = useCallback(async (email: string, password: string, role: string, headers?: Record<string, string>) => {
-    const response = await apiRequest('POST', '/api/auth/register', 
-      { email, password, role },
-      headers
-    );
+  const register = useCallback(async (
+    email: string, 
+    password: string, 
+    role: string, 
+    headers: Record<string, string> = {}
+  ) => {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      },
+      body: JSON.stringify({ email, password, role }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Registration failed');
+    }
+
     const data = await response.json();
     setUser(data.user);
     return data;
   }, []);
 
   const logout = useCallback(async () => {
-    await apiRequest('POST', '/api/auth/logout');
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
     setUser(null);
   }, []);
 
@@ -62,11 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   });
 
-  return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return { user, isLoading, login, register, logout };
 }
 
 export function useAuth() {
