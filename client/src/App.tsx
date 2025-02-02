@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { AuthContext, useAuthProvider } from "./lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
@@ -17,15 +17,13 @@ import NotFound from "@/pages/not-found";
 
 function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
-  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
   if (!user) {
-    setLocation("/auth/login");
-    return null;
+    return <Login />;
   }
 
   switch (user.role) {

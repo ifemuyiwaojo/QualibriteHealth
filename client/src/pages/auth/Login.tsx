@@ -25,16 +25,9 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { login, user } = useAuth();
+  const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      setLocation("/dashboard");
-    }
-  }, [user, setLocation]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -44,6 +37,12 @@ export default function Login() {
     },
   });
 
+  useEffect(() => {
+    if (!isLoading && user) {
+      setLocation("/dashboard");
+    }
+  }, [user, isLoading, setLocation]);
+
   async function onSubmit(data: LoginFormValues) {
     try {
       await login(data.email, data.password);
@@ -51,7 +50,6 @@ export default function Login() {
         title: "Login Successful",
         description: "Welcome back!",
       });
-      setLocation("/dashboard");
     } catch (error) {
       toast({
         title: "Login Failed",
@@ -59,6 +57,10 @@ export default function Login() {
         variant: "destructive",
       });
     }
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
