@@ -38,12 +38,16 @@ export function useAuthProvider() {
           return null;
         }
         const data = await res.json();
-        return data.user || null;
+        if (!data.user) {
+          return null;
+        }
+        return data.user;
       } catch (error) {
+        console.error("Auth check failed:", error);
         return null;
       }
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     refetchOnMount: true,

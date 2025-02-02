@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useState, useCallback } from "react";
 
 const loginSchema = z.object({
@@ -28,7 +28,6 @@ export default function Login() {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -38,13 +37,14 @@ export default function Login() {
     },
   });
 
-  const handleSubmit = useCallback(async (data: LoginFormValues) => {
+  const onSubmit = useCallback(async (data: LoginFormValues) => {
+    if (isSubmitting) return;
+
     try {
       setIsSubmitting(true);
       console.log("Attempting login...");
       await login(data.email, data.password);
-      console.log("Login successful, redirecting...");
-      setLocation("/dashboard");
+      console.log("Login successful");
       toast({
         title: "Login Successful",
         description: "Welcome back!",
@@ -59,7 +59,7 @@ export default function Login() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [login, toast, setLocation]);
+  }, [login, toast, isSubmitting]);
 
   if (isLoading) {
     return (
@@ -70,7 +70,7 @@ export default function Login() {
   }
 
   if (user) {
-    console.log("User already logged in, redirecting to dashboard...");
+    console.log("User already logged in, showing dashboard");
     return <Link href="/dashboard" replace />;
   }
 
@@ -82,7 +82,7 @@ export default function Login() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="email"

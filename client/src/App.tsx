@@ -39,11 +39,11 @@ const DashboardRouter = memo(function DashboardRouter() {
     case "admin":
       return <AdminDashboard />;
     default:
-      return <NotFound />;
+      return <Redirect to="/auth/login" />;
   }
 });
 
-const ProtectedRoute = memo(function ProtectedRoute({ 
+const AuthenticatedRoute = memo(function AuthenticatedRoute({ 
   component: Component 
 }: { 
   component: React.ComponentType 
@@ -66,7 +66,15 @@ const ProtectedRoute = memo(function ProtectedRoute({
 });
 
 const Router = memo(function Router() {
-  const { user } = useAuthProvider();
+  const { user, isLoading } = useAuthProvider();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -78,13 +86,20 @@ const Router = memo(function Router() {
           <Route path="/services" component={Services} />
           <Route path="/faq" component={FAQ} />
           <Route path="/contact" component={Contact} />
+
+          {/* Auth Routes */}
           <Route path="/auth/login">
             {user ? <Redirect to="/dashboard" /> : <Login />}
           </Route>
           <Route path="/auth/register">
             {user ? <Redirect to="/dashboard" /> : <Register />}
           </Route>
-          <Route path="/dashboard" component={DashboardRouter} />
+
+          {/* Protected Routes */}
+          <Route path="/dashboard">
+            {!user ? <Redirect to="/auth/login" /> : <DashboardRouter />}
+          </Route>
+
           <Route component={NotFound} />
         </Switch>
       </main>
