@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface VSeeVideoProps {
   sessionId: string;
@@ -7,6 +8,7 @@ interface VSeeVideoProps {
 
 export function VSeeVideo({ sessionId, isProvider }: VSeeVideoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const initializeVSee = async () => {
@@ -44,6 +46,7 @@ export function VSeeVideo({ sessionId, isProvider }: VSeeVideoProps) {
               ui: {
                 showControls: true,
                 showParticipantList: true,
+                showChat: true,
               }
             });
           }
@@ -60,11 +63,16 @@ export function VSeeVideo({ sessionId, isProvider }: VSeeVideoProps) {
         };
       } catch (error) {
         console.error('Failed to initialize VSee:', error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize video session. Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
     initializeVSee();
-  }, [sessionId, isProvider]);
+  }, [sessionId, isProvider, toast]);
 
   return (
     <div className="w-full h-[600px] bg-gray-100 rounded-lg" ref={containerRef}>

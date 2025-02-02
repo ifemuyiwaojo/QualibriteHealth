@@ -22,7 +22,6 @@ const vseeApi = axios.create({
   timeout: 15000,
   headers: {
     'X-ApiToken': VSEE_API_KEY,
-    'X-ApiSecret': VSEE_API_SECRET,
     'X-AccountCode': 'vclinic'
   }
 });
@@ -61,6 +60,65 @@ const handleVSeeError = (error: any) => {
   return error;
 };
 
+// Session creation endpoint
+router.post('/session', authenticateToken, async (req: any, res) => {
+  try {
+    const { userId, role } = req.body;
+    console.log('Creating new session for user:', userId, 'with role:', role);
+
+    // Step 1: Create an intake
+    const intakeData = new FormData();
+    intakeData.append('room_code', 'vclinic_room');
+    intakeData.append('reason_for_visit', 'Video consultation');
+    intakeData.append('type', '1'); // 1 for walkin as per docs
+
+    const intakeResponse = await vseeApi.post('/intakes', intakeData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (!intakeResponse.data?.data?.id) {
+      throw new Error('Failed to create VSee intake');
+    }
+
+    const intakeId = intakeResponse.data.data.id;
+    console.log('Created intake:', intakeId);
+
+    // Step 2: Create a walkin visit using the intake
+    const visitData = new FormData();
+    visitData.append('intake_id', intakeId);
+    visitData.append('room_code', 'vclinic_room');
+
+    const visitResponse = await vseeApi.post('/visits/add_walkin', visitData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (!visitResponse.data?.data?.id) {
+      throw new Error('Failed to create VSee visit');
+    }
+
+    const visitId = visitResponse.data.data.id;
+    console.log('Created visit:', visitId);
+
+    res.json({
+      success: true,
+      sessionId: visitId,
+      intakeId: intakeId,
+      roomData: visitResponse.data.data
+    });
+  } catch (error) {
+    const handledError = handleVSeeError(error);
+    console.error('Error creating session:', handledError);
+    res.status(500).json({
+      success: false,
+      error: handledError.message
+    });
+  }
+});
+
 // Join session endpoint
 router.post('/visit/:sessionId/join', authenticateToken, async (req: any, res) => {
   try {
@@ -71,11 +129,16 @@ router.post('/visit/:sessionId/join', authenticateToken, async (req: any, res) =
     console.log('User attempting to join session:', { sessionId, userId, userRole });
 
     // Create a token for the user
-    const tokenResponse = await vseeApi.post('/tokens', {
-      session_id: sessionId,
-      user_id: userId.toString(),
-      user_name: userRole === 'provider' ? 'Provider' : 'Patient',
-      role: userRole.toUpperCase()
+    const tokenData = new FormData();
+    tokenData.append('session_id', sessionId);
+    tokenData.append('user_id', userId.toString());
+    tokenData.append('user_name', userRole === 'provider' ? 'Provider' : 'Patient');
+    tokenData.append('role', userRole.toUpperCase());
+
+    const tokenResponse = await vseeApi.post('/tokens', tokenData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
 
     if (!tokenResponse.data?.token) {
@@ -95,57 +158,6 @@ router.post('/visit/:sessionId/join', authenticateToken, async (req: any, res) =
   } catch (error) {
     const handledError = handleVSeeError(error);
     console.error('Error joining session:', handledError);
-    res.status(500).json({
-      success: false,
-      error: handledError.message
-    });
-  }
-});
-
-// Session creation endpoint
-router.post('/session', authenticateToken, async (req, res) => {
-  try {
-    const { userId, role } = req.body;
-    console.log('Creating new session for user:', userId, 'with role:', role);
-
-    // Generate a unique session ID
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Create room token
-    const tokenResponse = await vseeApi.post('/tokens', {
-      session_id: sessionId,
-      user_id: userId.toString(),
-      user_name: role === 'provider' ? 'Provider' : 'Patient',
-      role: role.toUpperCase()
-    });
-
-    if (!tokenResponse.data?.token) {
-      throw new Error('Failed to create VSee token');
-    }
-
-    // Create a VSee room
-    const roomResponse = await vseeApi.post('/rooms', {
-      room_id: sessionId,
-      api_key: VSEE_API_KEY,
-      max_participants: 2,
-      room_type: 'meeting'
-    });
-
-    if (!roomResponse.data?.success) {
-      throw new Error('Failed to create VSee room');
-    }
-
-    console.log('Session created successfully:', sessionId);
-
-    res.json({
-      success: true,
-      sessionId,
-      roomData: roomResponse.data,
-      token: tokenResponse.data.token
-    });
-  } catch (error) {
-    const handledError = handleVSeeError(error);
-    console.error('Error creating session:', handledError);
     res.status(500).json({
       success: false,
       error: handledError.message
