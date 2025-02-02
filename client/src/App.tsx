@@ -12,7 +12,29 @@ import Contact from "@/pages/Contact";
 import FAQ from "@/pages/FAQ";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import PatientDashboard from "@/pages/dashboard/PatientDashboard";
+import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
+import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import NotFound from "@/pages/not-found";
+
+function DashboardRouter() {
+  const { user } = useAuthProvider();
+
+  if (!user) {
+    return <NotFound />;
+  }
+
+  switch (user.role) {
+    case "patient":
+      return <PatientDashboard />;
+    case "provider":
+      return <ProviderDashboard />;
+    case "admin":
+      return <AdminDashboard />;
+    default:
+      return <NotFound />;
+  }
+}
 
 function Router() {
   return (
@@ -27,6 +49,7 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/auth/login" component={Login} />
           <Route path="/auth/register" component={Register} />
+          <Route path="/dashboard" component={DashboardRouter} />
           <Route component={NotFound} />
         </Switch>
       </main>
