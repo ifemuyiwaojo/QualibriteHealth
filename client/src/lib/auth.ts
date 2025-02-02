@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
 
 interface User {
@@ -36,12 +36,16 @@ export function useAuthProvider() {
         const res = await fetch("/api/auth/me", { credentials: "include" });
         if (!res.ok) return null;
         const data = await res.json();
-        setUser(data.user);
+        setUser(data.user || null);
         return data.user;
       } catch (error) {
+        setUser(null);
         return null;
       }
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    retry: false
   });
 
   const login = useCallback(async (email: string, password: string) => {
