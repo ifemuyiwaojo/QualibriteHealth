@@ -30,6 +30,109 @@ const auditLog = async (userId: number, action: string, resourceType: string, re
   }
 };
 
+// Set temporary password for superadmin
+const initializeSuperadmin = async () => {
+  const tempPassword = "Admin2024!@QBH";
+  const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+  // Check if superadmin exists
+  const existingSuperadmin = await db.query.users.findFirst({
+    where: eq(users.email, 'superadmin@qualibritehealth.com'),
+  });
+
+  if (!existingSuperadmin) {
+    // Create superadmin if doesn't exist
+    await db.insert(users).values({
+      email: 'superadmin@qualibritehealth.com',
+      passwordHash: hashedPassword,
+      role: 'admin',
+      isSuperadmin: true,
+      changePasswordRequired: true,
+    });
+  } else {
+    // Update existing superadmin
+    await db.update(users)
+      .set({
+        passwordHash: hashedPassword,
+        changePasswordRequired: true,
+        isSuperadmin: true,
+        role: 'admin'
+      })
+      .where(eq(users.email, 'superadmin@qualibritehealth.com'));
+  }
+};
+
+// Initialize superadmin on module load
+initializeSuperadmin().catch(console.error);
+
+// Login endpoint
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password, rememberMe } = req.body;
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) {
+      // Log failed attempt
+      await db.insert(auditLogs).values({
+        userId: user.id,
+        action: 'failed_login_attempt',
+        resourceType: 'users',
+        resourceId: user.id,
+        details: { method: req.method, path: req.path },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: rememberMe ? "30d" : "24h" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    });
+
+    // Log successful login
+    await db.insert(auditLogs).values({
+      userId: user.id,
+      action: 'successful_login',
+      resourceType: 'users',
+      resourceId: user.id,
+      details: { method: req.method, path: req.path },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    res.json({
+      message: "Logged in successfully",
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        requiresPasswordChange: user.changePasswordRequired,
+        isSuperadmin: user.isSuperadmin
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(400).json({ message: "Login failed" });
+  }
+});
+
 // Get current user
 router.get("/me", authenticateToken, async (req: any, res) => {
   if (!req.user) {
@@ -40,15 +143,19 @@ router.get("/me", authenticateToken, async (req: any, res) => {
     where: eq(users.id, req.user.id),
   });
 
-  if (user?.change_password_required) {
-    return res.json({ 
-      user: req.user,
-      requiresPasswordChange: true 
-    });
+  if (!user) {
+      return res.status(401).json({ message: "User not found" });
   }
 
-  await auditLog(req.user.id, 'user_check', 'users', req.user.id, req);
-  res.json({ user: req.user });
+  res.json({
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      requiresPasswordChange: user.changePasswordRequired,
+      isSuperadmin: user.isSuperadmin
+    }
+  });
 });
 
 // Register new user (public registration - no admin)
@@ -196,55 +303,7 @@ router.post("/change-password", authenticateToken, async (req: any, res) => {
   }
 });
 
-// Login with password change check
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password, rememberMe } = req.body;
-    const user = await db.query.users.findFirst({
-      where: eq(users.email, email),
-    });
 
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.passwordHash);
-    if (!validPassword) {
-      await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: rememberMe ? "30d" : "24h" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
-    });
-
-    await auditLog(user.id, 'successful_login', 'users', user.id, req);
-
-    const userData = {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      requiresPasswordChange: user.change_password_required
-    };
-
-    res.json({
-      message: "Logged in successfully",
-      user: userData,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(400).json({ message: "Login failed" });
-  }
-});
 
 // Logout
 router.post("/logout", authenticateToken, async (req: any, res) => {

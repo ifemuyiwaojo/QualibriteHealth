@@ -11,6 +11,8 @@ export interface AuthRequest extends Request {
     id: number;
     email: string;
     role: string;
+    isSuperadmin?: boolean;
+    changePasswordRequired?: boolean;
   };
 }
 
@@ -44,6 +46,8 @@ export const authenticateToken = async (
       id: user.id,
       email: user.email,
       role: user.role,
+      isSuperadmin: user.isSuperadmin,
+      changePasswordRequired: user.changePasswordRequired,
     };
 
     next();

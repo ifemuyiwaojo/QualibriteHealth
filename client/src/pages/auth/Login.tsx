@@ -34,6 +34,8 @@ interface LoginResponse {
     id: number;
     email: string;
     role: string;
+    requiresPasswordChange: boolean;
+    isSuperadmin: boolean;
   };
 }
 
@@ -59,23 +61,32 @@ export default function Login() {
     try {
       setIsSubmitting(true);
       console.log("Attempting login...");
-      const response = await login(data.email, data.password, data.rememberMe) as LoginResponse;
+      const response = await login(data.email, data.password, data.rememberMe);
       console.log("Login successful");
 
       if (response?.user) {
-        setLocation("/dashboard");
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
+        if (response.user.requiresPasswordChange) {
+          setLocation("/auth/change-password");
+          toast({
+            title: "Password Change Required",
+            description: "Please change your password to continue.",
+            variant: "warning",
+          });
+        } else {
+          setLocation("/dashboard");
+          toast({
+            title: "Login Successful",
+            description: "Welcome back!",
+          });
+        }
       } else {
         throw new Error("Invalid response format");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
       toast({
         title: "Login Failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {

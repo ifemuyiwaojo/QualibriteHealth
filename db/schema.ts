@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   email: text("email").unique().notNull(),
   passwordHash: text("password_hash").notNull(),
   role: text("role", { enum: ["patient", "provider", "admin"] }).notNull(),
+  isSuperadmin: boolean("is_superadmin").default(false),
+  changePasswordRequired: boolean("change_password_required").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
