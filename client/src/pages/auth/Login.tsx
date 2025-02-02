@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useCallback } from "react";
 
 const loginSchema = z.object({
@@ -28,6 +28,7 @@ export default function Login() {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -43,12 +44,16 @@ export default function Login() {
     try {
       setIsSubmitting(true);
       console.log("Attempting login...");
-      await login(data.email, data.password);
+      const response = await login(data.email, data.password);
       console.log("Login successful");
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-      });
+
+      if (response.user) {
+        setLocation("/dashboard");
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+      }
     } catch (error) {
       console.error("Login failed:", error);
       toast({
@@ -59,7 +64,7 @@ export default function Login() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [login, toast, isSubmitting]);
+  }, [login, toast, isSubmitting, setLocation]);
 
   if (isLoading) {
     return (
@@ -70,7 +75,7 @@ export default function Login() {
   }
 
   if (user) {
-    console.log("User already logged in, showing dashboard");
+    console.log("User already logged in, redirecting to dashboard");
     return <Link href="/dashboard" replace />;
   }
 

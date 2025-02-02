@@ -9,6 +9,14 @@ import { authenticateToken } from "../middleware/auth";
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
+// Get current user
+router.get("/me", authenticateToken, (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  res.json({ user: req.user });
+});
+
 // Register new user
 router.post("/register", async (req, res) => {
   try {
@@ -45,6 +53,7 @@ router.post("/register", async (req, res) => {
       user: { id: user.id, email: user.email, role: user.role },
     });
   } catch (error) {
+    console.error("Registration error:", error);
     res.status(400).json({ message: "Invalid registration data" });
   }
 });
@@ -79,11 +88,19 @@ router.post("/login", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
+    // Send back minimal user data
+    const userData = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
     res.json({
       message: "Logged in successfully",
-      user: { id: user.id, email: user.email, role: user.role },
+      user: userData,
     });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(400).json({ message: "Login failed" });
   }
 });

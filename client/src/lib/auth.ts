@@ -1,6 +1,5 @@
 import { createContext, useContext, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "./queryClient";
 
 interface User {
   id: number;
@@ -33,10 +32,20 @@ export function useAuthProvider() {
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const res = await fetch("/api/auth/me", {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
         if (!res.ok) {
-          return null;
+          if (res.status === 401) {
+            return null;
+          }
+          throw new Error("Failed to fetch user");
         }
+
         const data = await res.json();
         if (!data.user) {
           return null;
@@ -49,36 +58,59 @@ export function useAuthProvider() {
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    retry: false,
+    retry: 1,
   });
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await apiRequest("POST", "/api/auth/login", { email, password });
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
     if (!res.ok) {
       throw new Error("Invalid credentials");
     }
+
+    const data = await res.json();
     await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    return data;
   }, [queryClient]);
 
   const register = useCallback(
     async (email: string, password: string, role: string) => {
-      const res = await apiRequest("POST", "/api/auth/register", {
-        email,
-        passwordHash: password,
-        role,
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          passwordHash: password,
+          role,
+        }),
       });
+
       if (!res.ok) {
         throw new Error("Registration failed");
       }
+
+      const data = await res.json();
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      return data;
     },
     [queryClient]
   );
 
   const logout = useCallback(async () => {
-    await apiRequest("POST", "/api/auth/logout");
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
     await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
   }, [queryClient]);
 
