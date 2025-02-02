@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { createContext, useContext, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
 
@@ -13,7 +13,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string, role: User['role']) => Promise<void>;
+  register: (email: string, password: string, role: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -27,29 +27,25 @@ export function useAuth() {
 }
 
 export function useAuthProvider() {
-  const [user, setUser] = useState<User | null>(null);
-
-  const { isLoading } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/me", { credentials: "include" });
         if (!res.ok) {
-          setUser(null);
           return null;
         }
         const data = await res.json();
-        const userData = data.user || null;
-        setUser(userData);
-        return userData;
+        return data.user || null;
       } catch (error) {
-        setUser(null);
         return null;
       }
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    retry: false
+    retry: false,
   });
 
   const login = useCallback(async (email: string, password: string) => {
@@ -57,12 +53,10 @@ export function useAuthProvider() {
     if (!res.ok) {
       throw new Error("Invalid credentials");
     }
-    const data = await res.json();
-    setUser(data.user);
   }, []);
 
   const register = useCallback(
-    async (email: string, password: string, role: User["role"]) => {
+    async (email: string, password: string, role: string) => {
       const res = await apiRequest("POST", "/api/auth/register", {
         email,
         passwordHash: password,
@@ -71,27 +65,19 @@ export function useAuthProvider() {
       if (!res.ok) {
         throw new Error("Registration failed");
       }
-      const data = await res.json();
-      setUser(data.user);
     },
     []
   );
 
   const logout = useCallback(async () => {
     await apiRequest("POST", "/api/auth/logout");
-    setUser(null);
   }, []);
 
-  const value = useMemo(
-    () => ({
-      user,
-      isLoading,
-      login,
-      logout,
-      register,
-    }),
-    [user, isLoading, login, logout, register]
-  );
-
-  return value;
+  return {
+    user,
+    isLoading,
+    login,
+    logout,
+    register,
+  };
 }

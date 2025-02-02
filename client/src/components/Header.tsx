@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -16,16 +16,14 @@ const navigation = [
 function HeaderComponent() {
   const [open, setOpen] = useState(false);
   const { user, logout, isLoading } = useAuth();
-  const [, navigate] = useLocation();
 
   const handleLogout = useCallback(async () => {
     try {
       await logout();
-      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  }, [logout, navigate]);
+  }, [logout]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
