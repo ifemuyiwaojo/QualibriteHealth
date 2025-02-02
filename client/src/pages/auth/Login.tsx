@@ -49,12 +49,14 @@ export default function Login() {
 
     try {
       setIsSubmitting(true);
-      console.log("Attempting login with:", data.email);
       const response = await login(data.email, data.password, data.rememberMe);
-      console.log("Login response:", response);
 
       if (response?.user) {
         if (response.user.changePasswordRequired) {
+          toast({
+            title: "Password Change Required",
+            description: "You'll need to set a new password.",
+          });
           setLocation("/auth/change-password");
         } else {
           setLocation("/dashboard");
@@ -104,7 +106,11 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your email" {...field} />
+                      <Input 
+                        placeholder="Enter your email" 
+                        {...field} 
+                        autoComplete="email"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -122,6 +128,7 @@ export default function Login() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           {...field}
+                          autoComplete="current-password"
                         />
                         <Button
                           type="button"
