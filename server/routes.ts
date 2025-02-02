@@ -1,9 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import authRoutes from "./routes/auth";
 
 export function registerRoutes(app: Express): Server {
-  // put application routes here
-  // prefix all routes with /api
+  // Authentication routes
+  app.use("/api/auth", authRoutes);
 
   const httpServer = createServer(app);
 
