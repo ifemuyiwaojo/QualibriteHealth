@@ -23,8 +23,7 @@ const vseeApi = axios.create({
   headers: {
     'X-ApiToken': VSEE_API_KEY,
     'X-ApiSecret': VSEE_API_SECRET,
-    'X-AccountCode': 'vclinic',
-    'Content-Type': 'application/json'
+    'X-AccountCode': 'vclinic'
   }
 });
 
@@ -56,7 +55,6 @@ const handleVSeeError = (error: any) => {
 
     return new Error(
       axiosError.response?.data?.message || 
-      axiosError.response?.data?.error || 
       'Telehealth service error. Please try again.'
     );
   }
@@ -83,19 +81,24 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
 
     console.log('Visit data validated:', visitData);
 
-    // First create an intake
-    const intakeData = {
-      provider_id: visitData.providerId,
-      reason_for_visit: visitData.reasonForVisit,
-      type: 2, // Schedule type as per docs
-      room_code: 'telehealth_room',
-      member_id: req.user.id.toString()
+    // Create intake using exact format from docs
+    const intakeData = new FormData();
+    intakeData.append('provider_id', visitData.providerId);
+    intakeData.append('reason_for_visit', visitData.reasonForVisit);
+    intakeData.append('type', '2'); // Schedule type as per docs
+    intakeData.append('room_code', 'telehealth_room');
+    intakeData.append('member_id', req.user.id.toString());
+
+    console.log('Creating intake with data:', Object.fromEntries(intakeData));
+
+    // Create intake using form data as shown in docs
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     };
 
-    console.log('Creating intake with data:', intakeData);
-
-    // Create intake first
-    const intakeResponse = await vseeApi.post('/intakes', intakeData);
+    const intakeResponse = await vseeApi.post('/intakes', intakeData, config);
 
     if (!intakeResponse.data?.data?.id) {
       throw new Error('Failed to create intake: Invalid response format');
@@ -103,19 +106,18 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
 
     console.log('Intake created:', intakeResponse.data);
 
-    // Now create the visit using the intake
-    const visitPayload = {
-      intake_id: intakeResponse.data.data.id,
-      slot_start: Math.floor(new Date(visitData.scheduledTime).getTime() / 1000),
-      slot_end: Math.floor(new Date(visitData.scheduledTime).getTime() / 1000) + (visitData.duration * 60),
-      type: 2, // Schedule type
-      room_code: 'telehealth_room',
-      provider_id: visitData.providerId
-    };
+    // Create visit using the intake
+    const visitPayload = new FormData();
+    visitPayload.append('intake_id', intakeResponse.data.data.id);
+    visitPayload.append('slot_start', Math.floor(new Date(visitData.scheduledTime).getTime() / 1000).toString());
+    visitPayload.append('slot_end', Math.floor(new Date(visitData.scheduledTime).getTime() / 1000 + (visitData.duration * 60)).toString());
+    visitPayload.append('type', '2'); // Schedule type
+    visitPayload.append('room_code', 'telehealth_room');
+    visitPayload.append('provider_id', visitData.providerId);
 
-    console.log('Creating visit with data:', visitPayload);
+    console.log('Creating visit with data:', Object.fromEntries(visitPayload));
 
-    const visitResponse = await vseeApi.post('/visits', visitPayload);
+    const visitResponse = await vseeApi.post('/visits', visitPayload, config);
     console.log('Visit created successfully:', visitResponse.data);
 
     res.json({
