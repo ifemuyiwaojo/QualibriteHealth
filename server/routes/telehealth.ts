@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@db';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
 import axios from 'axios';
+import { setTimeout } from 'timers/promises';
 
 const router = express.Router();
 
@@ -11,17 +12,40 @@ const VSEE_API_KEY = process.env.VSEE_API_KEY;
 const VSEE_API_SECRET = process.env.VSEE_API_SECRET;
 const VSEE_BASE_URL = 'https://clinic-api.vsee.com/api/v2';
 
+// Axios instance with retry logic
+const vseeApi = axios.create({
+  baseURL: VSEE_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Authorization': `Bearer ${VSEE_API_KEY}`,
+    'X-VSee-Secret': VSEE_API_SECRET,
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add retry logic
+vseeApi.interceptors.response.use(undefined, async (err) => {
+  const { config } = err;
+  if (!config || !config.retry) {
+    return Promise.reject(err);
+  }
+  config.retry -= 1;
+  const delayMs = config.retryDelay || 1000;
+  await setTimeout(delayMs);
+  return vseeApi(config);
+});
+
 // Schema for creating a visit
 const createVisitSchema = z.object({
-  patientIds: z.array(z.string()),  // Support multiple patients for group therapy
+  patientIds: z.array(z.string()),
   providerId: z.string(),
   scheduledTime: z.string().datetime(),
-  duration: z.number().min(15).max(120), // Extended max duration for group sessions
-  visitType: z.string().default('GROUP'),
+  duration: z.number().min(15).max(120),
+  visitType: z.enum(['VIDEO', 'GROUP']),
   patientNames: z.array(z.string()),
   providerName: z.string(),
   reasonForVisit: z.string().optional(),
-  maxParticipants: z.number().min(2).max(10).default(8), // Limit group size
+  maxParticipants: z.number().min(2).max(10).default(8),
   isGroupSession: z.boolean().default(false),
 });
 
@@ -44,15 +68,14 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
       role: 'PROVIDER'
     });
 
-    // Create VSee visit using their Visit API
-    const vseeResponse = await axios.post(
-      `${VSEE_BASE_URL}/visits`,
-      {
+    // Create VSee visit with retry logic
+    try {
+      const vseeResponse = await vseeApi.post('/visits', {
         participants,
         scheduled_at: visitData.scheduledTime,
         duration_minutes: visitData.duration,
         visit_type: visitData.visitType,
-        reason_for_visit: visitData.reasonForVisit || 'Group Therapy Session',
+        reason_for_visit: visitData.reasonForVisit || 'Scheduled Visit',
         status: 'SCHEDULED',
         settings: {
           max_participants: visitData.maxParticipants,
@@ -60,30 +83,24 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
           enable_waiting_room: true,
           allow_group_chat: true
         }
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${VSEE_API_KEY}`,
-          'X-VSee-Secret': VSEE_API_SECRET,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+      }, {
+        retry: 3,
+        retryDelay: 1000
+      });
 
-    if (!vseeResponse.data) {
-      throw new Error('Failed to create VSee visit');
+      res.json({
+        success: true,
+        visit: vseeResponse.data
+      });
+    } catch (error: any) {
+      console.error('VSee API Error:', error.response?.data || error.message);
+      throw new Error('Failed to communicate with telehealth service');
     }
-
-    res.json({
-      success: true,
-      visit: vseeResponse.data
-    });
   } catch (error: any) {
-    console.error('Error creating telehealth visit:', error.response?.data || error.message);
+    console.error('Error creating telehealth visit:', error);
     res.status(400).json({
       success: false,
-      error: 'Failed to create telehealth visit',
-      details: error.response?.data || error.message
+      error: error.message || 'Failed to create telehealth visit'
     });
   }
 });
@@ -93,13 +110,11 @@ router.get('/visit/:visitId', authenticateToken, authorizeRoles('provider', 'pat
   try {
     const { visitId } = req.params;
 
-    const vseeResponse = await axios.get(
-      `${VSEE_BASE_URL}/visits/${visitId}`,
+    const vseeResponse = await vseeApi.get(
+      `/visits/${visitId}`,
       {
-        headers: {
-          'Authorization': `Bearer ${VSEE_API_KEY}`,
-          'X-VSee-Secret': VSEE_API_SECRET
-        }
+        retry: 3,
+        retryDelay: 1000
       }
     );
 
@@ -121,10 +136,9 @@ router.get('/visit/:visitId', authenticateToken, authorizeRoles('provider', 'pat
   }
 });
 
-// List upcoming visits
+// List upcoming visits with retry logic
 router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
   try {
-    // Add user-specific parameters based on role
     const params: any = {
       status: 'SCHEDULED',
       sort: 'scheduled_at',
@@ -137,16 +151,11 @@ router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'pa
       params.provider_id = req.user.id;
     }
 
-    const vseeResponse = await axios.get(
-      `${VSEE_BASE_URL}/visits`,
-      {
-        headers: {
-          'Authorization': `Bearer ${VSEE_API_KEY}`,
-          'X-VSee-Secret': VSEE_API_SECRET
-        },
-        params
-      }
-    );
+    const vseeResponse = await vseeApi.get('/visits', {
+      params,
+      retry: 3,
+      retryDelay: 1000
+    });
 
     res.json({
       success: true,
@@ -169,17 +178,15 @@ router.post('/visit/:visitId/join', authenticateToken, authorizeRoles('provider'
     const isProvider = req.user.role === 'provider';
 
     // Get room URL from VSee
-    const vseeResponse = await axios.post(
-      `${VSEE_BASE_URL}/visits/${visitId}/${isProvider ? 'start' : 'join'}`,
+    const vseeResponse = await vseeApi.post(
+      `/visits/${visitId}/${isProvider ? 'start' : 'join'}`,
       {
         user_id: req.user.id,
         user_type: req.user.role.toUpperCase()
       },
       {
-        headers: {
-          'Authorization': `Bearer ${VSEE_API_KEY}`,
-          'X-VSee-Secret': VSEE_API_SECRET
-        }
+         retry: 3,
+         retryDelay: 1000
       }
     );
 
@@ -207,8 +214,8 @@ router.post('/visit/:visitId/participants', authenticateToken, authorizeRoles('p
     const { visitId } = req.params;
     const { participantId, participantName, role = 'PATIENT' } = req.body;
 
-    const vseeResponse = await axios.post(
-      `${VSEE_BASE_URL}/visits/${visitId}/participants`,
+    const vseeResponse = await vseeApi.post(
+      `/visits/${visitId}/participants`,
       {
         participant: {
           id: participantId,
@@ -217,10 +224,8 @@ router.post('/visit/:visitId/participants', authenticateToken, authorizeRoles('p
         }
       },
       {
-        headers: {
-          'Authorization': `Bearer ${VSEE_API_KEY}`,
-          'X-VSee-Secret': VSEE_API_SECRET
-        }
+        retry: 3,
+        retryDelay: 1000
       }
     );
 
