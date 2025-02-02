@@ -19,25 +19,25 @@ export default function ProviderDashboard() {
     {
       title: "Today's Schedule",
       icon: Calendar,
-      link: "/schedule",
+      link: "/provider/schedule",
       description: "View and manage your appointments"
     },
     {
       title: "Patient List",
       icon: Users,
-      link: "/patients",
+      link: "/provider/patients",
       description: "Access your patient records"
     },
     {
       title: "Medical Records",
       icon: ClipboardList,
-      link: "/records",
+      link: "/provider/records",
       description: "View and update medical records"
     },
     {
       title: "Profile",
       icon: User,
-      link: "/profile",
+      link: "/provider/profile",
       description: "Manage your provider profile"
     }
   ];

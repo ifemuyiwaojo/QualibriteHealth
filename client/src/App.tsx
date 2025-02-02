@@ -16,7 +16,7 @@ import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import NotFound from "@/pages/not-found";
-import { memo } from "react";
+import { memo, lazy } from "react";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
 import SecurityCenterPage from "@/pages/admin/SecurityCenterPage";
@@ -27,6 +27,11 @@ import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
 import PatientProfilePage from "@/pages/patient/ProfilePage";
 import MedicalRecordsPage from "@/pages/patient/MedicalRecordsPage";
+
+const ProviderSchedulePage = lazy(() => import("@/pages/provider/SchedulePage"));
+const ProviderPatientsPage = lazy(() => import("@/pages/provider/PatientsPage"));
+const ProviderRecordsPage = lazy(() => import("@/pages/provider/RecordsPage"));
+const ProviderProfilePage = lazy(() => import("@/pages/provider/ProfilePage"));
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -176,6 +181,21 @@ const Router = memo(function Router() {
           <Route path="/patient/profile">
             {!user ? <Redirect to="/auth/login" /> : <PatientProfilePage />}
           </Route>
+
+          {/* Provider Routes */}
+          <Route path="/provider/schedule">
+            {!user ? <Redirect to="/auth/login" /> : <ProviderSchedulePage />}
+          </Route>
+          <Route path="/provider/patients">
+            {!user ? <Redirect to="/auth/login" /> : <ProviderPatientsPage />}
+          </Route>
+          <Route path="/provider/records">
+            {!user ? <Redirect to="/auth/login" /> : <ProviderRecordsPage />}
+          </Route>
+          <Route path="/provider/profile">
+            {!user ? <Redirect to="/auth/login" /> : <ProviderProfilePage />}
+          </Route>
+
           <Route component={NotFound} />
         </Switch>
       </main>
