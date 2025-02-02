@@ -1,0 +1,76 @@
+import { createContext, useContext, useState, useCallback } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "./queryClient";
+
+interface User {
+  id: number;
+  email: string;
+  role: "patient" | "provider" | "admin";
+}
+
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, role: User['role']) => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
+
+export function useAuthProvider() {
+  const [user, setUser] = useState<User | null>(null);
+
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/auth/me"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.status === 401) return null;
+        const data = await res.json();
+        setUser(data.user);
+        return data.user;
+      } catch (error) {
+        return null;
+      }
+    },
+  });
+
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await apiRequest("POST", "/api/auth/login", { email, password });
+    const data = await res.json();
+    setUser(data.user);
+  }, []);
+
+  const register = useCallback(
+    async (email: string, password: string, role: User["role"]) => {
+      const res = await apiRequest("POST", "/api/auth/register", {
+        email,
+        passwordHash: password,
+        role,
+      });
+      const data = await res.json();
+      setUser(data.user);
+    },
+    []
+  );
+
+  const logout = useCallback(async () => {
+    await apiRequest("POST", "/api/auth/logout");
+    setUser(null);
+  }, []);
+
+  return {
+    user: currentUser || user,
+    login,
+    logout,
+    register,
+  };
+}

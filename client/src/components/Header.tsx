@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -15,6 +16,7 @@ const navigation = [
 export default function Header() {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -68,9 +70,30 @@ export default function Header() {
             <span className="text-xl font-bold text-primary">QUALIBRITE FAMILY PSYCHIATRY</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button asChild variant="default" className="hidden md:inline-flex">
-              <Link href="/contact">Schedule Consultation</Link>
-            </Button>
+            {user ? (
+              <>
+                <Button asChild variant="ghost">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    logout();
+                  }}
+                >
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="ghost">
+                  <Link href="/auth/login">Sign in</Link>
+                </Button>
+                <Button asChild variant="default">
+                  <Link href="/auth/register">Register</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </nav>
