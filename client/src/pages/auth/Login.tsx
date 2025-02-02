@@ -28,12 +28,6 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Sample credentials for testing:
-// Admin: admin@qualibrite.health / admin123456
-// Provider: provider@qualibrite.health / provider123
-// Patient: patient@qualibrite.health / patient123
-// Superadmin: superadmin@qualibrite.health / superadmin123
-
 export default function Login() {
   const { login, user } = useAuth();
   const { toast } = useToast();
@@ -58,25 +52,25 @@ export default function Login() {
       const response = await login(data.email, data.password, data.rememberMe);
 
       if (response?.user) {
-        if (response.user.requiresPasswordChange) {
+        if (response.user.changePasswordRequired) {
           setLocation("/auth/change-password");
         } else {
           setLocation("/dashboard");
           toast({
             title: "Login Successful",
-            description: `Welcome ${response.user.role === 'superadmin' ? 'Super Administrator' : 
-              response.user.role === 'admin' ? 'Administrator' : 
-              response.user.role === 'provider' ? 'Healthcare Provider' : 'Patient'}!`,
+            description: `Welcome back to QualiBrite Health${response.user.role === 'superadmin' ? ' Super Administrator' : 
+              response.user.role === 'admin' ? ' Administrator' : 
+              response.user.role === 'provider' ? ' Healthcare Provider' : ''}!`,
           });
         }
       } else {
-        throw new Error("Invalid response format");
+        throw new Error("Authentication failed");
       }
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Please check your credentials and try again.",
+        description: "Invalid credentials. Please check your email and password.",
         variant: "destructive",
       });
     } finally {
@@ -92,7 +86,7 @@ export default function Login() {
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+          <CardTitle className="text-2xl font-bold">Sign in to QualiBrite Health</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
