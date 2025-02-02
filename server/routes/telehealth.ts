@@ -9,10 +9,11 @@ const router = express.Router();
 // VSee API configuration
 const VSEE_API_KEY = process.env.VSEE_API_KEY;
 const VSEE_API_SECRET = process.env.VSEE_API_SECRET;
-const VSEE_BASE_URL = 'https://clinic.vsee.com/api/v2'; // Updated VSee Clinic API endpoint
+const VSEE_BASE_URL = 'https://care.vsee.com/api/v2'; // Updated to VSee Care API endpoint
 
 if (!VSEE_API_KEY || !VSEE_API_SECRET) {
   console.error('VSee API credentials are missing or invalid');
+  process.exit(1); // Exit if credentials are missing
 }
 
 // Configure axios instance with detailed logging
@@ -70,8 +71,8 @@ const validateVSeeConnection = async () => {
   try {
     console.log('Validating VSee API connection...');
     // Try to get clinic status as a basic health check
-    const response = await vseeApi.get('/clinic/status');
-    console.log('VSee API connection validated:', response.status === 200);
+    const response = await vseeApi.get('/status');
+    console.log('VSee API validation response:', response.data);
     return response.status === 200;
   } catch (error) {
     console.error('VSee API validation failed:', error);
@@ -122,7 +123,7 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
     ];
 
     // Create the visit
-    const response = await vseeApi.post('/clinic/appointments', {
+    const response = await vseeApi.post('/appointments', {
       participants,
       start_time: visitData.scheduledTime,
       duration: visitData.duration,
