@@ -5,6 +5,7 @@ import { ArrowLeft, Search, FileText } from "lucide-react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Link } from "wouter";
 
 // Sample medical records data
 const sampleRecords = [
@@ -103,8 +104,10 @@ export default function RecordsPage() {
                 <p className="text-sm text-muted-foreground">Date: {record.date}</p>
                 <p className="text-sm text-muted-foreground">Summary: {record.summary}</p>
                 <p className="text-sm text-muted-foreground">Status: {record.status}</p>
-                <Button variant="outline" className="w-full mt-4">
-                  View Record
+                <Button asChild variant="outline" className="w-full mt-4">
+                  <Link href={`/provider/records/${record.id}`}>
+                    View Record
+                  </Link>
                 </Button>
               </div>
             </CardContent>

@@ -5,6 +5,7 @@ import { ArrowLeft, Search, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Link } from "wouter";
 
 // Sample patient data
 const samplePatients = [
@@ -102,8 +103,10 @@ export default function PatientsPage() {
                 <p className="text-sm text-muted-foreground">Condition: {patient.condition}</p>
                 <p className="text-sm text-muted-foreground">Last Visit: {patient.lastVisit}</p>
                 <p className="text-sm text-muted-foreground">Status: {patient.status}</p>
-                <Button variant="outline" className="w-full mt-4">
-                  View Details
+                <Button asChild variant="outline" className="w-full mt-4">
+                  <Link href={`/provider/patients/${patient.id}`}>
+                    View Details
+                  </Link>
                 </Button>
               </div>
             </CardContent>

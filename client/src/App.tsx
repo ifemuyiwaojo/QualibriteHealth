@@ -33,6 +33,8 @@ const ProviderSchedulePage = lazy(() => import("@/pages/provider/SchedulePage"))
 const ProviderPatientsPage = lazy(() => import("@/pages/provider/PatientsPage"));
 const ProviderRecordsPage = lazy(() => import("@/pages/provider/RecordsPage"));
 const ProviderProfilePage = lazy(() => import("@/pages/provider/ProfilePage"));
+const ProviderPatientDetailPage = lazy(() => import("@/pages/provider/PatientDetailPage"));
+const ProviderRecordDetailPage = lazy(() => import("@/pages/provider/RecordDetailPage"));
 
 const LazyLoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -174,6 +176,24 @@ const Router = memo(function Router() {
           </Route>
 
           {/* Provider Routes */}
+          <Route path="/provider/patients/:id">
+            {!user ? (
+              <Redirect to="/auth/login" />
+            ) : (
+              <Suspense fallback={<LazyLoadingSpinner />}>
+                <ProviderPatientDetailPage />
+              </Suspense>
+            )}
+          </Route>
+          <Route path="/provider/records/:id">
+            {!user ? (
+              <Redirect to="/auth/login" />
+            ) : (
+              <Suspense fallback={<LazyLoadingSpinner />}>
+                <ProviderRecordDetailPage />
+              </Suspense>
+            )}
+          </Route>
           <Route path="/provider/schedule">
             {!user ? (
               <Redirect to="/auth/login" />
