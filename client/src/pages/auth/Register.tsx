@@ -59,6 +59,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTokenValue, setShowTokenValue] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -72,16 +73,23 @@ export default function Register() {
   });
 
   async function onSubmit(data: RegisterFormValues) {
+    if (isSubmitting) return;
+
     try {
+      setIsSubmitting(true);
+      console.log("Starting registration process...");
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
       };
 
       if (data.role === "admin" && data.adminToken) {
+        console.log("Registering admin user with token");
         headers["x-admin-token"] = data.adminToken;
       }
 
-      await register(data.email, data.password, data.role, headers);
+      const result = await register(data.email, data.password, data.role, headers);
+      console.log("Registration response:", result);
 
       setLocation("/dashboard");
       toast({
@@ -90,11 +98,17 @@ export default function Register() {
       });
     } catch (error: any) {
       console.error('Registration error:', error);
+      const errorMessage = error.message || 
+        (error.response?.data?.message) || 
+        "Registration failed. Please check your credentials and try again.";
+
       toast({
         title: "Registration Failed",
-        description: error.message || "Please check your credentials and try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -107,6 +121,7 @@ export default function Register() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Email field */}
               <FormField
                 control={form.control}
                 name="email"
@@ -120,6 +135,8 @@ export default function Register() {
                   </FormItem>
                 )}
               />
+
+              {/* Password field */}
               <FormField
                 control={form.control}
                 name="password"
@@ -155,6 +172,8 @@ export default function Register() {
                   </FormItem>
                 )}
               />
+
+              {/* Confirm Password field */}
               <FormField
                 control={form.control}
                 name="confirmPassword"
@@ -187,6 +206,8 @@ export default function Register() {
                   </FormItem>
                 )}
               />
+
+              {/* Role Selection */}
               <FormField
                 control={form.control}
                 name="role"
@@ -218,6 +239,8 @@ export default function Register() {
                   </FormItem>
                 )}
               />
+
+              {/* Admin Token field */}
               {showAdminToken && (
                 <FormField
                   control={form.control}
@@ -255,11 +278,15 @@ export default function Register() {
                   )}
                 />
               )}
-              <Button type="submit" className="w-full">
-                Create account
+
+              {/* Submit Button */}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Creating account..." : "Create account"}
               </Button>
             </form>
           </Form>
+
+          {/* Sign in link */}
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
             <Link href="/auth/login" className="text-primary hover:underline">

@@ -40,7 +40,7 @@ router.get("/me", authenticateToken, async (req: any, res) => {
   res.json({ user: req.user });
 });
 
-// Register new user with enhanced security and audit
+// Authentication routes
 router.post("/register", async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
@@ -48,13 +48,20 @@ router.post("/register", async (req, res) => {
     // Enhanced validation for admin registration
     if (validatedData.role === 'admin') {
       const adminToken = req.headers['x-admin-token'];
+      console.log("Admin registration attempt");
+      console.log("Received admin token:", adminToken ? "present" : "missing");
+      console.log("Expected token:", process.env.ADMIN_REGISTRATION_TOKEN ? "configured" : "missing");
+
       if (!adminToken || adminToken !== process.env.ADMIN_REGISTRATION_TOKEN) {
+        console.log("Admin token validation failed");
         return res.status(403).json({ 
-          message: "Invalid admin registration token. Please contact system administrator." 
+          message: "Invalid admin registration token. Please verify the token and try again." 
         });
       }
+      console.log("Admin token validation successful");
     }
 
+    // Check for existing user
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, validatedData.email),
     });
@@ -93,14 +100,16 @@ router.post("/register", async (req, res) => {
     // Log the registration
     await auditLog(user.id, 'user_registration', 'users', user.id, req);
 
+    console.log("User registration successful:", { id: user.id, email: user.email, role: user.role });
+
     res.status(201).json({
       message: "User registered successfully",
       user: { id: user.id, email: user.email, role: user.role },
     });
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("Registration error details:", error);
     res.status(400).json({ 
-      message: error.message || "Invalid registration data" 
+      message: error.message || "Registration failed. Please check your input and try again." 
     });
   }
 });
