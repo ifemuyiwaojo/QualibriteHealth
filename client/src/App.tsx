@@ -10,6 +10,7 @@ import Contact from "@/pages/Contact";
 import FAQ from "@/pages/FAQ";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import ChangePassword from "@/pages/auth/ChangePassword";
 import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
@@ -29,6 +30,10 @@ const DashboardRouter = memo(function DashboardRouter() {
 
   if (!user) {
     return <Redirect to="/auth/login" />;
+  }
+
+  if (user.changePasswordRequired) {
+    return <Redirect to="/auth/change-password" />;
   }
 
   switch (user.role) {
@@ -93,6 +98,9 @@ const Router = memo(function Router() {
           </Route>
           <Route path="/auth/register">
             {user ? <Redirect to="/dashboard" /> : <Register />}
+          </Route>
+          <Route path="/auth/change-password">
+            {!user ? <Redirect to="/auth/login" /> : <ChangePassword />}
           </Route>
 
           {/* Protected Routes */}
