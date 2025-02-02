@@ -22,13 +22,18 @@ export default function MedicalRecordsPage() {
     );
   }
 
-  if (!records) {
-    return <div>No medical records found</div>;
+  if (!records || records.length === 0) {
+    return <div className="container py-10">No medical records found</div>;
   }
 
   const diagnoses = records.filter(record => record.type === "diagnosis");
   const progressNotes = records.filter(record => record.type === "progress_note");
   const labResults = records.filter(record => record.type === "lab_result");
+
+  const formatDate = (date: Date | string | null) => {
+    if (!date) return "N/A";
+    return format(new Date(date), 'PPP');
+  };
 
   return (
     <div className="container py-10">
@@ -50,7 +55,7 @@ export default function MedicalRecordsPage() {
                     {(record.content as any).diagnosis}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(record.createdAt), 'PPP')}
+                    {formatDate(record.createdAt)}
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -61,7 +66,7 @@ export default function MedicalRecordsPage() {
                       <div>
                         <strong>Prescriptions:</strong>
                         <ul className="list-disc list-inside">
-                          {(record.content as any).prescriptions.map((rx: string, i: number) => (
+                          {((record.content as any).prescriptions as string[]).map((rx, i) => (
                             <li key={i}>{rx}</li>
                           ))}
                         </ul>
@@ -81,7 +86,7 @@ export default function MedicalRecordsPage() {
                 <CardHeader>
                   <CardTitle>Progress Note</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(record.createdAt), 'PPP')}
+                    {formatDate(record.createdAt)}
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -89,9 +94,9 @@ export default function MedicalRecordsPage() {
                     <div>
                       <strong>Vital Signs:</strong>
                       <ul className="list-disc list-inside">
-                        <li>Blood Pressure: {(record.content as any).vital_signs.blood_pressure}</li>
-                        <li>Heart Rate: {(record.content as any).vital_signs.heart_rate}</li>
-                        <li>Temperature: {(record.content as any).vital_signs.temperature}</li>
+                        <li>Blood Pressure: {(record.content as any).vital_signs?.blood_pressure || 'N/A'}</li>
+                        <li>Heart Rate: {(record.content as any).vital_signs?.heart_rate || 'N/A'}</li>
+                        <li>Temperature: {(record.content as any).vital_signs?.temperature || 'N/A'}</li>
                       </ul>
                     </div>
                     <p><strong>Symptoms:</strong> {(record.content as any).symptoms}</p>
@@ -110,7 +115,7 @@ export default function MedicalRecordsPage() {
                 <CardHeader>
                   <CardTitle>{(record.content as any).test_type}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(record.createdAt), 'PPP')}
+                    {formatDate(record.createdAt)}
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -118,8 +123,8 @@ export default function MedicalRecordsPage() {
                     <div>
                       <strong>Results:</strong>
                       <ul className="list-disc list-inside">
-                        {Object.entries((record.content as any).results).map(([key, value]) => (
-                          <li key={key}>{key}: {value}</li>
+                        {Object.entries((record.content as any).results || {}).map(([key, value]) => (
+                          <li key={key}>{key}: {String(value)}</li>
                         ))}
                       </ul>
                     </div>
