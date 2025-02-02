@@ -1,49 +1,6 @@
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
-
-const contactFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
-
-type ContactFormValues = z.infer<typeof contactFormSchema>;
+import { MapPin, Phone, Mail, Clock, PhoneCall } from "lucide-react";
 
 export default function Contact() {
-  const { toast } = useToast();
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
-    },
-  });
-
-  function onSubmit(data: ContactFormValues) {
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
-    form.reset();
-  }
-
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -58,128 +15,78 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Contact Form & Info */}
+      {/* Contact Information */}
       <section className="py-20">
         <div className="container">
-          <div className="grid gap-12 md:grid-cols-2">
-            {/* Contact Information */}
-            <div>
-              <h2 className="text-2xl font-bold">Get in Touch</h2>
-              <p className="mt-4 text-muted-foreground">
-                Have questions about our services? Our team is here to help.
-              </p>
+          <div className="mx-auto max-w-3xl">
+            <div className="grid gap-8 md:grid-cols-2">
+              {/* Department Contacts */}
+              <div className="space-y-8">
+                <h2 className="text-2xl font-bold">Departments</h2>
 
-              <div className="mt-8 space-y-6">
-                <div className="flex items-center gap-4">
-                  <MapPin className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Location</h3>
-                    <p className="text-muted-foreground">
-                      123 Medical Center Drive<br />
-                      Healthcare City, HC 12345
-                    </p>
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <Mail className="mt-1 h-5 w-5 text-primary" />
+                    <div>
+                      <h3 className="font-semibold">Billing Department</h3>
+                      <p className="text-muted-foreground">(888) 511-3697</p>
+                      <p className="text-muted-foreground">billing@qualibritehealth.com</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <Phone className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                  <div className="flex items-start gap-4">
+                    <Phone className="mt-1 h-5 w-5 text-primary" />
+                    <div>
+                      <h3 className="font-semibold">Technical Support</h3>
+                      <p className="text-muted-foreground">(888) 511-3697</p>
+                      <p className="text-muted-foreground">support@qualibritehealth.com</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <Mail className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Email</h3>
-                    <p className="text-muted-foreground">contact@qualibrite.health</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <Clock className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Hours</h3>
-                    <p className="text-muted-foreground">
-                      Monday - Friday: 8:00 AM - 6:00 PM<br />
-                      Saturday: 9:00 AM - 1:00 PM<br />
-                      Sunday: Closed
-                    </p>
+                  <div className="flex items-start gap-4">
+                    <Mail className="mt-1 h-5 w-5 text-primary" />
+                    <div>
+                      <h3 className="font-semibold">Patient Inquiries</h3>
+                      <p className="text-muted-foreground">(888) 511-3697</p>
+                      <p className="text-muted-foreground">myhealth@qualibritehealth.com</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Contact Form */}
-            <div>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {/* Emergency Contacts & Hours */}
+              <div className="space-y-8">
+                <h2 className="text-2xl font-bold">Emergency Contacts</h2>
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <PhoneCall className="mt-1 h-5 w-5 text-destructive" />
+                    <div>
+                      <h3 className="font-semibold">Emergency Hotline</h3>
+                      <p className="text-muted-foreground">911</p>
+                    </div>
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your phone number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex items-start gap-4">
+                    <PhoneCall className="mt-1 h-5 w-5 text-destructive" />
+                    <div>
+                      <h3 className="font-semibold">Suicide Emergency Helpline</h3>
+                      <p className="text-muted-foreground">988</p>
+                    </div>
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="How can we help you?"
-                            className="min-h-[120px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button type="submit" className="w-full">
-                    Send Message
-                  </Button>
-                </form>
-              </Form>
+                  <div className="flex items-start gap-4 pt-4">
+                    <Clock className="mt-1 h-5 w-5 text-primary" />
+                    <div>
+                      <h3 className="font-semibold">Hours of Operation</h3>
+                      <p className="text-muted-foreground">
+                        Monday - Saturday: 7:00AM - 10:00PM<br />
+                        Sunday: 7:00AM - 6:00PM
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
