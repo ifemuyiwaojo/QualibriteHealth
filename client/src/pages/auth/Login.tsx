@@ -49,13 +49,15 @@ export default function Login() {
 
     try {
       setIsSubmitting(true);
+      console.log("Attempting login with:", data.email);
       const response = await login(data.email, data.password, data.rememberMe);
+      console.log("Login response:", response);
 
       if (response?.user) {
         if (response.user.changePasswordRequired) {
           toast({
             title: "Password Change Required",
-            description: "You'll need to set a new password.",
+            description: "Please set a new password to continue.",
           });
           setLocation("/auth/change-password");
         } else {
@@ -74,7 +76,7 @@ export default function Login() {
       console.error("Login failed:", error);
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Please check your email and password.",
+        description: error.message || "Invalid credentials. Please check your email and password.",
         variant: "destructive",
       });
       form.setError("password", {
