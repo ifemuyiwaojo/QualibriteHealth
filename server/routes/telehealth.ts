@@ -2,7 +2,7 @@ import express from 'express';
 import { z } from 'zod';
 import { db } from '@db';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { setTimeout } from 'timers/promises';
 
 const router = express.Router();
@@ -12,10 +12,14 @@ const VSEE_API_KEY = process.env.VSEE_API_KEY;
 const VSEE_API_SECRET = process.env.VSEE_API_SECRET;
 const VSEE_BASE_URL = 'https://clinic-api.vsee.com/api/v2';
 
-// Axios instance with retry logic
+if (!VSEE_API_KEY || !VSEE_API_SECRET) {
+  console.error('VSee API credentials are not properly configured');
+}
+
+// Axios instance with extended configuration
 const vseeApi = axios.create({
   baseURL: VSEE_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased timeout
   headers: {
     'Authorization': `Bearer ${VSEE_API_KEY}`,
     'X-VSee-Secret': VSEE_API_SECRET,
@@ -23,17 +27,19 @@ const vseeApi = axios.create({
   }
 });
 
-// Add retry logic
-vseeApi.interceptors.response.use(undefined, async (err) => {
-  const { config } = err;
-  if (!config || !config.retry) {
-    return Promise.reject(err);
+// Helper function to handle API errors
+const handleVSeeError = (error: any) => {
+  if (axios.isAxiosError(error)) {
+    if (error.code === 'ENOTFOUND') {
+      throw new Error('Unable to connect to telehealth service. Please try again later.');
+    }
+    if (error.response?.status === 401) {
+      throw new Error('Telehealth service authentication failed. Please contact support.');
+    }
+    throw new Error(error.response?.data?.error || 'Telehealth service error. Please try again.');
   }
-  config.retry -= 1;
-  const delayMs = config.retryDelay || 1000;
-  await setTimeout(delayMs);
-  return vseeApi(config);
-});
+  throw error;
+};
 
 // Schema for creating a visit
 const createVisitSchema = z.object({
@@ -68,8 +74,12 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
       role: 'PROVIDER'
     });
 
-    // Create VSee visit with retry logic
     try {
+      // Validate API connection before proceeding
+      await vseeApi.get('/health-check').catch(() => {
+        throw new Error('Telehealth service is currently unavailable. Please try again later.');
+      });
+
       const vseeResponse = await vseeApi.post('/visits', {
         participants,
         scheduled_at: visitData.scheduledTime,
@@ -83,18 +93,14 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
           enable_waiting_room: true,
           allow_group_chat: true
         }
-      }, {
-        retry: 3,
-        retryDelay: 1000
       });
 
       res.json({
         success: true,
         visit: vseeResponse.data
       });
-    } catch (error: any) {
-      console.error('VSee API Error:', error.response?.data || error.message);
-      throw new Error('Failed to communicate with telehealth service');
+    } catch (error) {
+      handleVSeeError(error);
     }
   } catch (error: any) {
     console.error('Error creating telehealth visit:', error);
@@ -105,38 +111,7 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
   }
 });
 
-// Get visit details
-router.get('/visit/:visitId', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
-  try {
-    const { visitId } = req.params;
-
-    const vseeResponse = await vseeApi.get(
-      `/visits/${visitId}`,
-      {
-        retry: 3,
-        retryDelay: 1000
-      }
-    );
-
-    if (!vseeResponse.data) {
-      throw new Error('Visit not found');
-    }
-
-    res.json({
-      success: true,
-      visit: vseeResponse.data
-    });
-  } catch (error: any) {
-    console.error('Error fetching visit:', error.response?.data || error.message);
-    res.status(error.response?.status || 400).json({
-      success: false,
-      error: 'Failed to fetch visit details',
-      details: error.response?.data || error.message
-    });
-  }
-});
-
-// List upcoming visits with retry logic
+// Get upcoming visits with basic error handling
 router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
   try {
     const params: any = {
@@ -151,94 +126,20 @@ router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'pa
       params.provider_id = req.user.id;
     }
 
-    const vseeResponse = await vseeApi.get('/visits', {
-      params,
-      retry: 3,
-      retryDelay: 1000
-    });
-
-    res.json({
-      success: true,
-      visits: vseeResponse.data.visits || []
-    });
-  } catch (error: any) {
-    console.error('Error fetching upcoming visits:', error.response?.data || error.message);
-    res.status(error.response?.status || 400).json({
-      success: false,
-      error: 'Failed to fetch upcoming visits',
-      details: error.response?.data || error.message
-    });
-  }
-});
-
-// Start or join a visit
-router.post('/visit/:visitId/join', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
-  try {
-    const { visitId } = req.params;
-    const isProvider = req.user.role === 'provider';
-
-    // Get room URL from VSee
-    const vseeResponse = await vseeApi.post(
-      `/visits/${visitId}/${isProvider ? 'start' : 'join'}`,
-      {
-        user_id: req.user.id,
-        user_type: req.user.role.toUpperCase()
-      },
-      {
-         retry: 3,
-         retryDelay: 1000
-      }
-    );
-
-    if (!vseeResponse.data || !vseeResponse.data.room_url) {
-      throw new Error('Failed to get room URL');
+    try {
+      const vseeResponse = await vseeApi.get('/visits', { params });
+      res.json({
+        success: true,
+        visits: vseeResponse.data.visits || []
+      });
+    } catch (error) {
+      handleVSeeError(error);
     }
-
-    res.json({
-      success: true,
-      roomUrl: vseeResponse.data.room_url
-    });
   } catch (error: any) {
-    console.error('Error joining visit:', error.response?.data || error.message);
-    res.status(error.response?.status || 400).json({
+    console.error('Error fetching upcoming visits:', error);
+    res.status(400).json({
       success: false,
-      error: 'Failed to join visit',
-      details: error.response?.data || error.message
-    });
-  }
-});
-
-// Add participant to group session
-router.post('/visit/:visitId/participants', authenticateToken, authorizeRoles('provider'), async (req: any, res) => {
-  try {
-    const { visitId } = req.params;
-    const { participantId, participantName, role = 'PATIENT' } = req.body;
-
-    const vseeResponse = await vseeApi.post(
-      `/visits/${visitId}/participants`,
-      {
-        participant: {
-          id: participantId,
-          name: participantName,
-          role
-        }
-      },
-      {
-        retry: 3,
-        retryDelay: 1000
-      }
-    );
-
-    res.json({
-      success: true,
-      participant: vseeResponse.data
-    });
-  } catch (error: any) {
-    console.error('Error adding participant:', error.response?.data || error.message);
-    res.status(error.response?.status || 400).json({
-      success: false,
-      error: 'Failed to add participant',
-      details: error.response?.data || error.message
+      error: error.message || 'Failed to fetch upcoming visits'
     });
   }
 });
