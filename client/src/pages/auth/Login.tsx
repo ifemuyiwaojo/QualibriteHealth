@@ -67,11 +67,6 @@ export default function Login() {
       if (response?.user) {
         if (response.user.requiresPasswordChange) {
           setLocation("/auth/change-password");
-          toast({
-            title: "Password Change Required",
-            description: "Please change your password to continue.",
-            variant: "warning",
-          });
         } else {
           setLocation("/dashboard");
           toast({

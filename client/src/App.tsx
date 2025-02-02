@@ -32,6 +32,7 @@ const DashboardRouter = memo(function DashboardRouter() {
     return <Redirect to="/auth/login" />;
   }
 
+  // Force password change before accessing dashboard
   if (user.changePasswordRequired) {
     return <Redirect to="/auth/change-password" />;
   }
@@ -67,6 +68,11 @@ const AuthenticatedRoute = memo(function AuthenticatedRoute({
     return <Redirect to="/auth/login" />;
   }
 
+  // Force password change for authenticated routes as well
+  if (user.changePasswordRequired) {
+    return <Redirect to="/auth/change-password" />;
+  }
+
   return <Component />;
 });
 
@@ -94,7 +100,15 @@ const Router = memo(function Router() {
 
           {/* Auth Routes */}
           <Route path="/auth/login">
-            {user ? <Redirect to="/dashboard" /> : <Login />}
+            {user ? (
+              user.changePasswordRequired ? (
+                <Redirect to="/auth/change-password" />
+              ) : (
+                <Redirect to="/dashboard" />
+              )
+            ) : (
+              <Login />
+            )}
           </Route>
           <Route path="/auth/register">
             {user ? <Redirect to="/dashboard" /> : <Register />}
