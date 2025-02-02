@@ -23,6 +23,7 @@ import CompliancePage from "@/pages/admin/CompliancePage";
 import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
+import AppointmentsPage from "@/pages/patient/AppointmentsPage";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -164,7 +165,7 @@ const Router = memo(function Router() {
             {!user ? <Redirect to="/auth/login" /> : <TelehealthPage />}
           </Route>
           <Route path="/patient/appointments">
-            {!user ? <Redirect to="/auth/login" /> : <div>Appointments Page</div>}
+            {!user ? <Redirect to="/auth/login" /> : <AppointmentsPage />}
           </Route>
           <Route path="/patient/records">
             {!user ? <Redirect to="/auth/login" /> : <div>Medical Records Page</div>}
