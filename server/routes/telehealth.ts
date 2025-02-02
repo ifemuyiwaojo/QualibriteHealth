@@ -61,74 +61,41 @@ const handleVSeeError = (error: any) => {
   return error;
 };
 
-// Create a new telehealth visit
-router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
-  console.log('Attempting to create new telehealth visit...');
-
+// Join session endpoint
+router.post('/visit/:sessionId/join', authenticateToken, async (req: any, res) => {
   try {
-    const visitData = {
-      patientIds: [req.user.id.toString()],
-      patientNames: [req.user.email],
-      providerId: req.body.providerId,
-      providerName: req.body.providerName,
-      scheduledTime: req.body.scheduledTime,
-      duration: req.body.duration,
-      isGroupSession: req.body.isGroupSession,
-      visitType: req.body.isGroupSession ? 'GROUP' : 'VIDEO',
-      reasonForVisit: req.body.reasonForVisit || 'Scheduled Visit',
-      maxParticipants: req.body.isGroupSession ? 8 : 2
-    };
+    const { sessionId } = req.params;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
 
-    console.log('Visit data validated:', visitData);
+    console.log('User attempting to join session:', { sessionId, userId, userRole });
 
-    // Create intake using exact format from docs
-    const intakeData = new FormData();
-    intakeData.append('provider_id', visitData.providerId);
-    intakeData.append('reason_for_visit', visitData.reasonForVisit);
-    intakeData.append('type', '2'); // Schedule type as per docs
-    intakeData.append('room_code', 'telehealth_room');
-    intakeData.append('member_id', req.user.id.toString());
+    // Create a token for the user
+    const tokenResponse = await vseeApi.post('/tokens', {
+      session_id: sessionId,
+      user_id: userId.toString(),
+      user_name: userRole === 'provider' ? 'Provider' : 'Patient',
+      role: userRole.toUpperCase()
+    });
 
-    console.log('Creating intake with data:', Object.fromEntries(intakeData));
-
-    // Create intake using form data as shown in docs
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    };
-
-    const intakeResponse = await vseeApi.post('/intakes', intakeData, config);
-
-    if (!intakeResponse.data?.data?.id) {
-      throw new Error('Failed to create intake: Invalid response format');
+    if (!tokenResponse.data?.token) {
+      throw new Error('Failed to create VSee token');
     }
 
-    console.log('Intake created:', intakeResponse.data);
+    // Get room URL
+    const roomUrl = `${VSEE_BASE_URL}/rooms/${sessionId}`;
 
-    // Create visit using the intake
-    const visitPayload = new FormData();
-    visitPayload.append('intake_id', intakeResponse.data.data.id);
-    visitPayload.append('slot_start', Math.floor(new Date(visitData.scheduledTime).getTime() / 1000).toString());
-    visitPayload.append('slot_end', Math.floor(new Date(visitData.scheduledTime).getTime() / 1000 + (visitData.duration * 60)).toString());
-    visitPayload.append('type', '2'); // Schedule type
-    visitPayload.append('room_code', 'telehealth_room');
-    visitPayload.append('provider_id', visitData.providerId);
-
-    console.log('Creating visit with data:', Object.fromEntries(visitPayload));
-
-    const visitResponse = await vseeApi.post('/visits', visitPayload, config);
-    console.log('Visit created successfully:', visitResponse.data);
+    console.log('Successfully created join session data:', { sessionId, roomUrl });
 
     res.json({
       success: true,
-      visit: visitResponse.data.data
+      token: tokenResponse.data.token,
+      roomUrl,
     });
-  } catch (error: any) {
+  } catch (error) {
     const handledError = handleVSeeError(error);
-    console.error('Failed to create visit:', handledError.message);
-
-    res.status(400).json({
+    console.error('Error joining session:', handledError);
+    res.status(500).json({
       success: false,
       error: handledError.message
     });
@@ -144,15 +111,27 @@ router.post('/session', authenticateToken, async (req, res) => {
     // Generate a unique session ID
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Create a VSee room using their API
-    const response = await axios.post(`${VSEE_BASE_URL}/rooms`, {
+    // Create room token
+    const tokenResponse = await vseeApi.post('/tokens', {
+      session_id: sessionId,
+      user_id: userId.toString(),
+      user_name: role === 'provider' ? 'Provider' : 'Patient',
+      role: role.toUpperCase()
+    });
+
+    if (!tokenResponse.data?.token) {
+      throw new Error('Failed to create VSee token');
+    }
+
+    // Create a VSee room
+    const roomResponse = await vseeApi.post('/rooms', {
       room_id: sessionId,
       api_key: VSEE_API_KEY,
       max_participants: 2,
       room_type: 'meeting'
     });
 
-    if (!response.data?.success) {
+    if (!roomResponse.data?.success) {
       throw new Error('Failed to create VSee room');
     }
 
@@ -161,19 +140,21 @@ router.post('/session', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       sessionId,
-      roomData: response.data
+      roomData: roomResponse.data,
+      token: tokenResponse.data.token
     });
   } catch (error) {
-    console.error('Error creating session:', error);
+    const handledError = handleVSeeError(error);
+    console.error('Error creating session:', handledError);
     res.status(500).json({
       success: false,
-      error: 'Failed to create session'
+      error: handledError.message
     });
   }
 });
 
 // Active session retrieval endpoint
-router.get('/active-session', authenticateToken, async (req, res) => {
+router.get('/active-session', authenticateToken, async (req: any, res) => {
   try {
     const userId = req.user?.id;
 
