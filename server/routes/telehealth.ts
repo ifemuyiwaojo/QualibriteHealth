@@ -13,38 +13,53 @@ const VSEE_BASE_URL = 'https://clinic-api.vsee.com/api/v2';
 
 // Schema for creating a visit
 const createVisitSchema = z.object({
-  patientId: z.string(),
+  patientIds: z.array(z.string()),  // Support multiple patients for group therapy
   providerId: z.string(),
   scheduledTime: z.string().datetime(),
-  duration: z.number().min(15).max(60),
-  visitType: z.string().default('VIDEO'),
-  patientName: z.string(),
+  duration: z.number().min(15).max(120), // Extended max duration for group sessions
+  visitType: z.string().default('GROUP'),
+  patientNames: z.array(z.string()),
   providerName: z.string(),
   reasonForVisit: z.string().optional(),
+  maxParticipants: z.number().min(2).max(10).default(8), // Limit group size
+  isGroupSession: z.boolean().default(false),
 });
 
-// Create a new visit
+// Create a new visit (single or group)
 router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
   try {
     const visitData = createVisitSchema.parse(req.body);
+
+    // Prepare participants data
+    const participants = visitData.patientIds.map((id, index) => ({
+      id,
+      name: visitData.patientNames[index],
+      role: 'PATIENT'
+    }));
+
+    // Add provider to participants
+    participants.push({
+      id: visitData.providerId,
+      name: visitData.providerName,
+      role: 'PROVIDER'
+    });
 
     // Create VSee visit using their Visit API
     const vseeResponse = await axios.post(
       `${VSEE_BASE_URL}/visits`,
       {
-        patient: {
-          id: visitData.patientId,
-          name: visitData.patientName
-        },
-        provider: {
-          id: visitData.providerId,
-          name: visitData.providerName
-        },
+        participants,
         scheduled_at: visitData.scheduledTime,
         duration_minutes: visitData.duration,
         visit_type: visitData.visitType,
-        reason_for_visit: visitData.reasonForVisit || 'Scheduled Visit',
-        status: 'SCHEDULED'
+        reason_for_visit: visitData.reasonForVisit || 'Group Therapy Session',
+        status: 'SCHEDULED',
+        settings: {
+          max_participants: visitData.maxParticipants,
+          is_group_session: visitData.isGroupSession,
+          enable_waiting_room: true,
+          allow_group_chat: true
+        }
       },
       {
         headers: {
@@ -181,6 +196,43 @@ router.post('/visit/:visitId/join', authenticateToken, authorizeRoles('provider'
     res.status(error.response?.status || 400).json({
       success: false,
       error: 'Failed to join visit',
+      details: error.response?.data || error.message
+    });
+  }
+});
+
+// Add participant to group session
+router.post('/visit/:visitId/participants', authenticateToken, authorizeRoles('provider'), async (req: any, res) => {
+  try {
+    const { visitId } = req.params;
+    const { participantId, participantName, role = 'PATIENT' } = req.body;
+
+    const vseeResponse = await axios.post(
+      `${VSEE_BASE_URL}/visits/${visitId}/participants`,
+      {
+        participant: {
+          id: participantId,
+          name: participantName,
+          role
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${VSEE_API_KEY}`,
+          'X-VSee-Secret': VSEE_API_SECRET
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      participant: vseeResponse.data
+    });
+  } catch (error: any) {
+    console.error('Error adding participant:', error.response?.data || error.message);
+    res.status(error.response?.status || 400).json({
+      success: false,
+      error: 'Failed to add participant',
       details: error.response?.data || error.message
     });
   }

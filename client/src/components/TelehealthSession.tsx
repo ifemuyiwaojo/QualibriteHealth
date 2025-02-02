@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import { useAuth } from '@/lib/auth';
+import { Badge } from './ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 interface TelehealthSessionProps {
   visitId?: string;
@@ -17,6 +21,8 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [showAddParticipant, setShowAddParticipant] = useState(false);
+  const [newParticipantEmail, setNewParticipantEmail] = useState('');
 
   const { data: visit, isLoading, error } = useQuery({
     queryKey: ['telehealth-visit', visitId],
@@ -46,9 +52,12 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
 
   const createVisitMutation = useMutation({
     mutationFn: async (data: {
+      patientIds: string[];
+      patientNames: string[];
       providerId: string;
       scheduledTime: string;
       duration: number;
+      isGroupSession?: boolean;
     }) => {
       const response = await fetch('/api/telehealth/visit', {
         method: 'POST',
@@ -57,10 +66,8 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
         },
         body: JSON.stringify({
           ...data,
-          patientId: user?.id.toString(),
-          patientName: user?.email, // Use email temporarily, should be replaced with actual name
           providerName: "Provider", // Should be fetched from provider details
-          visitType: 'VIDEO'
+          visitType: data.isGroupSession ? 'GROUP' : 'VIDEO',
         }),
       });
 
@@ -81,6 +88,44 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
       toast({
         title: 'Error',
         description: error.message || 'Failed to create visit',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const addParticipantMutation = useMutation({
+    mutationFn: async ({ visitId, participantEmail }: { visitId: string; participantEmail: string }) => {
+      const response = await fetch(`/api/telehealth/visit/${visitId}/participants`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          participantId: participantEmail, // Using email as ID temporarily
+          participantName: participantEmail,
+          role: 'PATIENT'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add participant');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Participant added successfully',
+      });
+      setShowAddParticipant(false);
+      setNewParticipantEmail('');
+      refetchVisits();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to add participant',
         variant: 'destructive',
       });
     },
@@ -125,6 +170,22 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
     }
   };
 
+  const handleAddParticipant = async (visitId: string) => {
+    if (!newParticipantEmail) {
+      toast({
+        title: 'Error',
+        description: 'Please enter participant email',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await addParticipantMutation.mutateAsync({
+      visitId,
+      participantEmail: newParticipantEmail,
+    });
+  };
+
   if (error) {
     return (
       <Card className="p-6">
@@ -152,7 +213,12 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
       <h2 className="text-2xl font-bold mb-4">Telehealth Visit</h2>
       {visit?.visit ? (
         <div className="space-y-4">
-          <p>Visit ID: {visit.visit.id}</p>
+          <div className="flex items-center gap-2">
+            <p>Visit ID: {visit.visit.id}</p>
+            {visit.visit.visit_type === 'GROUP' && (
+              <Badge variant="secondary">Group Session</Badge>
+            )}
+          </div>
           <p>Status: {visit.visit.status}</p>
           {visit.visit.scheduled_at && (
             <p>Scheduled: {new Date(visit.visit.scheduled_at).toLocaleString()}</p>
@@ -160,6 +226,55 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
           {visit.visit.duration_minutes && (
             <p>Duration: {visit.visit.duration_minutes} minutes</p>
           )}
+
+          {/* Display participants for group sessions */}
+          {visit.visit.visit_type === 'GROUP' && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Participants</h3>
+              <div className="space-y-2">
+                {visit.visit.participants?.map((participant: any) => (
+                  <div key={participant.id} className="flex items-center gap-2">
+                    <span>{participant.name}</span>
+                    <Badge variant="outline">{participant.role}</Badge>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Participant Dialog */}
+              {isProvider && (
+                <Dialog open={showAddParticipant} onOpenChange={setShowAddParticipant}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="mt-2">
+                      Add Participant
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Participant to Group Session</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="participant-email">Participant Email</Label>
+                        <Input
+                          id="participant-email"
+                          value={newParticipantEmail}
+                          onChange={(e) => setNewParticipantEmail(e.target.value)}
+                          placeholder="Enter participant's email"
+                        />
+                      </div>
+                      <Button
+                        onClick={() => handleAddParticipant(visit.visit.id)}
+                        disabled={addParticipantMutation.isPending}
+                      >
+                        {addParticipantMutation.isPending ? 'Adding...' : 'Add Participant'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          )}
+
           <Button 
             onClick={() => joinVisit(visit.visit.id)}
             disabled={joinVisitMutation.isPending}
@@ -176,19 +291,36 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
               <div className="space-y-2">
                 {upcomingVisits.visits.map((visit: any) => (
                   <div key={visit.id} className="p-3 border rounded">
-                    <p>Date: {new Date(visit.scheduled_at).toLocaleString()}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <p>Date: {new Date(visit.scheduled_at).toLocaleString()}</p>
+                      {visit.visit_type === 'GROUP' && (
+                        <Badge variant="secondary">Group Session</Badge>
+                      )}
+                    </div>
                     <p>Duration: {visit.duration_minutes} minutes</p>
                     <p>Status: {visit.status}</p>
                     {visit.status === 'SCHEDULED' && (
-                      <Button 
-                        onClick={() => joinVisit(visit.id)}
-                        disabled={joinVisitMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                      >
-                        {joinVisitMutation.isPending ? 'Connecting...' : isProvider ? 'Start Visit' : 'Join Visit'}
-                      </Button>
+                      <div className="flex gap-2 mt-2">
+                        <Button 
+                          onClick={() => joinVisit(visit.id)}
+                          disabled={joinVisitMutation.isPending}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {joinVisitMutation.isPending ? 'Connecting...' : isProvider ? 'Start Visit' : 'Join Visit'}
+                        </Button>
+                        {isProvider && visit.visit_type === 'GROUP' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setShowAddParticipant(true);
+                            }}
+                          >
+                            Add Participant
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}
