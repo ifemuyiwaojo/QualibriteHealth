@@ -22,6 +22,7 @@ import SecurityCenterPage from "@/pages/admin/SecurityCenterPage";
 import CompliancePage from "@/pages/admin/CompliancePage";
 import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
+import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -158,6 +159,19 @@ const Router = memo(function Router() {
           <Route path="/admin/compliance" component={() => <AdminRoute component={CompliancePage} />} />
           <Route path="/admin/security" component={() => <AdminRoute component={SecurityCenterPage} />} />
 
+          {/* Patient Routes */}
+           <Route path="/telehealth">
+            {!user ? <Redirect to="/auth/login" /> : <TelehealthPage />}
+          </Route>
+          <Route path="/patient/appointments">
+            {!user ? <Redirect to="/auth/login" /> : <div>Appointments Page</div>}
+          </Route>
+          <Route path="/patient/records">
+            {!user ? <Redirect to="/auth/login" /> : <div>Medical Records Page</div>}
+          </Route>
+          <Route path="/patient/profile">
+            {!user ? <Redirect to="/auth/login" /> : <div>Patient Profile Page</div>}
+          </Route>
           <Route component={NotFound} />
         </Switch>
       </main>
