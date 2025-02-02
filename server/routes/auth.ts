@@ -45,9 +45,14 @@ router.post("/register", async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
 
-    // For admin registration, require a special token
-    if (validatedData.role === 'admin' && req.headers['x-admin-token'] !== process.env.ADMIN_REGISTRATION_TOKEN) {
-      return res.status(403).json({ message: "Unauthorized admin registration attempt" });
+    // Enhanced validation for admin registration
+    if (validatedData.role === 'admin') {
+      const adminToken = req.headers['x-admin-token'];
+      if (!adminToken || adminToken !== process.env.ADMIN_REGISTRATION_TOKEN) {
+        return res.status(403).json({ 
+          message: "Invalid admin registration token. Please contact system administrator." 
+        });
+      }
     }
 
     const existingUser = await db.query.users.findFirst({
@@ -56,6 +61,14 @@ router.post("/register", async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
+    }
+
+    // Password complexity validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(validatedData.passwordHash)) {
+      return res.status(400).json({
+        message: "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters"
+      });
     }
 
     const hashedPassword = await bcrypt.hash(validatedData.passwordHash, 10);
@@ -84,9 +97,11 @@ router.post("/register", async (req, res) => {
       message: "User registered successfully",
       user: { id: user.id, email: user.email, role: user.role },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
-    res.status(400).json({ message: "Invalid registration data" });
+    res.status(400).json({ 
+      message: error.message || "Invalid registration data" 
+    });
   }
 });
 

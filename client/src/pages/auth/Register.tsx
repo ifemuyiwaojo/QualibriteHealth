@@ -26,7 +26,12 @@ import { useState } from "react";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
   confirmPassword: z.string(),
   role: z.enum(["patient", "provider", "admin"]),
   adminToken: z.string().optional(),
@@ -119,6 +124,9 @@ export default function Register() {
                         {...field}
                       />
                     </FormControl>
+                     <p className="text-xs text-muted-foreground mt-1">
+                        Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters
+                      </p>
                     <FormMessage />
                   </FormItem>
                 )}
