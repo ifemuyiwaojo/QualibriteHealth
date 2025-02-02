@@ -1,5 +1,5 @@
 import { createContext, useContext, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
 
 interface User {
@@ -27,6 +27,8 @@ export function useAuth() {
 }
 
 export function useAuthProvider() {
+  const queryClient = useQueryClient();
+
   const { data: user, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
@@ -41,8 +43,8 @@ export function useAuthProvider() {
         return null;
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     retry: false,
@@ -53,7 +55,8 @@ export function useAuthProvider() {
     if (!res.ok) {
       throw new Error("Invalid credentials");
     }
-  }, []);
+    await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+  }, [queryClient]);
 
   const register = useCallback(
     async (email: string, password: string, role: string) => {
@@ -65,13 +68,15 @@ export function useAuthProvider() {
       if (!res.ok) {
         throw new Error("Registration failed");
       }
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
-    []
+    [queryClient]
   );
 
   const logout = useCallback(async () => {
     await apiRequest("POST", "/api/auth/logout");
-  }, []);
+    await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+  }, [queryClient]);
 
   return {
     user,
