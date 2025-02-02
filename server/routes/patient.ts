@@ -12,10 +12,21 @@ const router = express.Router();
 router.get("/profile", authenticateToken, authorizeRoles("patient"), async (req: any, res) => {
   try {
     const [patient] = await db
-      .select()
+      .select({
+        id: patients.id,
+        firstName: patients.firstName,
+        lastName: patients.lastName,
+        email: users.email,
+        dateOfBirth: patients.dateOfBirth,
+        phone: patients.phone,
+        address: patients.address,
+        emergencyContact: patients.emergencyContact,
+        emergencyPhone: patients.emergencyPhone,
+      })
       .from(patients)
       .where(eq(patients.userId, req.user.id))
-      .leftJoin(users, eq(patients.userId, users.id));
+      .leftJoin(users, eq(patients.userId, users.id))
+      .limit(1);
 
     if (!patient) {
       return res.status(404).json({ message: "Patient profile not found" });
