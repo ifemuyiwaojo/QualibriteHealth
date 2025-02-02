@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { db } from "@db";
 import { users, auditLogs, insertUserSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { authenticateToken } from "../middleware/auth";
+import { authenticateToken, authorizeRoles } from "../middleware/auth";
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -30,38 +30,39 @@ const auditLog = async (userId: number, action: string, resourceType: string, re
   }
 };
 
-// Get current user with enhanced security
+// Get current user
 router.get("/me", authenticateToken, async (req: any, res) => {
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.user.id),
+  });
+
+  if (user?.change_password_required) {
+    return res.json({ 
+      user: req.user,
+      requiresPasswordChange: true 
+    });
   }
 
   await auditLog(req.user.id, 'user_check', 'users', req.user.id, req);
   res.json({ user: req.user });
 });
 
-// Register new user with enhanced security and audit
+// Register new user (public registration - no admin)
 router.post("/register", async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
 
-    // Enhanced validation for admin registration
+    // Prevent admin registration through public endpoint
     if (validatedData.role === 'admin') {
-      const adminToken = req.headers['x-admin-token'];
-      console.log("Admin registration attempt");
-      console.log("Received admin token:", adminToken ? "present" : "missing");
-      console.log("Expected token:", process.env.ADMIN_REGISTRATION_TOKEN ? "configured" : "missing");
-
-      if (!adminToken || adminToken !== process.env.ADMIN_REGISTRATION_TOKEN) {
-        console.log("Admin token validation failed");
-        return res.status(403).json({ 
-          message: "Invalid admin registration token. Please verify the token and try again." 
-        });
-      }
-      console.log("Admin token validation successful");
+      return res.status(403).json({ 
+        message: "Admin accounts can only be created by existing administrators" 
+      });
     }
 
-    // Check for existing user
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, validatedData.email),
     });
@@ -79,46 +80,123 @@ router.post("/register", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(validatedData.passwordHash, 10);
-
-    // Create user
     const [user] = await db.insert(users).values({
       ...validatedData,
       passwordHash: hashedPassword,
     }).returning();
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "24h" }
     );
 
-    // Set HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
-    // Log the registration
     await auditLog(user.id, 'user_registration', 'users', user.id, req);
-
-    console.log("User registration successful:", { id: user.id, email: user.email, role: user.role });
-
     res.status(201).json({
       message: "User registered successfully",
       user: { id: user.id, email: user.email, role: user.role },
     });
   } catch (error: any) {
-    console.error("Registration error details:", error);
+    console.error("Registration error:", error);
     res.status(400).json({ 
-      message: error.message || "Registration failed. Please check your input and try again." 
+      message: error.message || "Registration failed" 
     });
   }
 });
 
-// Login with enhanced security and audit
+// Create admin user (superadmin only)
+router.post("/create-admin", authenticateToken, authorizeRoles("admin"), async (req: any, res) => {
+  try {
+    // Check if the requesting user is a superadmin
+    const requestingUser = await db.query.users.findFirst({
+      where: eq(users.id, req.user.id),
+    });
+
+    if (!requestingUser?.is_superadmin) {
+      return res.status(403).json({ 
+        message: "Only superadmins can create new admin users" 
+      });
+    }
+
+    const { email } = req.body;
+    const temporaryPassword = `Admin${Math.random().toString(36).slice(2)}#${new Date().getFullYear()}`;
+    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+
+    const [newAdmin] = await db.insert(users).values({
+      email,
+      passwordHash: hashedPassword,
+      role: 'admin',
+      change_password_required: true,
+      is_superadmin: false,
+    }).returning();
+
+    await auditLog(req.user.id, 'admin_user_creation', 'users', newAdmin.id, req);
+
+    res.status(201).json({
+      message: "Admin user created successfully",
+      temporaryPassword,
+      admin: { id: newAdmin.id, email: newAdmin.email, role: newAdmin.role },
+    });
+  } catch (error: any) {
+    console.error("Admin creation error:", error);
+    res.status(400).json({ 
+      message: error.message || "Failed to create admin user" 
+    });
+  }
+});
+
+// Change password (required for first login)
+router.post("/change-password", authenticateToken, async (req: any, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, req.user.id),
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const validPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!validPassword) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    // Password complexity validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        message: "New password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db
+      .update(users)
+      .set({ 
+        passwordHash: hashedPassword,
+        change_password_required: false 
+      })
+      .where(eq(users.id, req.user.id));
+
+    await auditLog(req.user.id, 'password_change', 'users', req.user.id, req);
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(400).json({ message: "Failed to change password" });
+  }
+});
+
+// Login with password change check
 router.post("/login", async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
@@ -132,7 +210,6 @@ router.post("/login", async (req, res) => {
 
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {
-      // Log failed login attempt
       await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -147,16 +224,16 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000, // 30 days or 24 hours
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
     });
 
-    // Log successful login
     await auditLog(user.id, 'successful_login', 'users', user.id, req);
 
     const userData = {
       id: user.id,
       email: user.email,
       role: user.role,
+      requiresPasswordChange: user.change_password_required
     };
 
     res.json({
@@ -169,7 +246,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Logout with audit
+// Logout
 router.post("/logout", authenticateToken, async (req: any, res) => {
   if (req.user) {
     await auditLog(req.user.id, 'logout', 'users', req.user.id, req);

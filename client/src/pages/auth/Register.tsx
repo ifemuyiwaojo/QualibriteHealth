@@ -34,19 +34,10 @@ const registerSchema = z.object({
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     ),
   confirmPassword: z.string(),
-  role: z.enum(["patient", "provider", "admin"]),
-  adminToken: z.string().optional(),
+  role: z.enum(["patient", "provider"]),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-}).refine((data) => {
-  if (data.role === "admin" && !data.adminToken) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Admin token is required for admin registration",
-  path: ["adminToken"],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -55,10 +46,8 @@ export default function Register() {
   const { register } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [showAdminToken, setShowAdminToken] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showTokenValue, setShowTokenValue] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegisterFormValues>({
@@ -68,7 +57,6 @@ export default function Register() {
       password: "",
       confirmPassword: "",
       role: "patient",
-      adminToken: "",
     },
   });
 
@@ -79,15 +67,8 @@ export default function Register() {
       setIsSubmitting(true);
       console.log("Starting registration process...");
 
-      const headers: Record<string, string> = {};
-
-      if (data.role === "admin" && data.adminToken) {
-        console.log("Registering admin user with token");
-        headers["X-Admin-Token"] = data.adminToken;
-      }
-
       const { email, password, role } = data;
-      const result = await register(email, password, role, headers);
+      const result = await register(email, password, role);
       console.log("Registration response:", result);
 
       if (result?.user) {
@@ -218,13 +199,7 @@ export default function Register() {
                   <FormItem>
                     <FormLabel>I am a</FormLabel>
                     <Select 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setShowAdminToken(value === "admin");
-                        if (value !== "admin") {
-                          form.setValue("adminToken", "");
-                        }
-                      }} 
+                      onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
@@ -235,52 +210,12 @@ export default function Register() {
                       <SelectContent>
                         <SelectItem value="patient">Patient</SelectItem>
                         <SelectItem value="provider">Healthcare Provider</SelectItem>
-                        <SelectItem value="admin">Administrator</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Admin Token field */}
-              {showAdminToken && (
-                <FormField
-                  control={form.control}
-                  name="adminToken"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Admin Registration Token</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={showTokenValue ? "text" : "password"}
-                            placeholder="Enter admin token"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowTokenValue(!showTokenValue)}
-                          >
-                            {showTokenValue ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Please enter the admin registration token provided by the system administrator
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
 
               {/* Submit Button */}
               <Button type="submit" className="w-full" disabled={isSubmitting}>
