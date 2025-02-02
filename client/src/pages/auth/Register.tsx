@@ -22,15 +22,25 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  role: z.enum(["patient", "provider"]),
+  role: z.enum(["patient", "provider", "admin"]),
+  adminToken: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  if (data.role === "admin" && !data.adminToken) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Admin token is required for admin registration",
+  path: ["adminToken"],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -39,6 +49,7 @@ export default function Register() {
   const { register } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [showAdminToken, setShowAdminToken] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -47,12 +58,18 @@ export default function Register() {
       password: "",
       confirmPassword: "",
       role: "patient",
+      adminToken: "",
     },
   });
 
   async function onSubmit(data: RegisterFormValues) {
     try {
-      await register(data.email, data.password, data.role);
+      const headers: Record<string, string> = {};
+      if (data.role === "admin" && data.adminToken) {
+        headers["x-admin-token"] = data.adminToken;
+      }
+
+      await register(data.email, data.password, data.role, headers);
       setLocation("/dashboard");
       toast({
         title: "Registration Successful",
@@ -129,7 +146,13 @@ export default function Register() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>I am a</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setShowAdminToken(value === "admin");
+                      }} 
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your role" />
@@ -138,12 +161,32 @@ export default function Register() {
                       <SelectContent>
                         <SelectItem value="patient">Patient</SelectItem>
                         <SelectItem value="provider">Healthcare Provider</SelectItem>
+                        <SelectItem value="admin">Administrator</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {showAdminToken && (
+                <FormField
+                  control={form.control}
+                  name="adminToken"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Admin Registration Token</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter admin token"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <Button type="submit" className="w-full">
                 Create account
               </Button>
