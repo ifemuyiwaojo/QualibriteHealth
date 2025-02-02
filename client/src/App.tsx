@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { AuthContext, useAuthProvider } from "./lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
@@ -17,9 +17,10 @@ import NotFound from "@/pages/not-found";
 
 function DashboardRouter() {
   const { user } = useAuthProvider();
+  const [, setLocation] = useLocation();
 
   if (!user) {
-    window.location.href = "/auth/login";
+    setLocation("/auth/login");
     return null;
   }
 
@@ -36,8 +37,6 @@ function DashboardRouter() {
 }
 
 function Router() {
-  const { user } = useAuthProvider();
-
   return (
     <div className="flex min-h-screen flex-col">
       <Header />

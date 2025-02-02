@@ -10,6 +10,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, role: User['role']) => Promise<void>;
@@ -28,12 +29,12 @@ export function useAuth() {
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
 
-  const { data: currentUser } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (res.status === 401) return null;
+        if (!res.ok) return null;
         const data = await res.json();
         setUser(data.user);
         return data.user;
@@ -45,6 +46,9 @@ export function useAuthProvider() {
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiRequest("POST", "/api/auth/login", { email, password });
+    if (!res.ok) {
+      throw new Error("Invalid credentials");
+    }
     const data = await res.json();
     setUser(data.user);
   }, []);
@@ -56,6 +60,9 @@ export function useAuthProvider() {
         passwordHash: password,
         role,
       });
+      if (!res.ok) {
+        throw new Error("Registration failed");
+      }
       const data = await res.json();
       setUser(data.user);
     },
@@ -68,7 +75,8 @@ export function useAuthProvider() {
   }, []);
 
   return {
-    user: currentUser || user,
+    user,
+    isLoading,
     login,
     logout,
     register,
