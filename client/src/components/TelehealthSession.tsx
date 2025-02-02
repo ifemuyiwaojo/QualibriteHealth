@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
+import { useAuth } from '@/lib/auth';
 
 interface TelehealthSessionProps {
   visitId?: string;
@@ -15,6 +16,7 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
   isProvider = false,
 }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: visit, isLoading, error } = useQuery({
     queryKey: ['telehealth-visit', visitId],
@@ -30,7 +32,7 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
     enabled: !!visitId,
   });
 
-  const { data: upcomingVisits } = useQuery({
+  const { data: upcomingVisits, refetch: refetchVisits } = useQuery({
     queryKey: ['telehealth-visits-upcoming'],
     queryFn: async () => {
       const response = await fetch('/api/telehealth/visits/upcoming');
@@ -39,6 +41,48 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
         throw new Error(errorData.error || 'Failed to fetch upcoming visits');
       }
       return response.json();
+    },
+  });
+
+  const createVisitMutation = useMutation({
+    mutationFn: async (data: {
+      providerId: string;
+      scheduledTime: string;
+      duration: number;
+    }) => {
+      const response = await fetch('/api/telehealth/visit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          patientId: user?.id.toString(),
+          patientName: user?.email, // Use email temporarily, should be replaced with actual name
+          providerName: "Provider", // Should be fetched from provider details
+          visitType: 'VIDEO'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create visit');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Visit created successfully',
+      });
+      refetchVisits();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create visit',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -110,8 +154,8 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
         <div className="space-y-4">
           <p>Visit ID: {visit.visit.id}</p>
           <p>Status: {visit.visit.status}</p>
-          {visit.visit.scheduled_time && (
-            <p>Scheduled: {new Date(visit.visit.scheduled_time).toLocaleString()}</p>
+          {visit.visit.scheduled_at && (
+            <p>Scheduled: {new Date(visit.visit.scheduled_at).toLocaleString()}</p>
           )}
           {visit.visit.duration_minutes && (
             <p>Duration: {visit.visit.duration_minutes} minutes</p>
@@ -132,7 +176,7 @@ export const TelehealthSession: React.FC<TelehealthSessionProps> = ({
               <div className="space-y-2">
                 {upcomingVisits.visits.map((visit: any) => (
                   <div key={visit.id} className="p-3 border rounded">
-                    <p>Date: {new Date(visit.scheduled_time).toLocaleString()}</p>
+                    <p>Date: {new Date(visit.scheduled_at).toLocaleString()}</p>
                     <p>Duration: {visit.duration_minutes} minutes</p>
                     <p>Status: {visit.status}</p>
                     {visit.status === 'SCHEDULED' && (

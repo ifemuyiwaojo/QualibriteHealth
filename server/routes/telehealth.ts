@@ -17,7 +17,10 @@ const createVisitSchema = z.object({
   providerId: z.string(),
   scheduledTime: z.string().datetime(),
   duration: z.number().min(15).max(60),
-  visitType: z.string().default('SCHEDULED'),
+  visitType: z.string().default('VIDEO'),
+  patientName: z.string(),
+  providerName: z.string(),
+  reasonForVisit: z.string().optional(),
 });
 
 // Create a new visit
@@ -29,11 +32,19 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
     const vseeResponse = await axios.post(
       `${VSEE_BASE_URL}/visits`,
       {
-        patient_id: visitData.patientId,
-        provider_id: visitData.providerId,
-        scheduled_time: visitData.scheduledTime,
+        patient: {
+          id: visitData.patientId,
+          name: visitData.patientName
+        },
+        provider: {
+          id: visitData.providerId,
+          name: visitData.providerName
+        },
+        scheduled_at: visitData.scheduledTime,
         duration_minutes: visitData.duration,
-        visit_type: visitData.visitType
+        visit_type: visitData.visitType,
+        reason_for_visit: visitData.reasonForVisit || 'Scheduled Visit',
+        status: 'SCHEDULED'
       },
       {
         headers: {
@@ -98,6 +109,19 @@ router.get('/visit/:visitId', authenticateToken, authorizeRoles('provider', 'pat
 // List upcoming visits
 router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'patient'), async (req: any, res) => {
   try {
+    // Add user-specific parameters based on role
+    const params: any = {
+      status: 'SCHEDULED',
+      sort: 'scheduled_at',
+      order: 'asc'
+    };
+
+    if (req.user.role === 'patient') {
+      params.patient_id = req.user.id;
+    } else if (req.user.role === 'provider') {
+      params.provider_id = req.user.id;
+    }
+
     const vseeResponse = await axios.get(
       `${VSEE_BASE_URL}/visits`,
       {
@@ -105,18 +129,13 @@ router.get('/visits/upcoming', authenticateToken, authorizeRoles('provider', 'pa
           'Authorization': `Bearer ${VSEE_API_KEY}`,
           'X-VSee-Secret': VSEE_API_SECRET
         },
-        params: {
-          user_id: req.user.id,
-          status: 'SCHEDULED',
-          sort: 'scheduled_time',
-          order: 'asc'
-        }
+        params
       }
     );
 
     res.json({
       success: true,
-      visits: vseeResponse.data
+      visits: vseeResponse.data.visits || []
     });
   } catch (error: any) {
     console.error('Error fetching upcoming visits:', error.response?.data || error.message);
@@ -137,7 +156,10 @@ router.post('/visit/:visitId/join', authenticateToken, authorizeRoles('provider'
     // Get room URL from VSee
     const vseeResponse = await axios.post(
       `${VSEE_BASE_URL}/visits/${visitId}/${isProvider ? 'start' : 'join'}`,
-      {},
+      {
+        user_id: req.user.id,
+        user_type: req.user.role.toUpperCase()
+      },
       {
         headers: {
           'Authorization': `Bearer ${VSEE_API_KEY}`,
