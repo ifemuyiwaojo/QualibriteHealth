@@ -58,6 +58,7 @@ export default function Register() {
   const [showAdminToken, setShowAdminToken] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showTokenValue, setShowTokenValue] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -72,21 +73,26 @@ export default function Register() {
 
   async function onSubmit(data: RegisterFormValues) {
     try {
-      const headers: Record<string, string> = {};
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
       if (data.role === "admin" && data.adminToken) {
         headers["x-admin-token"] = data.adminToken;
       }
 
       await register(data.email, data.password, data.role, headers);
+
       setLocation("/dashboard");
       toast({
         title: "Registration Successful",
         description: "Welcome to QualiBrite Health!",
       });
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: "Registration Failed",
-        description: error.message || "Please try again with different credentials.",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     }
@@ -220,11 +226,26 @@ export default function Register() {
                     <FormItem>
                       <FormLabel>Admin Registration Token</FormLabel>
                       <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Enter admin token"
-                          {...field}
-                        />
+                        <div className="relative">
+                          <Input
+                            type={showTokenValue ? "text" : "password"}
+                            placeholder="Enter admin token"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowTokenValue(!showTokenValue)}
+                          >
+                            {showTokenValue ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </FormControl>
                       <p className="text-xs text-muted-foreground mt-1">
                         Please enter the admin registration token provided by the system administrator
