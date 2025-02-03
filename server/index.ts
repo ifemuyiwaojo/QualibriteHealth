@@ -2,12 +2,12 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import cookieParser from "cookie-parser";
+import path from 'path';
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use('/attached_assets', express.static('attached_assets'));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -53,6 +53,7 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
+    app.use(express.static(path.join(__dirname, 'attached_assets'))); // Serve static files
     serveStatic(app);
   }
 

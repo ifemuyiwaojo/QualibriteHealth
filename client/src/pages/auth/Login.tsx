@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { useState, useCallback } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -28,19 +28,8 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-interface LoginResponse {
-  message: string;
-  user: {
-    id: number;
-    email: string;
-    role: string;
-    requiresPasswordChange: boolean;
-    isSuperadmin: boolean;
-  };
-}
-
 export default function Login() {
-  const { login, user, isLoading } = useAuth();
+  const { login, user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -60,45 +49,46 @@ export default function Login() {
 
     try {
       setIsSubmitting(true);
-      console.log("Attempting login...");
+      console.log("Attempting login with:", data.email);
       const response = await login(data.email, data.password, data.rememberMe);
-      console.log("Login successful");
+      console.log("Login response:", response);
 
       if (response?.user) {
-        if (response.user.requiresPasswordChange) {
+        if (response.user.changePasswordRequired) {
+          toast({
+            title: "Password Change Required",
+            description: "Please set a new password to continue.",
+          });
           setLocation("/auth/change-password");
         } else {
           setLocation("/dashboard");
           toast({
             title: "Login Successful",
-            description: "Welcome back!",
+            description: `Welcome back to QualiBrite Health${response.user.role === 'superadmin' ? ' Super Administrator' : 
+              response.user.role === 'admin' ? ' Administrator' : 
+              response.user.role === 'provider' ? ' Healthcare Provider' : ''}!`,
           });
         }
       } else {
-        throw new Error("Invalid response format");
+        throw new Error("Authentication failed");
       }
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Please check your credentials and try again.",
+        description: error.message || "Invalid credentials. Please check your email and password.",
         variant: "destructive",
+      });
+      form.setError("password", {
+        type: "manual",
+        message: "Invalid email or password"
       });
     } finally {
       setIsSubmitting(false);
     }
-  }, [login, toast, isSubmitting, setLocation]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
+  }, [login, toast, isSubmitting, setLocation, form]);
 
   if (user) {
-    console.log("User already logged in, redirecting to dashboard");
     return <Link href="/dashboard" replace />;
   }
 
@@ -106,7 +96,7 @@ export default function Login() {
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+          <CardTitle className="text-2xl font-bold">Sign in to QualiBrite Health</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -118,7 +108,11 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your email" {...field} />
+                      <Input 
+                        placeholder="Enter your email" 
+                        {...field} 
+                        autoComplete="email"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -136,6 +130,7 @@ export default function Login() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           {...field}
+                          autoComplete="current-password"
                         />
                         <Button
                           type="button"
@@ -177,7 +172,14 @@ export default function Login() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Signing in..." : "Sign in"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
               </Button>
             </form>
           </Form>

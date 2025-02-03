@@ -1,14 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 
-export default function CompliancePage() {
+export default function SchedulePage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
-  if (!user || user.role !== "admin") {
+  if (!user || user.role !== "provider") {
     return null;
   }
 
@@ -23,13 +23,14 @@ export default function CompliancePage() {
         Back to Dashboard
       </Button>
 
-      <h1 className="text-3xl font-bold mb-8">Compliance Reports</h1>
+      <h1 className="text-3xl font-bold mb-8">Schedule Management</h1>
+
       <Card>
         <CardHeader>
-          <CardTitle>HIPAA Compliance Dashboard</CardTitle>
+          <CardTitle>Today's Schedule</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Compliance reports and monitoring will be displayed here.</p>
+          <p>Schedule management functionality will be implemented here.</p>
         </CardContent>
       </Card>
     </div>

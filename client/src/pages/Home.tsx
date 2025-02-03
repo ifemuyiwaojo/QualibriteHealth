@@ -45,13 +45,17 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-24">
         <div className="container">
-          <div className="mb-16 flex flex-col items-center justify-center text-center">
+          <div className="mb-16 text-center">
             <img
-              src="/attached_assets/QBH Plaque with Ribbon-new.jpg"
-              alt="Excellence Award Plaque"
-              className="mb-4 h-48 w-auto object-contain drop-shadow-lg"
+              src="attached_assets/image_1738482845414.png"
+              alt="Excellence in Mental Health Care Text"
+              className="mx-auto w-full max-w-2xl mb-8"
             />
-            <h2 className="text-4xl font-bold text-primary">in Mental Health Care</h2>
+            <img
+              src="attached_assets/image_1738482966447.png"
+              alt="Excellence Badge"
+              className="mx-auto h-40 w-40 drop-shadow-lg"
+            />
           </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
