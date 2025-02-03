@@ -27,6 +27,7 @@ import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -152,6 +153,9 @@ const Router = memo(function Router() {
               </Route>
               <Route path="/auth/change-password">
                 {!user ? <Redirect to="/auth/login" /> : <ChangePassword />}
+              </Route>
+               <Route path="/auth/forgot-password">
+                {user ? <Redirect to="/dashboard" /> : <ForgotPassword />}
               </Route>
 
               {/* Protected Routes */}
