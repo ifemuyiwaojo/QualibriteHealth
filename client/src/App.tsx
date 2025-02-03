@@ -112,7 +112,7 @@ const Router = memo(function Router() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         <div>Loading...</div>
       </div>
     );
@@ -121,7 +121,7 @@ const Router = memo(function Router() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow w-full max-w-[1920px] mx-auto">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/about" component={About} />
