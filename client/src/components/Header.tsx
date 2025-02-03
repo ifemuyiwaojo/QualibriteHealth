@@ -25,20 +25,22 @@ function HeaderComponent() {
     }
   }, [logout]);
 
+  const getBrandName = (isMobile = false) => {
+    if (user) {
+      if (user.role === 'patient') return isMobile ? '1-P' : '1 - PATIENT PORTAL';
+      if (user.role === 'provider') return isMobile ? '2-P' : '2 - PROVIDER PORTAL';
+      if (user.role === 'admin') return isMobile ? '3-A' : '3 - ADMIN PORTAL';
+    }
+    return isMobile ? 'QUALIBRITE' : 'QUALIBRITE FAMILY PSYCHIATRY';
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1920px] flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <span className="text-xl font-bold text-primary">
-              {user ? (
-                user.role === 'patient' ? '1 - PATIENT PORTAL' : 
-                user.role === 'provider' ? '2 - PROVIDER PORTAL' : 
-                user.role === 'admin' ? '3 - ADMIN PORTAL' : 
-                'QUALIBRITE FAMILY PSYCHIATRY'
-              ) : (
-                'QUALIBRITE FAMILY PSYCHIATRY'
-              )}
+              {getBrandName()}
             </span>
           </Link>
           <div className="flex gap-6">
@@ -80,14 +82,7 @@ function HeaderComponent() {
         <div className="flex flex-1 items-center justify-between md:justify-end">
           <Link href="/" className="md:hidden">
             <span className="text-xl font-bold text-primary">
-              {user ? (
-                user.role === 'patient' ? '1 - PATIENT PORTAL' : 
-                user.role === 'provider' ? '2 - PROVIDER PORTAL' : 
-                user.role === 'admin' ? '3 - ADMIN PORTAL' : 
-                'QUALIBRITE FAMILY PSYCHIATRY'
-              ) : (
-                'QUALIBRITE FAMILY PSYCHIATRY'
-              )}
+              {getBrandName(true)}
             </span>
           </Link>
           <div className="flex items-center gap-2">

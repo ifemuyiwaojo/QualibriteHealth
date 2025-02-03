@@ -94,9 +94,11 @@ export default function Home() {
             <div className="space-y-4 md:space-y-6">
               <h2 className="text-3xl md:text-4xl font-bold">About Us</h2>
               <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
-                At QualiBrite Family Psychiatry, we take your mental health very seriously. We understand the
-                challenges our patients face and we are committed to providing comprehensive mental health services
-                within the local San Antonio area.
+                At QualiBrite Family Psychiatry, we take your mental health very seriously! We understand the
+                importance of providing prompt and timely attention to your urgent mental health wellness.
+                Our commitment to you is a personalized, timely response to your urgent mental health needs
+                without the usual wait encountered at outpatient service centers. Try our services today and
+                you will be glad you did.
               </p>
               <Button asChild variant="outline" size="lg">
                 <Link href="/about">Learn More About Us</Link>
