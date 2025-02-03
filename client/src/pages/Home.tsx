@@ -46,7 +46,7 @@ export default function Home() {
       <section className="py-8">
         <div className="container">
           <div className="mb-16 text-center">
-            <h2 className="text-5xl font-serif italic tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 bg-clip-text text-transparent shadow-excellence dithered animate-gradient-x">
+            <h2 className="text-5xl font-serif italic tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 bg-clip-text text-transparent shadow-excellence dithered animate-gradient-x drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
               Excellence in Mental Health Care
             </h2>
           </div>
