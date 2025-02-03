@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  .container {
+    @apply px-6 md:px-12 lg:px-24;
+  }
   * {
     @apply border-border;
   }
