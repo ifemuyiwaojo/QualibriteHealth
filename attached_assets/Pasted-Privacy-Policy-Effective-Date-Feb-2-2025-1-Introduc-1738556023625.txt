@@ -1,0 +1,125 @@
+Privacy Policy
+
+Effective Date: Feb 2, 2025
+________________________________________
+1. Introduction
+Qualibrite Family Psychiatry ("we," "us," "our") is committed to protecting your privacy and maintaining the confidentiality and security of your Protected Health Information (PHI) and personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information through our website, telehealth platforms, and all related communications—including text messages, emails, and phone calls. This policy applies to all services provided by Qualibrite Family Psychiatry, a division of Qualibrite Health LLC.
+________________________________________
+2. Definitions
+•	Protected Health Information (PHI): Any information regarding your physical or mental health, healthcare services provided, or payment for such services that is created, received, stored, or transmitted by us and is protected under the Health Insurance Portability and Accountability Act (HIPAA).
+•	Personal Information: Information that can be used to identify you, such as your name, address, phone number, email address, date of birth, and insurance details.
+•	Telehealth Services: The delivery of mental health care services—including individual therapy, group therapy, medication management, telepsychiatry sessions, crisis intervention, and psychological assessments—via secure, online platforms.
+•	Communication Data: Information arising from our communications with you, including text messages, emails, phone call recordings (if applicable), and other forms of electronic correspondence.
+•	Usage Data: Information about how you interact with our website and telehealth platforms, including your IP address, browser type, device information, and access times.
+________________________________________
+3. Information We Collect
+We collect and maintain various types of information to provide high-quality, secure telehealth services:
+•	Protected Health Information (PHI): 
+o	Medical records and treatment details related to your mental health care.
+o	Data from psychological assessments, therapy sessions, medication management, crisis intervention, and other clinical interactions.
+•	Personal Information: 
+o	Contact details such as name, mailing address, phone number, and email address.
+o	Date of birth, insurance information, and other demographic details necessary for treatment and billing.
+•	Communication Data: 
+o	Records of text messages, emails, and phone calls (which may be recorded or monitored for quality assurance and training purposes).
+o	Secure messaging logs from our HIPAA-compliant platforms.
+•	Usage Data: 
+o	Technical data such as IP addresses, browser type, device information, and access times, which are used to enhance and secure our online services.
+________________________________________
+4. How We Use Your Information
+Your information is used for the following purposes:
+•	Healthcare Delivery: 
+o	To provide, manage, and coordinate telehealth mental health services including individual therapy, group therapy, medication management, telepsychiatry, crisis intervention, and psychological assessments.
+o	To develop and update treatment plans and clinical assessments.
+•	Administrative and Operational Purposes: 
+o	To process payments, manage insurance claims, and conduct billing activities.
+o	To schedule and manage appointments, send reminders, and communicate treatment-related information.
+•	Communication and Client Support: 
+o	To send appointment reminders, follow-up messages, and other communications via email, text, or phone using secure, HIPAA-compliant methods.
+o	To provide customer support, quality assurance, and training for our staff.
+•	Service Improvement: 
+o	To analyze usage data, troubleshoot technical issues, and improve our website and telehealth platforms.
+•	Legal and Regulatory Compliance: 
+o	To comply with legal obligations, respond to subpoenas or court orders, and protect our rights under applicable law.
+________________________________________
+5. Disclosure of Your Information
+Your information may be disclosed under the following circumstances:
+•	Healthcare Coordination: 
+o	With other healthcare providers or specialists for the purpose of coordinating and delivering comprehensive care.
+•	Insurance Processing: 
+o	To insurance companies or third-party payers to process claims and facilitate payments.
+•	Legal Requirements: 
+o	When required by law, regulation, subpoena, or court order.
+•	With Your Consent: 
+o	For purposes not otherwise permitted under HIPAA, if you provide explicit consent.
+•	Business Operations: 
+o	To trusted third-party service providers (e.g., payment processors such as Stripe or PayPal, electronic health record systems, customer relationship management systems, telehealth platform providers) who are contractually obligated to maintain the confidentiality and security of your information.
+•	Aggregate Data: 
+o	In aggregated or de-identified form that cannot reasonably be used to identify you.
+________________________________________
+6. Communication Policies
+We maintain rigorous standards for secure communications in a HIPAA-compliant environment:
+•	Secure Messaging: 
+o	All electronic communications containing PHI are transmitted using secure, encrypted channels.
+•	Text Messages and Emails: 
+o	By providing your contact information, you consent to receiving appointment reminders, treatment updates, and other non-emergency communications. You may opt-out of non-essential communications at any time.
+•	Phone Communications: 
+o	Phone calls may be monitored or recorded for quality assurance and training. PHI discussed during calls is subject to the same security measures as other forms of communication.
+•	Opt-In and Consent Practices: 
+o	During account registration, scheduling, or service initiation, you will be prompted to opt-in for electronic communications. These practices are compliant with HIPAA and allow you to adjust your communication preferences at any time.
+________________________________________
+7. Data Security
+We implement a range of security measures to safeguard your information:
+•	Encryption: 
+o	Data is encrypted both in transit and at rest using industry-standard encryption protocols.
+•	Access Controls: 
+o	Strict authentication and authorization mechanisms are in place to limit access to PHI and personal data to authorized personnel only.
+•	Regular Audits and Training: 
+o	We conduct periodic security audits and provide regular training to our staff regarding data protection and HIPAA compliance.
+•	Risk Management: 
+o	Despite these measures, no system is entirely immune to risks. We continuously monitor our systems and work to mitigate any potential vulnerabilities.
+________________________________________
+8. Data Retention
+•	Retention Policy: 
+o	We retain your PHI and personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy, comply with legal requirements, resolve disputes, and enforce our agreements. Retention periods are determined in accordance with HIPAA regulations and other applicable laws.
+•	Data Disposal: 
+o	When information is no longer needed, it is securely disposed of or rendered irretrievable in accordance with our internal policies and industry best practices.
+________________________________________
+9. Third-Party Websites and Services
+•	External Links: 
+o	Our website may contain links to third-party websites. We are not responsible for the privacy practices or content of these websites. We encourage you to review the privacy policies of any third-party sites you visit.
+•	Third-Party Service Providers: 
+o	All third-party providers who handle your information on our behalf are contractually required to implement appropriate safeguards to protect your data and to use it only for purposes related to the provision of our services.
+________________________________________
+10. Your Rights Under HIPAA and Other Privacy Laws
+You have certain rights regarding your PHI, including:
+•	Access and Copies: 
+o	You may request access to and obtain copies of your medical records and personal data.
+•	Amendments: 
+o	You may request corrections or amendments to your records if you believe they are inaccurate or incomplete.
+•	Restrictions on Use and Disclosure: 
+o	You can request limitations on how your information is used or disclosed, subject to certain exceptions.
+•	Confidential Communications: 
+o	You have the right to request that we communicate with you using alternative methods or at alternative locations.
+•	Accounting of Disclosures: 
+o	You may request an accounting of disclosures of your PHI made by us, subject to applicable legal requirements.
+•	Filing a Complaint: 
+o	If you believe your privacy rights have been violated, you may file a complaint with us or with the U.S. Department of Health and Human Services (HHS).
+________________________________________
+11. Changes to This Privacy Policy
+•	Policy Updates: 
+o	We may update this Privacy Policy periodically to reflect changes in our practices or legal requirements. The updated policy will be posted on our website with the revised "Effective Date."
+•	Your Continued Use: 
+o	Your continued use of our Services after any changes to this Privacy Policy constitutes your acceptance of the updated terms.
+________________________________________
+12. Contact Information
+If you have any questions, concerns, or requests regarding this Privacy Policy or your privacy rights, please contact us at:
+Qualibrite Family Psychiatry
+A Division of Qualibrite Health LLC
+Phone: (888) 511-3697
+Email: Support@qualibritehealth.com
+________________________________________
+13. Acknowledgment
+By using our Services, you acknowledge that you have read and understood this Privacy Policy and agree to its terms. You also acknowledge that you understand the practices we employ to collect, use, and protect your PHI and personal data as described above.
+________________________________________
+

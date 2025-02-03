@@ -2,8 +2,11 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, UserCheck, CalendarCheck, Award } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
@@ -22,12 +25,14 @@ export default function Home() {
                 For Adults & Children
               </p>
               <div className="space-y-2 text-base md:text-lg text-muted-foreground">
-                <p>Monday - Saturday: 7:00AM - 5:00PM</p>
-                <p>Sunday: 7:00AM - 4:00PM</p>
+                <p>Monday - Saturday: 7:00am – 9:00pm</p>
+                <p>Sunday: 7:00am – 6:00pm</p>
               </div>
               <div className="flex gap-4">
                 <Button asChild size="lg" className="text-base md:text-lg">
-                  <Link href="/contact">Schedule Now</Link>
+                  <Link href={user ? "/dashboard" : "/auth/login"}>
+                    Schedule Now
+                  </Link>
                 </Button>
               </div>
             </div>

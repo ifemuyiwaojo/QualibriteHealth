@@ -25,6 +25,8 @@ import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -130,6 +132,8 @@ const Router = memo(function Router() {
               <Route path="/services" component={Services} />
               <Route path="/faq" component={FAQ} />
               <Route path="/contact" component={Contact} />
+              <Route path="/terms" component={Terms} />
+              <Route path="/privacy" component={Privacy} />
 
               {/* Auth Routes */}
               <Route path="/auth/login">
