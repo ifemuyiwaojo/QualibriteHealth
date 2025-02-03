@@ -8,7 +8,6 @@ import {
   ClipboardCheck,
   ArrowRight
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
@@ -46,7 +45,6 @@ const services = [
 ];
 
 export default function Services() {
-  const { user } = useAuth();
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -93,7 +91,7 @@ export default function Services() {
               with our experienced mental health professionals.
             </p>
             <Button asChild size="lg" className="mt-8">
-              <Link href={user ? "/dashboard" : "/auth/login"} className="group">
+              <Link href="/contact" className="group">
                 Schedule Consultation
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>

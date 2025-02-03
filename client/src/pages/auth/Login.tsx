@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { useState, useCallback } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -89,14 +89,6 @@ export default function Login() {
     }
   }, [login, toast, isSubmitting, setLocation]);
 
-  const handleForgotPassword = () => {
-    setLocation("/auth/forgot-password");
-    toast({
-      title: "Password Reset",
-      description: "Please check your email for password reset instructions.",
-    });
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -111,13 +103,10 @@ export default function Login() {
   }
 
   return (
-    <div className="container flex min-h-screen w-screen flex-col items-center justify-center bg-gradient-to-b from-primary/5 to-background">
-      <Card className="w-full max-w-md shadow-2xl">
+    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to access your account
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -129,11 +118,7 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Enter your email" 
-                        {...field}
-                        className="bg-white/50"
-                      />
+                      <Input placeholder="Enter your email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,7 +135,6 @@ export default function Login() {
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
-                          className="bg-white/50"
                           {...field}
                         />
                         <Button
@@ -197,21 +181,11 @@ export default function Login() {
               </Button>
             </form>
           </Form>
-
-          <div className="mt-4 flex flex-col space-y-2 text-center text-sm">
-            <Button 
-              variant="link" 
-              className="text-primary hover:text-primary/80"
-              onClick={handleForgotPassword}
-            >
-              Forgot password?
-            </Button>
-            <div>
-              Don't have an account?{" "}
-              <Link href="/auth/register" className="text-primary hover:underline font-medium">
-                Register here
-              </Link>
-            </div>
+          <div className="mt-4 text-center text-sm">
+            Don't have an account?{" "}
+            <Link href="/auth/register" className="text-primary hover:underline">
+              Register here
+            </Link>
           </div>
         </CardContent>
       </Card>

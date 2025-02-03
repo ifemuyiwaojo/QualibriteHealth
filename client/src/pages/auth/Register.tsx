@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { useState, useCallback } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -97,13 +97,10 @@ export default function Register() {
   }, [register, toast, isSubmitting, setLocation]);
 
   return (
-    <div className="container flex min-h-screen w-screen flex-col items-center justify-center bg-gradient-to-b from-primary/5 to-background">
-      <Card className="w-full max-w-md shadow-2xl">
+    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
-          <CardDescription className="text-center">
-            Join QualiBrite Family Psychiatry today
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -116,11 +113,7 @@ export default function Register() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Enter your email" 
-                        {...field} 
-                        className="bg-white/50"
-                      />
+                      <Input placeholder="Enter your email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,7 +132,6 @@ export default function Register() {
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a password"
-                          className="bg-white/50"
                           {...field}
                         />
                         <Button
@@ -177,7 +169,6 @@ export default function Register() {
                         <Input
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="Confirm your password"
-                          className="bg-white/50"
                           {...field}
                         />
                         <Button
@@ -212,7 +203,7 @@ export default function Register() {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="bg-white/50">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
                       </FormControl>
@@ -236,7 +227,7 @@ export default function Register() {
           {/* Sign in link */}
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-primary hover:underline font-medium">
+            <Link href="/auth/login" className="text-primary hover:underline">
               Sign in
             </Link>
           </div>

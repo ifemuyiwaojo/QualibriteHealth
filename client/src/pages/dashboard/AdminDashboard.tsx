@@ -9,18 +9,9 @@ import {
   Shield, 
   FileText,
   AlertTriangle,
-  UserPlus,
-  ArrowLeft
+  UserPlus
 } from "lucide-react";
 import { Link } from "wouter";
-
-// Sample system metrics
-const systemMetrics = {
-  activeUsers: 245,
-  activeProviders: 12,
-  pendingApprovals: 5,
-  securityAlerts: 2
-};
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -32,19 +23,8 @@ export default function AdminDashboard() {
   return (
     <div className="container py-10">
       <div className="flex justify-between items-center mb-8">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
-            System Overview - {new Date().toLocaleDateString()}
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
           <Button variant="outline" asChild className="gap-2">
             <Link href="/admin/security">
               <Shield className="h-4 w-4" />
@@ -58,46 +38,6 @@ export default function AdminDashboard() {
             </Link>
           </Button>
         </div>
-      </div>
-
-      {/* System Metrics */}
-      <div className="grid gap-4 md:grid-cols-4 mb-8">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between">
-              <p className="text-sm font-medium">Active Users</p>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-2xl font-bold mt-2">{systemMetrics.activeUsers}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between">
-              <p className="text-sm font-medium">Active Providers</p>
-              <UserCog className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-2xl font-bold mt-2">{systemMetrics.activeProviders}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between">
-              <p className="text-sm font-medium">Pending Approvals</p>
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-2xl font-bold mt-2">{systemMetrics.pendingApprovals}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between">
-              <p className="text-sm font-medium">Security Alerts</p>
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-            </div>
-            <p className="text-2xl font-bold mt-2 text-destructive">{systemMetrics.securityAlerts}</p>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -189,6 +129,21 @@ export default function AdminDashboard() {
             </p>
             <Button asChild variant="outline" className="w-full">
               <Link href="/admin/compliance">View Reports</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Security Center</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Monitor security alerts and system health
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/admin/security">Security Center</Link>
             </Button>
           </CardContent>
         </Card>

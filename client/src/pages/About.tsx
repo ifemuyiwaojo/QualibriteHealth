@@ -7,9 +7,9 @@ export default function About() {
       <section className="bg-primary/10 py-20">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight">About QualiBrite Family Psychiatry</h1>
+            <h1 className="text-4xl font-bold tracking-tight">About QualiBrite Health</h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Committed to providing prompt and timely attention to your urgent mental health wellness.
+              A leading healthcare provider committed to excellence in patient care and medical innovation.
             </p>
           </div>
         </div>
@@ -23,7 +23,7 @@ export default function About() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold">Our Mission</h2>
                 <p className="mt-4 text-muted-foreground">
-                  At Qualibrite Family Psychiatry, we take your mental health very seriously! We understand the importance of providing prompt and timely attention to your urgent mental health wellness.
+                  To provide exceptional healthcare services that improve the quality of life for our patients through innovative medical solutions and compassionate care.
                 </p>
               </CardContent>
             </Card>
@@ -31,7 +31,7 @@ export default function About() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold">Our Vision</h2>
                 <p className="mt-4 text-muted-foreground">
-                  Our commitment to you is a personalized, timely response to your urgent mental health needs without the usual wait encountered at outpatient service centers. Try our services today and you will be glad you did.
+                  To be the most trusted healthcare provider, recognized for excellence in patient care, medical innovation, and community wellness.
                 </p>
               </CardContent>
             </Card>
@@ -39,21 +39,62 @@ export default function About() {
         </div>
       </section>
 
-      {/* Online Services Section */}
+      {/* Team Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="container">
+          <h2 className="text-center text-3xl font-bold">Our Team</h2>
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                image: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd",
+                name: "Dr. Sarah Johnson",
+                role: "Chief Medical Officer",
+              },
+              {
+                image: "https://images.unsplash.com/photo-1576669802367-42e9fd83d9af",
+                name: "Dr. Michael Chen",
+                role: "Senior Physician",
+              },
+              {
+                image: "https://images.unsplash.com/photo-1584515933487-779824d29309",
+                name: "Dr. Emily Rodriguez",
+                role: "Specialist",
+              },
+            ].map((member, index) => (
+              <Card key={index}>
+                <CardContent className="p-6">
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="aspect-square w-full rounded-lg object-cover"
+                  />
+                  <h3 className="mt-4 text-xl font-semibold">{member.name}</h3>
+                  <p className="text-sm text-muted-foreground">{member.role}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Facility Section */}
       <section className="py-20">
         <div className="container">
           <div className="grid gap-8 md:grid-cols-2">
             <div>
-              <h2 className="text-3xl font-bold">Modern Online Care</h2>
+              <h2 className="text-3xl font-bold">State-of-the-Art Facility</h2>
               <p className="mt-4 text-muted-foreground">
-                Through our state-of-the-art telehealth platform, we provide convenient and secure mental health services directly to you. Our virtual consultations ensure you receive professional care from the comfort of your own home, eliminating the barriers of traditional in-person visits while maintaining the highest standards of psychiatric care.
+                Our modern medical facility is equipped with the latest technology and
+                staffed by experienced healthcare professionals. We maintain the highest
+                standards of cleanliness and safety to ensure the best possible care
+                for our patients.
               </p>
             </div>
             <div>
               <img
-                src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d"
-                alt="Virtual Healthcare"
-                className="rounded-lg shadow-xl"
+                src="https://images.unsplash.com/photo-1710074213379-2a9c2653046a"
+                alt="Medical Facility"
+                className="rounded-lg shadow-lg"
               />
             </div>
           </div>

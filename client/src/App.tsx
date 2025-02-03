@@ -25,9 +25,6 @@ import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
-import Terms from "@/pages/Terms";
-import Privacy from "@/pages/Privacy";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -122,72 +119,63 @@ const Router = memo(function Router() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-100">
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-grow w-full">
-        <div className="mx-auto max-w-[1920px] px-4 sm:px-6 lg:px-8">
-          <div className="bg-background shadow-xl rounded-none sm:rounded-none">
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/about" component={About} />
-              <Route path="/services" component={Services} />
-              <Route path="/faq" component={FAQ} />
-              <Route path="/contact" component={Contact} />
-              <Route path="/terms" component={Terms} />
-              <Route path="/privacy" component={Privacy} />
+      <main className="flex-grow">
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/about" component={About} />
+          <Route path="/services" component={Services} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/contact" component={Contact} />
 
-              {/* Auth Routes */}
-              <Route path="/auth/login">
-                {user ? (
-                  user.changePasswordRequired ? (
-                    <Redirect to="/auth/change-password" />
-                  ) : (
-                    <Redirect to="/dashboard" />
-                  )
-                ) : (
-                  <Login />
-                )}
-              </Route>
-              <Route path="/auth/register">
-                {user ? <Redirect to="/dashboard" /> : <Register />}
-              </Route>
-              <Route path="/auth/change-password">
-                {!user ? <Redirect to="/auth/login" /> : <ChangePassword />}
-              </Route>
-               <Route path="/auth/forgot-password">
-                {user ? <Redirect to="/dashboard" /> : <ForgotPassword />}
-              </Route>
+          {/* Auth Routes */}
+          <Route path="/auth/login">
+            {user ? (
+              user.changePasswordRequired ? (
+                <Redirect to="/auth/change-password" />
+              ) : (
+                <Redirect to="/dashboard" />
+              )
+            ) : (
+              <Login />
+            )}
+          </Route>
+          <Route path="/auth/register">
+            {user ? <Redirect to="/dashboard" /> : <Register />}
+          </Route>
+          <Route path="/auth/change-password">
+            {!user ? <Redirect to="/auth/login" /> : <ChangePassword />}
+          </Route>
 
-              {/* Protected Routes */}
-              <Route path="/dashboard">
-                {!user ? <Redirect to="/auth/login" /> : <DashboardRouter />}
-              </Route>
+          {/* Protected Routes */}
+          <Route path="/dashboard">
+            {!user ? <Redirect to="/auth/login" /> : <DashboardRouter />}
+          </Route>
 
-              {/* Admin Routes */}
-              <Route path="/admin/users" component={() => <AdminRoute component={AdminUsersPage} />} />
-              <Route path="/admin/providers" component={() => <AdminRoute component={ProvidersPage} />} />
-              <Route path="/admin/audit-logs" component={() => <AdminRoute component={AuditLogsPage} />} />
-              <Route path="/admin/settings" component={() => <AdminRoute component={SettingsPage} />} />
-              <Route path="/admin/compliance" component={() => <AdminRoute component={CompliancePage} />} />
-              <Route path="/admin/security" component={() => <AdminRoute component={SecurityCenterPage} />} />
+          {/* Admin Routes */}
+          <Route path="/admin/users" component={() => <AdminRoute component={AdminUsersPage} />} />
+          <Route path="/admin/providers" component={() => <AdminRoute component={ProvidersPage} />} />
+          <Route path="/admin/audit-logs" component={() => <AdminRoute component={AuditLogsPage} />} />
+          <Route path="/admin/settings" component={() => <AdminRoute component={SettingsPage} />} />
+          <Route path="/admin/compliance" component={() => <AdminRoute component={CompliancePage} />} />
+          <Route path="/admin/security" component={() => <AdminRoute component={SecurityCenterPage} />} />
 
-              {/* Patient Routes */}
-              <Route path="/telehealth">
-                {!user ? <Redirect to="/auth/login" /> : <TelehealthPage />}
-              </Route>
-              <Route path="/patient/appointments">
-                {!user ? <Redirect to="/auth/login" /> : <AppointmentsPage />}
-              </Route>
-              <Route path="/patient/records">
-                {!user ? <Redirect to="/auth/login" /> : <div>Medical Records Page</div>}
-              </Route>
-              <Route path="/patient/profile">
-                {!user ? <Redirect to="/auth/login" /> : <div>Patient Profile Page</div>}
-              </Route>
-              <Route component={NotFound} />
-            </Switch>
-          </div>
-        </div>
+          {/* Patient Routes */}
+           <Route path="/telehealth">
+            {!user ? <Redirect to="/auth/login" /> : <TelehealthPage />}
+          </Route>
+          <Route path="/patient/appointments">
+            {!user ? <Redirect to="/auth/login" /> : <AppointmentsPage />}
+          </Route>
+          <Route path="/patient/records">
+            {!user ? <Redirect to="/auth/login" /> : <div>Medical Records Page</div>}
+          </Route>
+          <Route path="/patient/profile">
+            {!user ? <Redirect to="/auth/login" /> : <div>Patient Profile Page</div>}
+          </Route>
+          <Route component={NotFound} />
+        </Switch>
       </main>
       <Footer />
       <ConvaiWidget />
