@@ -30,7 +30,13 @@ function HeaderComponent() {
       <nav className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">QUALIBRITE FAMILY PSYCHIATRY</span>
+            <span className="text-xl font-bold text-primary">
+              {!user ? 'LOGIN' : 
+               user.role === 'patient' ? '1 - PATIENT PORTAL' : 
+               user.role === 'provider' ? '2 - PROVIDER PORTAL' : 
+               user.role === 'admin' ? '3 - ADMIN PORTAL' : 
+               'QUALIBRITE FAMILY PSYCHIATRY'}
+            </span>
           </Link>
           <div className="flex gap-6">
             {navigation.map((item) => (
@@ -70,7 +76,13 @@ function HeaderComponent() {
 
         <div className="flex flex-1 items-center justify-between md:justify-end">
           <Link href="/" className="md:hidden">
-            <span className="text-xl font-bold text-primary">QUALIBRITE FAMILY PSYCHIATRY</span>
+            <span className="text-xl font-bold text-primary">
+              {!user ? 'LOGIN' : 
+               user.role === 'patient' ? '1 - PATIENT PORTAL' : 
+               user.role === 'provider' ? '2 - PROVIDER PORTAL' : 
+               user.role === 'admin' ? '3 - ADMIN PORTAL' : 
+               'QUALIBRITE FAMILY PSYCHIATRY'}
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             {!isLoading && (
