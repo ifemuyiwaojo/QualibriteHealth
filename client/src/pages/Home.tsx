@@ -47,12 +47,12 @@ export default function Home() {
         <div className="container">
           <div className="mb-16 text-center">
             <img
-              src="/attached_assets/image_1738482845414.png"
+              src="attached_assets/image_1738482845414.png"
               alt="Excellence in Mental Health Care Text"
               className="mx-auto w-full max-w-2xl mb-8"
             />
             <img
-              src="/attached_assets/image_1738482966447.png"
+              src="attached_assets/image_1738482966447.png"
               alt="Excellence Badge"
               className="mx-auto h-40 w-40 drop-shadow-lg"
             />
