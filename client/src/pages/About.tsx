@@ -7,9 +7,9 @@ export default function About() {
       <section className="bg-primary/10 py-20">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight">About QualiBrite Health</h1>
+            <h1 className="text-4xl font-bold tracking-tight">About QualiBrite Family Psychiatry</h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              A leading healthcare provider committed to excellence in patient care and medical innovation.
+              Committed to providing prompt and timely attention to your urgent mental health wellness.
             </p>
           </div>
         </div>
@@ -23,7 +23,7 @@ export default function About() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold">Our Mission</h2>
                 <p className="mt-4 text-muted-foreground">
-                  To provide exceptional healthcare services that improve the quality of life for our patients through innovative medical solutions and compassionate care.
+                  At Qualibrite Family Psychiatry, we take your mental health very seriously! We understand the importance of providing prompt and timely attention to your urgent mental health wellness.
                 </p>
               </CardContent>
             </Card>
@@ -31,7 +31,7 @@ export default function About() {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold">Our Vision</h2>
                 <p className="mt-4 text-muted-foreground">
-                  To be the most trusted healthcare provider, recognized for excellence in patient care, medical innovation, and community wellness.
+                  Our commitment to you is a personalized, timely response to your urgent mental health needs without the usual wait encountered at outpatient service centers. Try our services today and you will be glad you did.
                 </p>
               </CardContent>
             </Card>
