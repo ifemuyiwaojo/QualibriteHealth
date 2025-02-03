@@ -10,6 +10,18 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
 
+.dithered {
+  text-shadow: 
+    2px 2px #FFD70088,
+    -2px -2px #DAA52088;
+  mix-blend-mode: multiply;
+}
+
+.shadow-excellence {
+  filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.2)) 
+         drop-shadow(0 4px 3px rgb(0 0 0 / 0.3));
+}
+
 @keyframes gradient-x {
   0%, 100% {
     background-size: 200% 100%;

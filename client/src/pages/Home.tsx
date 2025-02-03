@@ -43,10 +43,10 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24">
+      <section className="py-12">
         <div className="container">
           <div className="mb-16 text-center">
-            <h2 className="text-5xl font-serif italic tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 bg-clip-text text-transparent drop-shadow-lg animate-gradient-x">
+            <h2 className="text-5xl font-serif italic tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 bg-clip-text text-transparent shadow-excellence dithered animate-gradient-x">
               Excellence in Mental Health Care
             </h2>
           </div>
