@@ -69,76 +69,64 @@ initializeSuperadmin().catch(console.error);
 router.post("/login", async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
-    console.log("Login attempt for email:", email);
 
     const user = await db.query.users.findFirst({
       where: eq(users.email, email),
     });
 
     if (!user) {
-      console.log("User not found:", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    console.log("Comparing passwords for user:", email);
-    try {
-      const validPassword = await bcrypt.compare(password, user.passwordHash);
-      console.log("Password comparison result:", validPassword);
-
-      if (!validPassword) {
-        console.log("Invalid password for user:", email);
-        await db.insert(auditLogs).values({
-          userId: user.id,
-          action: 'failed_login_attempt',
-          resourceType: 'users',
-          resourceId: user.id,
-          details: { method: req.method, path: req.path },
-          ipAddress: req.ip,
-          userAgent: req.get('user-agent'),
-        });
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      console.log("Password valid, generating token for user:", email);
-      const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        JWT_SECRET,
-        { expiresIn: rememberMe ? "30d" : "24h" }
-      );
-
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 24 * 60 * 60 * 1000,
-      });
-
-      // Log successful login
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) {
+      // Log failed attempt
       await db.insert(auditLogs).values({
         userId: user.id,
-        action: 'successful_login',
+        action: 'failed_login_attempt',
         resourceType: 'users',
         resourceId: user.id,
         details: { method: req.method, path: req.path },
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),
       });
-
-      console.log("Login successful for user:", email);
-      res.json({
-        message: "Logged in successfully",
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          changePasswordRequired: user.changePasswordRequired,
-          isSuperadmin: user.isSuperadmin
-        },
-      });
-    } catch (error) {
-      console.error("Password comparison error:", error);
-      return res.status(500).json({ message: "Internal server error during authentication" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: rememberMe ? "30d" : "24h" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    });
+
+    // Log successful login
+    await db.insert(auditLogs).values({
+      userId: user.id,
+      action: 'successful_login',
+      resourceType: 'users',
+      resourceId: user.id,
+      details: { method: req.method, path: req.path },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    res.json({
+      message: "Logged in successfully",
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        requiresPasswordChange: user.changePasswordRequired,
+        isSuperadmin: user.isSuperadmin
+      },
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(400).json({ message: "Login failed" });
