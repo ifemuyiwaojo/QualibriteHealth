@@ -46,12 +46,9 @@ export default function Home() {
       <section className="py-24">
         <div className="container">
           <div className="mb-16 text-center">
-            <img
-              src="/excellence-badge.png"
-              alt="Excellence in Mental Health Care"
-              className="mx-auto h-32 w-32 drop-shadow-md"
-            />
-            <h2 className="mt-8 text-3xl font-bold">Excellence in Mental Health Care</h2>
+            <h2 className="text-5xl font-serif italic tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 bg-clip-text text-transparent drop-shadow-lg animate-gradient-x">
+              Excellence in Mental Health Care
+            </h2>
           </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
