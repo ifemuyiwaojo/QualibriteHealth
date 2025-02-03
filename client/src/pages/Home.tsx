@@ -5,7 +5,7 @@ import { Clock, UserCheck, CalendarCheck, Award } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col min-h-screen w-full max-w-[1440px] mx-auto">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-b from-primary/10 via-primary/5 to-background py-24">
         <div className="container">
