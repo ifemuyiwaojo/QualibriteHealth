@@ -121,7 +121,7 @@ const Router = memo(function Router() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow w-full mx-auto max-w-[1920px]">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/about" component={About} />
