@@ -11,15 +11,13 @@
     @apply font-sans antialiased bg-background text-foreground;
 
 .dithered {
-  text-shadow: 
-    2px 2px #FFD70088,
-    -2px -2px #DAA52088;
-  mix-blend-mode: multiply;
+  -webkit-text-stroke: 0.5px black;
+  text-shadow: none;
+  mix-blend-mode: normal;
 }
 
 .shadow-excellence {
-  filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.2)) 
-         drop-shadow(0 4px 3px rgb(0 0 0 / 0.3));
+  filter: none;
 }
 
 @keyframes gradient-x {

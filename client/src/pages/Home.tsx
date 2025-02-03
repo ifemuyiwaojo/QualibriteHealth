@@ -43,7 +43,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12">
+      <section className="py-8">
         <div className="container">
           <div className="mb-16 text-center">
             <h2 className="text-5xl font-serif italic tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 bg-clip-text text-transparent shadow-excellence dithered animate-gradient-x">
