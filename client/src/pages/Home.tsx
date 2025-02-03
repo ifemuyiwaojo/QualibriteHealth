@@ -47,11 +47,15 @@ export default function Home() {
         <div className="container">
           <div className="mb-16 text-center">
             <img
-              src="/excellence-badge.png"
-              alt="Excellence in Mental Health Care"
-              className="mx-auto h-32 w-32 drop-shadow-md"
+              src="/attached_assets/image_1738482845414.png"
+              alt="Excellence in Mental Health Care Text"
+              className="mx-auto w-full max-w-2xl mb-8"
             />
-            <h2 className="mt-8 text-3xl font-bold">Excellence in Mental Health Care</h2>
+            <img
+              src="/attached_assets/image_1738482966447.png"
+              alt="Excellence Badge"
+              className="mx-auto h-40 w-40 drop-shadow-lg"
+            />
           </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
