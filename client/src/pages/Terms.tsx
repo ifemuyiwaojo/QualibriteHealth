@@ -49,6 +49,7 @@ export default function Terms() {
               <li>Telepsychiatry Sessions: Virtual consultations and treatment sessions with board-certified psychiatric professionals.</li>
               <li>Crisis Intervention: Immediate support and intervention for clients experiencing acute psychological distress; however, these services are not a substitute for emergency medical care.</li>
               <li>Psychological Assessments: Diagnostic evaluations and assessments conducted remotely.</li>
+              <li>These services are delivered exclusively online via secure, HIPAA-compliant platforms, subject to the limitations inherent in telehealth modalities.</li>
             </ul>
           </section>
 
