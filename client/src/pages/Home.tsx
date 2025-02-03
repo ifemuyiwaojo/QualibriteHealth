@@ -45,11 +45,11 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-24">
         <div className="container">
-          <div className="mb-16 flex items-center justify-center gap-8">
+          <div className="mb-16 flex flex-col items-center justify-center text-center">
             <img
               src="/attached_assets/QBH Plaque with Ribbon-new.jpg"
               alt="Excellence Award Plaque"
-              className="h-48 w-auto object-contain drop-shadow-lg"
+              className="mb-4 h-48 w-auto object-contain drop-shadow-lg"
             />
             <h2 className="text-4xl font-bold text-primary">in Mental Health Care</h2>
           </div>
