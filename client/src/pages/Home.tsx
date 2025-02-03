@@ -47,7 +47,7 @@ export default function Home() {
         <div className="container">
           <div className="mb-16 flex items-center justify-center gap-8">
             <img
-              src="attached_assets/QBH Plaque with Ribbon-new.jpg"
+              src="/attached_assets/QBH Plaque with Ribbon-new.jpg"
               alt="Excellence Award Plaque"
               className="h-48 w-auto object-contain drop-shadow-lg"
             />
