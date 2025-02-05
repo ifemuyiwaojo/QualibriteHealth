@@ -52,7 +52,7 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
       .where(eq(patientProfiles.providerId, req.user!.id));
 
     console.log('Provider ID:', req.user!.id);
-    console.log('Found patients:', patients.length);
+    console.log('Found patients:', patients);
 
     res.json(patients);
   } catch (error) {
@@ -75,12 +75,12 @@ router.get("/records", authenticateToken, authorizeRoles("provider"), async (req
         patientName: sql<string>`concat(${patientProfiles.firstName}, ' ', ${patientProfiles.lastName})`.as('patientName'),
       })
       .from(medicalRecords)
-      .innerJoin(patientProfiles, eq(patientProfiles.userId, medicalRecords.patientId))
+      .innerJoin(patientProfiles, eq(patientProfiles.id, medicalRecords.patientId))
       .where(eq(medicalRecords.providerId, req.user!.id))
       .orderBy(desc(medicalRecords.visitDate));
 
     console.log('Provider ID:', req.user!.id);
-    console.log('Found records:', records.length);
+    console.log('Found records:', records);
 
     res.json(records);
   } catch (error) {
