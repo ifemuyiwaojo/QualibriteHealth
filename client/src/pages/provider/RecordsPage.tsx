@@ -56,6 +56,7 @@ export default function RecordsPage() {
 
   const { data: medicalRecords, isLoading } = useQuery<MedicalRecord[]>({
     queryKey: ['/api/provider/records'],
+    enabled: !!user && user.role === 'provider'
   });
 
   if (!user || user.role !== "provider") {
@@ -175,7 +176,7 @@ export default function RecordsPage() {
 
                           <div className="flex gap-2 mt-4">
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/provider/records/${record.id}`}>
+                              <Link href={`/provider/records/${record.patientId}`}>
                                 View Full Record
                               </Link>
                             </Button>

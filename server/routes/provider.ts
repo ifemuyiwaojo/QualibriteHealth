@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@db";
 import { authenticateToken, authorizeRoles } from "../middleware/auth";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { AuthRequest } from "../middleware/auth";
 import {
   users,
@@ -69,19 +69,20 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
 // Get all medical records for a provider's patients
 router.get("/records", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const records = await db.select({
-      id: medicalRecords.id,
-      patientId: medicalRecords.patientId,
-      type: medicalRecords.type,
-      visitDate: medicalRecords.visitDate,
-      content: medicalRecords.content,
-      createdAt: medicalRecords.createdAt,
-      patientName: db.sql<string>`CONCAT(${patientProfiles.firstName}, ' ', ${patientProfiles.lastName})`.as('patientName'),
-    })
-    .from(medicalRecords)
-    .innerJoin(patientProfiles, eq(patientProfiles.userId, medicalRecords.patientId))
-    .where(eq(medicalRecords.providerId, req.user!.id))
-    .orderBy(desc(medicalRecords.visitDate));
+    const records = await db
+      .select({
+        id: medicalRecords.id,
+        patientId: medicalRecords.patientId,
+        type: medicalRecords.type,
+        visitDate: medicalRecords.visitDate,
+        content: medicalRecords.content,
+        createdAt: medicalRecords.createdAt,
+        patientName: sql<string>`concat(${patientProfiles.firstName}, ' ', ${patientProfiles.lastName})`.as('patientName'),
+      })
+      .from(medicalRecords)
+      .innerJoin(patientProfiles, eq(patientProfiles.userId, medicalRecords.patientId))
+      .where(eq(medicalRecords.providerId, req.user!.id))
+      .orderBy(desc(medicalRecords.visitDate));
 
     res.json(records);
   } catch (error) {
@@ -117,40 +118,6 @@ router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"),
   } catch (error) {
     console.error("Error fetching patient medical records:", error);
     res.status(500).json({ message: "Failed to fetch medical records" });
-  }
-});
-
-// Add new medical record
-router.post("/records", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
-  try {
-    const { patientId, type, content } = req.body;
-
-    // Verify provider has access to this patient
-    const patient = await db.query.patientProfiles.findFirst({
-      where: and(
-        eq(patientProfiles.userId, patientId),
-        eq(patientProfiles.providerId, req.user!.id)
-      )
-    });
-
-    if (!patient) {
-      return res.status(403).json({ message: "Access denied" });
-    }
-
-    const [record] = await db.insert(medicalRecords)
-      .values({
-        patientId,
-        providerId: req.user!.id,
-        type,
-        visitDate: new Date(),
-        content
-      })
-      .returning();
-
-    res.status(201).json(record);
-  } catch (error) {
-    console.error("Error creating medical record:", error);
-    res.status(500).json({ message: "Failed to create medical record" });
   }
 });
 
