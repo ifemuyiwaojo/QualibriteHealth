@@ -1,7 +1,7 @@
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, UserSquare, Video, User } from "lucide-react";
+import { Calendar, FileText, UserSquare, Video, User, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { TelehealthSession } from "@/components/TelehealthSession";
 
@@ -22,9 +22,15 @@ export default function PatientDashboard() {
             <CardTitle className="text-sm font-medium">Telehealth</CardTitle>
             <Video className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline" className="w-full mt-4">
+          <CardContent className="space-y-2">
+            <Button asChild variant="outline" className="w-full">
               <Link href="/telehealth">Start Video Visit</Link>
+            </Button>
+            <Button asChild variant="ghost" className="w-full" size="sm">
+              <Link href="/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -34,9 +40,15 @@ export default function PatientDashboard() {
             <CardTitle className="text-sm font-medium">Schedule Appointments</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline" className="w-full mt-4">
+          <CardContent className="space-y-2">
+            <Button asChild variant="outline" className="w-full">
               <Link href="/patient/appointments">Schedule Now</Link>
+            </Button>
+            <Button asChild variant="ghost" className="w-full" size="sm">
+              <Link href="/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -46,9 +58,15 @@ export default function PatientDashboard() {
             <CardTitle className="text-sm font-medium">Medical Records</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline" className="w-full mt-4">
+          <CardContent className="space-y-2">
+            <Button asChild variant="outline" className="w-full">
               <Link href="/patient/records">View Records</Link>
+            </Button>
+            <Button asChild variant="ghost" className="w-full" size="sm">
+              <Link href="/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -58,9 +76,15 @@ export default function PatientDashboard() {
             <CardTitle className="text-sm font-medium">Profile</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline" className="w-full mt-4">
+          <CardContent className="space-y-2">
+            <Button asChild variant="outline" className="w-full">
               <Link href="/patient/profile">View Profile</Link>
+            </Button>
+            <Button asChild variant="ghost" className="w-full" size="sm">
+              <Link href="/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
             </Button>
           </CardContent>
         </Card>
