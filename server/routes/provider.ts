@@ -40,24 +40,27 @@ router.get("/profile", authenticateToken, authorizeRoles("provider"), async (req
 // Get provider's patients
 router.get("/patients", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const patients = await db.select({
-      id: patientProfiles.id,
-      firstName: patientProfiles.firstName,
-      lastName: patientProfiles.lastName,
-      dateOfBirth: patientProfiles.dateOfBirth,
-      phone: patientProfiles.phone,
-      address: patientProfiles.address,
-      email: users.email,
-      userId: patientProfiles.userId,
-      emergencyContact: patientProfiles.emergencyContact,
-      emergencyPhone: patientProfiles.emergencyPhone,
-      insuranceInfo: patientProfiles.insuranceInfo,
-      medicalHistory: patientProfiles.medicalHistory,
-    })
-    .from(patientProfiles)
-    .innerJoin(users, eq(users.id, patientProfiles.userId))
-    .where(eq(patientProfiles.providerId, req.user!.id))
-    .orderBy(desc(patientProfiles.updatedAt));
+    const patients = await db
+      .select({
+        id: patientProfiles.id,
+        firstName: patientProfiles.firstName,
+        lastName: patientProfiles.lastName,
+        dateOfBirth: patientProfiles.dateOfBirth,
+        phone: patientProfiles.phone,
+        address: patientProfiles.address,
+        email: users.email,
+        userId: patientProfiles.userId,
+        emergencyContact: patientProfiles.emergencyContact,
+        emergencyPhone: patientProfiles.emergencyPhone,
+        insuranceInfo: patientProfiles.insuranceInfo,
+        medicalHistory: patientProfiles.medicalHistory,
+      })
+      .from(patientProfiles)
+      .innerJoin(users, eq(users.id, patientProfiles.userId))
+      .where(eq(patientProfiles.providerId, req.user!.id));
+
+    console.log('Provider ID:', req.user!.id);
+    console.log('Found patients:', patients.length);
 
     res.json(patients);
   } catch (error) {
@@ -83,6 +86,9 @@ router.get("/records", authenticateToken, authorizeRoles("provider"), async (req
       .innerJoin(patientProfiles, eq(patientProfiles.userId, medicalRecords.patientId))
       .where(eq(medicalRecords.providerId, req.user!.id))
       .orderBy(desc(medicalRecords.visitDate));
+
+    console.log('Provider ID:', req.user!.id);
+    console.log('Found records:', records.length);
 
     res.json(records);
   } catch (error) {
