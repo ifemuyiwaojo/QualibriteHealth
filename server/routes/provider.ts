@@ -40,13 +40,24 @@ router.get("/profile", authenticateToken, authorizeRoles("provider"), async (req
 // Get provider's patients
 router.get("/patients", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const patients = await db.query.patientProfiles.findMany({
-      where: eq(patientProfiles.providerId, req.user!.id),
-      orderBy: [desc(patientProfiles.updatedAt)],
-      with: {
-        user: true
-      }
-    });
+    const patients = await db.select({
+      id: patientProfiles.id,
+      firstName: patientProfiles.firstName,
+      lastName: patientProfiles.lastName,
+      dateOfBirth: patientProfiles.dateOfBirth,
+      phone: patientProfiles.phone,
+      address: patientProfiles.address,
+      email: users.email,
+      userId: patientProfiles.userId,
+      emergencyContact: patientProfiles.emergencyContact,
+      emergencyPhone: patientProfiles.emergencyPhone,
+      insuranceInfo: patientProfiles.insuranceInfo,
+      medicalHistory: patientProfiles.medicalHistory,
+    })
+    .from(patientProfiles)
+    .innerJoin(users, eq(users.id, patientProfiles.userId))
+    .where(eq(patientProfiles.providerId, req.user!.id))
+    .orderBy(desc(patientProfiles.updatedAt));
 
     res.json(patients);
   } catch (error) {
@@ -58,26 +69,21 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
 // Get all medical records for a provider's patients
 router.get("/records", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const records = await db.query.medicalRecords.findMany({
-      where: eq(medicalRecords.providerId, req.user!.id),
-      orderBy: [desc(medicalRecords.visitDate)],
-      with: {
-        patient: true
-      }
-    });
+    const records = await db.select({
+      id: medicalRecords.id,
+      patientId: medicalRecords.patientId,
+      type: medicalRecords.type,
+      visitDate: medicalRecords.visitDate,
+      content: medicalRecords.content,
+      createdAt: medicalRecords.createdAt,
+      patientName: db.sql<string>`CONCAT(${patientProfiles.firstName}, ' ', ${patientProfiles.lastName})`.as('patientName'),
+    })
+    .from(medicalRecords)
+    .innerJoin(patientProfiles, eq(patientProfiles.userId, medicalRecords.patientId))
+    .where(eq(medicalRecords.providerId, req.user!.id))
+    .orderBy(desc(medicalRecords.visitDate));
 
-    // Transform records to include patient name
-    const transformedRecords = records.map(record => ({
-      id: record.id,
-      patientId: record.patientId,
-      patientName: `${record.patient.firstName} ${record.patient.lastName}`,
-      type: record.type,
-      visitDate: record.visitDate,
-      content: record.content as MedicalRecordContent,
-      createdAt: record.createdAt
-    }));
-
-    res.json(transformedRecords);
+    res.json(records);
   } catch (error) {
     console.error("Error fetching medical records:", error);
     res.status(500).json({ message: "Failed to fetch medical records" });
@@ -100,7 +106,10 @@ router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"),
     }
 
     const records = await db.query.medicalRecords.findMany({
-      where: eq(medicalRecords.patientId, parseInt(req.params.patientId)),
+      where: and(
+        eq(medicalRecords.patientId, parseInt(req.params.patientId)),
+        eq(medicalRecords.providerId, req.user!.id)
+      ),
       orderBy: [desc(medicalRecords.visitDate)]
     });
 
