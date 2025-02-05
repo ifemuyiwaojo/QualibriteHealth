@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User, GraduationCap, Award, BookOpen, Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,72 +27,125 @@ export default function ProviderProfilePage() {
         </Button>
         <h1 className="text-3xl font-bold">Provider Profile</h1>
       </div>
+
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Personal Information
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div>Loading profile...</div>
+              <div className="flex items-center justify-center p-8">
+                <div className="text-muted-foreground">Loading profile...</div>
+              </div>
             ) : profile ? (
-              <div className="space-y-4">
-                <div className="grid gap-2">
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-4">
                   <div>
-                    <span className="font-semibold">Name: </span>
-                    Dr. {profile.firstName} {profile.lastName}
+                    <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                    <p className="text-lg">Dr. {profile.firstName} {profile.lastName}</p>
                   </div>
                   <div>
-                    <span className="font-semibold">Title: </span>
-                    {profile.title}
+                    <label className="text-sm font-medium text-muted-foreground">Title</label>
+                    <p className="text-lg">{profile.title}</p>
                   </div>
                   <div>
-                    <span className="font-semibold">Specialization: </span>
-                    {profile.specialization}
+                    <label className="text-sm font-medium text-muted-foreground">Specialization</label>
+                    <p className="text-lg">{profile.specialization}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">NPI Number</label>
+                    <p className="text-lg">{profile.npi}</p>
                   </div>
                   <div>
-                    <span className="font-semibold">NPI: </span>
-                    {profile.npi}
+                    <label className="text-sm font-medium text-muted-foreground">Contact Information</label>
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <p>{user.email}</p>
+                      </div>
+                      {profile.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <p>{profile.phone}</p>
+                        </div>
+                      )}
+                      {profile.address && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <p>{profile.address}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div>No profile data available.</div>
+              <div className="text-center p-8 text-muted-foreground">No profile data available.</div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Credentials</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div>Loading credentials...</div>
-            ) : profile?.credentials ? (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Education</h3>
-                  <ul className="list-disc pl-6">
-                    {profile.credentials.education.map((edu: string, index: number) => (
-                      <li key={index}>{edu}</li>
-                    ))}
-                  </ul>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Education
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <div className="text-muted-foreground">Loading...</div>
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Certifications</h3>
-                  <ul className="list-disc pl-6">
-                    {profile.credentials.certifications.map((cert: string, index: number) => (
-                      <li key={index}>{cert}</li>
-                    ))}
-                  </ul>
+              ) : profile?.credentials?.education ? (
+                <ul className="space-y-3">
+                  {profile.credentials.education.map((edu: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <BookOpen className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <span>{edu}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">No education data available.</div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Certifications
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <div className="text-muted-foreground">Loading...</div>
                 </div>
-              </div>
-            ) : (
-              <div>No credentials data available.</div>
-            )}
-          </CardContent>
-        </Card>
+              ) : profile?.credentials?.certifications ? (
+                <ul className="space-y-3">
+                  {profile.credentials.certifications.map((cert: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <Award className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <span>{cert}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">No certification data available.</div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
