@@ -27,6 +27,9 @@ export default function PatientListPage() {
     enabled: !!user && user.role === 'provider'
   });
 
+  console.log('Current user:', user);
+  console.log('Fetched patients:', patients);
+
   if (!user || user.role !== "provider") {
     return null;
   }

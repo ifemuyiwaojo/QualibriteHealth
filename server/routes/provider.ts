@@ -36,14 +36,18 @@ router.get("/profile", authenticateToken, authorizeRoles("provider"), async (req
 // Get provider's patients
 router.get("/patients", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const provider = await db.query.providerProfiles.findFirst({
+    // First get the provider profile
+    const providerProfile = await db.query.providerProfiles.findFirst({
       where: eq(providerProfiles.userId, req.user!.id),
     });
 
-    if (!provider) {
+    if (!providerProfile) {
       return res.status(404).json({ message: "Provider profile not found" });
     }
 
+    console.log('Provider Profile:', providerProfile);
+
+    // Then get all patients for this provider
     const patients = await db
       .select({
         id: patientProfiles.id,
@@ -56,28 +60,29 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
       })
       .from(patientProfiles)
       .innerJoin(users, eq(users.id, patientProfiles.userId))
-      .where(eq(patientProfiles.providerId, provider.id));
+      .where(eq(patientProfiles.providerId, providerProfile.id));
 
-    console.log('Provider ID:', provider.id);
     console.log('Found patients:', patients);
 
     res.json(patients);
   } catch (error) {
     console.error("Error fetching patients:", error);
-    res.status(500).json({ message: "Failed to fetch patients" });
+    res.status(500).json({ message: "Failed to fetch patients", error: error.message });
   }
 });
 
 // Get all medical records for a provider's patients
 router.get("/records", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const provider = await db.query.providerProfiles.findFirst({
+    const providerProfile = await db.query.providerProfiles.findFirst({
       where: eq(providerProfiles.userId, req.user!.id),
     });
 
-    if (!provider) {
+    if (!providerProfile) {
       return res.status(404).json({ message: "Provider profile not found" });
     }
+
+    console.log('Provider Profile:', providerProfile);
 
     const records = await db
       .select({
@@ -91,27 +96,34 @@ router.get("/records", authenticateToken, authorizeRoles("provider"), async (req
       })
       .from(medicalRecords)
       .innerJoin(patientProfiles, eq(patientProfiles.id, medicalRecords.patientId))
-      .where(eq(medicalRecords.providerId, provider.id))
+      .where(eq(medicalRecords.providerId, providerProfile.id))
       .orderBy(desc(medicalRecords.visitDate));
 
-    console.log('Provider ID:', provider.id);
     console.log('Found records:', records);
 
     res.json(records);
   } catch (error) {
     console.error("Error fetching medical records:", error);
-    res.status(500).json({ message: "Failed to fetch medical records" });
+    res.status(500).json({ message: "Failed to fetch medical records", error: error.message });
   }
 });
 
 // Get medical records for a specific patient
 router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
+    const providerProfile = await db.query.providerProfiles.findFirst({
+      where: eq(providerProfiles.userId, req.user!.id),
+    });
+
+    if (!providerProfile) {
+      return res.status(404).json({ message: "Provider profile not found" });
+    }
+
     // First verify this patient belongs to the provider
     const patient = await db.query.patientProfiles.findFirst({
       where: and(
-        eq(patientProfiles.userId, parseInt(req.params.patientId)),
-        eq(patientProfiles.providerId, req.user!.id)
+        eq(patientProfiles.id, parseInt(req.params.patientId)),
+        eq(patientProfiles.providerId, providerProfile.id)
       )
     });
 
@@ -122,7 +134,7 @@ router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"),
     const records = await db.query.medicalRecords.findMany({
       where: and(
         eq(medicalRecords.patientId, parseInt(req.params.patientId)),
-        eq(medicalRecords.providerId, req.user!.id)
+        eq(medicalRecords.providerId, providerProfile.id)
       ),
       orderBy: [desc(medicalRecords.visitDate)]
     });
@@ -130,7 +142,7 @@ router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"),
     res.json(records);
   } catch (error) {
     console.error("Error fetching patient medical records:", error);
-    res.status(500).json({ message: "Failed to fetch medical records" });
+    res.status(500).json({ message: "Failed to fetch medical records", error: error.message });
   }
 });
 
