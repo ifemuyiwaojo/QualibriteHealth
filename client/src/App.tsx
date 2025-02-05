@@ -25,6 +25,11 @@ import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
+import SchedulePage from "@/pages/provider/SchedulePage"; // Added import
+import PatientListPage from "@/pages/provider/PatientListPage"; // Added import
+import RecordsPage from "@/pages/provider/RecordsPage"; // Added import
+import ProviderProfilePage from "@/pages/provider/ProviderProfilePage"; // Added import
+
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
@@ -178,16 +183,16 @@ export const Router = memo(function Router() {
 
           {/* Provider Routes */}
           <Route path="/provider/schedule">
-            {!user ? <Redirect to="/auth/login" /> : <div>Schedule Page</div>}
+            {!user ? <Redirect to="/auth/login" /> : <SchedulePage />}
           </Route>
           <Route path="/provider/patients">
-            {!user ? <Redirect to="/auth/login" /> : <div>Patient List Page</div>}
+            {!user ? <Redirect to="/auth/login" /> : <PatientListPage />}
           </Route>
           <Route path="/provider/records">
-            {!user ? <Redirect to="/auth/login" /> : <div>Provider Records Page</div>}
+            {!user ? <Redirect to="/auth/login" /> : <RecordsPage />}
           </Route>
           <Route path="/provider/profile">
-            {!user ? <Redirect to="/auth/login" /> : <div>Provider Profile Page</div>}
+            {!user ? <Redirect to="/auth/login" /> : <ProviderProfilePage />}
           </Route>
 
           <Route component={NotFound} />
