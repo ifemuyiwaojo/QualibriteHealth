@@ -36,22 +36,29 @@ router.get("/profile", authenticateToken, authorizeRoles("provider"), async (req
 // Get provider's patients
 router.get("/patients", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
+    const provider = await db.query.providerProfiles.findFirst({
+      where: eq(providerProfiles.userId, req.user!.id),
+    });
+
+    if (!provider) {
+      return res.status(404).json({ message: "Provider profile not found" });
+    }
+
     const patients = await db
       .select({
         id: patientProfiles.id,
-        userId: patientProfiles.userId,
         firstName: patientProfiles.firstName,
         lastName: patientProfiles.lastName,
         dateOfBirth: patientProfiles.dateOfBirth,
         phone: patientProfiles.phone,
         address: patientProfiles.address,
-        email: users.email
+        email: users.email,
       })
       .from(patientProfiles)
       .innerJoin(users, eq(users.id, patientProfiles.userId))
-      .where(eq(patientProfiles.providerId, req.user!.id));
+      .where(eq(patientProfiles.providerId, provider.id));
 
-    console.log('Provider ID:', req.user!.id);
+    console.log('Provider ID:', provider.id);
     console.log('Found patients:', patients);
 
     res.json(patients);
@@ -64,6 +71,14 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
 // Get all medical records for a provider's patients
 router.get("/records", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
+    const provider = await db.query.providerProfiles.findFirst({
+      where: eq(providerProfiles.userId, req.user!.id),
+    });
+
+    if (!provider) {
+      return res.status(404).json({ message: "Provider profile not found" });
+    }
+
     const records = await db
       .select({
         id: medicalRecords.id,
@@ -76,10 +91,10 @@ router.get("/records", authenticateToken, authorizeRoles("provider"), async (req
       })
       .from(medicalRecords)
       .innerJoin(patientProfiles, eq(patientProfiles.id, medicalRecords.patientId))
-      .where(eq(medicalRecords.providerId, req.user!.id))
+      .where(eq(medicalRecords.providerId, provider.id))
       .orderBy(desc(medicalRecords.visitDate));
 
-    console.log('Provider ID:', req.user!.id);
+    console.log('Provider ID:', provider.id);
     console.log('Found records:', records);
 
     res.json(records);

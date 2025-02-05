@@ -1,31 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, MapPin, Heart, Calendar, AlertCircle, Search } from "lucide-react";
+import { ArrowLeft, Phone, MapPin, Calendar, Search } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
+interface Patient {
+  id: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  phone: string;
+  address: string;
+  email: string;
+}
+
 export default function PatientListPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: patients, isLoading } = useQuery({
+  const { data: patients, isLoading } = useQuery<Patient[]>({
     queryKey: ['/api/provider/patients'],
+    enabled: !!user && user.role === 'provider'
   });
 
   if (!user || user.role !== "provider") {
     return null;
   }
 
-  const filteredPatients = patients?.filter((patient: any) => {
+  const filteredPatients = patients?.filter((patient) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       patient.firstName.toLowerCase().includes(searchLower) ||
       patient.lastName.toLowerCase().includes(searchLower) ||
-      patient.phone.includes(searchTerm)
+      patient.email.toLowerCase().includes(searchLower)
     );
   });
 
@@ -65,10 +76,10 @@ export default function PatientListPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredPatients?.map((patient: any) => (
+              {filteredPatients?.map((patient) => (
                 <Card key={patient.id} className="hover:bg-accent/5 transition-colors">
                   <CardContent className="p-6">
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       <div className="space-y-2">
                         <h3 className="text-xl font-semibold">
                           {patient.firstName} {patient.lastName}
@@ -92,19 +103,6 @@ export default function PatientListPage() {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <AlertCircle className="h-4 w-4" />
-                          <span>Emergency Contact:</span>
-                        </div>
-                        <div className="pl-6">
-                          <div>{patient.emergencyContact}</div>
-                          <a href={`tel:${patient.emergencyPhone}`} className="text-sm hover:underline">
-                            {patient.emergencyPhone}
-                          </a>
-                        </div>
-                      </div>
-
                       <div className="flex flex-col md:items-end justify-center gap-2">
                         <Button asChild variant="default" size="sm" className="w-full md:w-auto">
                           <Link href={`/provider/patients/${patient.id}/records`}>
@@ -120,7 +118,11 @@ export default function PatientListPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )) ?? <div className="text-center p-8 text-muted-foreground">No patients found.</div>}
+              )) ?? (
+                <div className="text-center p-8 text-muted-foreground">
+                  No patients found.
+                </div>
+              )}
             </div>
           )}
         </CardContent>
