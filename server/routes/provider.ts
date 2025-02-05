@@ -36,75 +36,77 @@ router.get("/profile", authenticateToken, authorizeRoles("provider"), async (req
 // Get provider's patients
 router.get("/patients", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    // First get the provider profile
-    const providerProfile = await db.query.providerProfiles.findFirst({
+    // Get the provider profile
+    const provider = await db.query.providerProfiles.findFirst({
       where: eq(providerProfiles.userId, req.user!.id),
+      with: {
+        user: true
+      }
     });
 
-    if (!providerProfile) {
+    if (!provider) {
       return res.status(404).json({ message: "Provider profile not found" });
     }
 
-    console.log('Provider Profile:', providerProfile);
+    console.log('Provider found:', provider);
 
-    // Then get all patients for this provider
-    const patients = await db
-      .select({
-        id: patientProfiles.id,
-        firstName: patientProfiles.firstName,
-        lastName: patientProfiles.lastName,
-        dateOfBirth: patientProfiles.dateOfBirth,
-        phone: patientProfiles.phone,
-        address: patientProfiles.address,
-        email: users.email,
-      })
-      .from(patientProfiles)
-      .innerJoin(users, eq(users.id, patientProfiles.userId))
-      .where(eq(patientProfiles.providerId, providerProfile.id));
+    // Get all patients for this provider using the correct relationship
+    const patients = await db.query.patientProfiles.findMany({
+      where: eq(patientProfiles.providerId, provider.id),
+      with: {
+        user: true,
+        provider: true
+      }
+    });
 
     console.log('Found patients:', patients);
 
-    res.json(patients);
+    // Transform the data for the frontend
+    const formattedPatients = patients.map(patient => ({
+      id: patient.id,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      dateOfBirth: patient.dateOfBirth,
+      phone: patient.phone,
+      address: patient.address,
+      email: patient.user.email
+    }));
+
+    res.json(formattedPatients);
   } catch (error) {
     console.error("Error fetching patients:", error);
-    res.status(500).json({ message: "Failed to fetch patients", error: error.message });
+    res.status(500).json({ message: "Failed to fetch patients", error: (error as Error).message });
   }
 });
 
 // Get all medical records for a provider's patients
 router.get("/records", authenticateToken, authorizeRoles("provider"), async (req: AuthRequest, res) => {
   try {
-    const providerProfile = await db.query.providerProfiles.findFirst({
+    const provider = await db.query.providerProfiles.findFirst({
       where: eq(providerProfiles.userId, req.user!.id),
     });
 
-    if (!providerProfile) {
+    if (!provider) {
       return res.status(404).json({ message: "Provider profile not found" });
     }
 
-    console.log('Provider Profile:', providerProfile);
+    console.log('Provider found:', provider);
 
-    const records = await db
-      .select({
-        id: medicalRecords.id,
-        patientId: medicalRecords.patientId,
-        type: medicalRecords.type,
-        visitDate: medicalRecords.visitDate,
-        content: medicalRecords.content,
-        createdAt: medicalRecords.createdAt,
-        patientName: sql<string>`concat(${patientProfiles.firstName}, ' ', ${patientProfiles.lastName})`.as('patientName'),
-      })
-      .from(medicalRecords)
-      .innerJoin(patientProfiles, eq(patientProfiles.id, medicalRecords.patientId))
-      .where(eq(medicalRecords.providerId, providerProfile.id))
-      .orderBy(desc(medicalRecords.visitDate));
+    // Get records using the correct relationship
+    const records = await db.query.medicalRecords.findMany({
+      where: eq(medicalRecords.providerId, provider.id),
+      with: {
+        patient: true
+      },
+      orderBy: [desc(medicalRecords.visitDate)]
+    });
 
     console.log('Found records:', records);
 
     res.json(records);
   } catch (error) {
     console.error("Error fetching medical records:", error);
-    res.status(500).json({ message: "Failed to fetch medical records", error: error.message });
+    res.status(500).json({ message: "Failed to fetch medical records", error: (error as Error).message });
   }
 });
 
@@ -142,7 +144,7 @@ router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"),
     res.json(records);
   } catch (error) {
     console.error("Error fetching patient medical records:", error);
-    res.status(500).json({ message: "Failed to fetch medical records", error: error.message });
+    res.status(500).json({ message: "Failed to fetch medical records", error: (error as Error).message });
   }
 });
 

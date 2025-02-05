@@ -18,7 +18,7 @@ export const users = pgTable("users", {
 export const patientProfiles = pgTable("patient_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  providerId: integer("provider_id").references(() => users.id).notNull(),
+  providerId: integer("provider_id").references(() => providerProfiles.id).notNull(), // Fix: Reference provider_profiles instead of users
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   dateOfBirth: timestamp("date_of_birth").notNull(),
@@ -106,9 +106,9 @@ export const patientProfilesRelations = relations(patientProfiles, ({ one }) => 
     fields: [patientProfiles.userId],
     references: [users.id],
   }),
-  provider: one(users, {
+  provider: one(providerProfiles, { // Fix: Reference provider_profiles
     fields: [patientProfiles.providerId],
-    references: [users.id],
+    references: [providerProfiles.id],
   }),
 }));
 
