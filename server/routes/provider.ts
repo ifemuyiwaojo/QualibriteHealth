@@ -50,10 +50,6 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
         address: patientProfiles.address,
         email: users.email,
         userId: patientProfiles.userId,
-        emergencyContact: patientProfiles.emergencyContact,
-        emergencyPhone: patientProfiles.emergencyPhone,
-        insuranceInfo: patientProfiles.insuranceInfo,
-        medicalHistory: patientProfiles.medicalHistory,
       })
       .from(patientProfiles)
       .innerJoin(users, eq(users.id, patientProfiles.userId))
