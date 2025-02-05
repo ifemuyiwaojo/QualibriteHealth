@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import authRoutes from "./routes/auth";
 import telehealthRoutes from "./routes/telehealth";
+import providerRoutes from "./routes/provider";
 
 export function registerRoutes(app: Express): Server {
   // Authentication routes
@@ -9,6 +10,9 @@ export function registerRoutes(app: Express): Server {
 
   // Telehealth routes
   app.use("/api/telehealth", telehealthRoutes);
+
+  // Provider routes
+  app.use("/api/provider", providerRoutes);
 
   const httpServer = createServer(app);
 

@@ -16,19 +16,45 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
-const recordTypeColors: Record<string, string> = {
+type MedicalRecordType = 'diagnosis' | 'prescription' | 'lab_result' | 'progress_note';
+
+interface MedicalRecord {
+  id: number;
+  patientId: number;
+  patientName: string;
+  type: MedicalRecordType;
+  visitDate: string;
+  content: {
+    summary: string;
+    diagnosis?: string;
+    treatment?: string;
+    prescription?: string;
+    vitals?: Record<string, string>;
+    follow_up?: string;
+  };
+  createdAt: string;
+}
+
+const recordTypeColors: Record<MedicalRecordType, string> = {
   diagnosis: 'bg-blue-100 text-blue-800',
   prescription: 'bg-purple-100 text-purple-800',
   lab_result: 'bg-green-100 text-green-800',
   progress_note: 'bg-orange-100 text-orange-800'
 };
 
+const recordTypeLabels: Record<MedicalRecordType, string> = {
+  diagnosis: 'Diagnosis',
+  prescription: 'Prescription',
+  lab_result: 'Lab Result',
+  progress_note: 'Progress Note'
+};
+
 export default function RecordsPage() {
   const { user } = useAuth();
-  const [recordType, setRecordType] = useState<string>("all");
+  const [recordType, setRecordType] = useState<MedicalRecordType | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: medicalRecords, isLoading } = useQuery({
+  const { data: medicalRecords, isLoading } = useQuery<MedicalRecord[]>({
     queryKey: ['/api/provider/records'],
   });
 
@@ -36,7 +62,7 @@ export default function RecordsPage() {
     return null;
   }
 
-  const filteredRecords = medicalRecords?.filter((record: any) => {
+  const filteredRecords = medicalRecords?.filter((record) => {
     const matchesType = recordType === "all" || record.type === recordType;
     const matchesSearch = 
       record.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,7 +93,7 @@ export default function RecordsPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     className="pl-10 w-full"
-                    placeholder="Search records..."
+                    placeholder="Search records by patient name or summary..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -75,7 +101,10 @@ export default function RecordsPage() {
               </div>
               <div className="flex items-center gap-4 w-full md:w-auto">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={recordType} onValueChange={setRecordType}>
+                <Select
+                  value={recordType}
+                  onValueChange={(value) => setRecordType(value as MedicalRecordType | 'all')}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Record Type" />
                   </SelectTrigger>
@@ -103,7 +132,7 @@ export default function RecordsPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredRecords?.map((record: any) => (
+                {filteredRecords?.map((record) => (
                   <Card key={record.id} className="hover:bg-accent/5 transition-colors">
                     <CardContent className="p-6">
                       <div className="space-y-4">
@@ -113,7 +142,7 @@ export default function RecordsPage() {
                             <h3 className="font-semibold">{record.patientName}</h3>
                           </div>
                           <Badge className={recordTypeColors[record.type]}>
-                            {record.type.replace('_', ' ')}
+                            {recordTypeLabels[record.type]}
                           </Badge>
                         </div>
 
@@ -121,7 +150,7 @@ export default function RecordsPage() {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
                             <span>
-                              Created: {format(new Date(record.createdAt), 'MMM d, yyyy h:mm a')}
+                              Visit Date: {format(new Date(record.visitDate), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
 
@@ -130,6 +159,18 @@ export default function RecordsPage() {
                             <p className="mt-1 text-muted-foreground">
                               {record.content.summary}
                             </p>
+                            {record.content.diagnosis && (
+                              <div className="mt-2">
+                                <p className="font-medium">Diagnosis</p>
+                                <p className="text-muted-foreground">{record.content.diagnosis}</p>
+                              </div>
+                            )}
+                            {record.content.treatment && (
+                              <div className="mt-2">
+                                <p className="font-medium">Treatment</p>
+                                <p className="text-muted-foreground">{record.content.treatment}</p>
+                              </div>
+                            )}
                           </div>
 
                           <div className="flex gap-2 mt-4">

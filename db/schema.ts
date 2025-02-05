@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 
@@ -14,24 +14,26 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Patients
-export const patients = pgTable("patients", {
+// Patient Profiles
+export const patientProfiles = pgTable("patient_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
+  providerId: integer("provider_id").references(() => users.id).notNull(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   dateOfBirth: timestamp("date_of_birth").notNull(),
-  phone: text("phone").notNull(),
-  address: text("address").notNull(),
+  phone: text("phone"),
+  address: text("address"),
   emergencyContact: text("emergency_contact"),
   emergencyPhone: text("emergency_phone"),
   insuranceInfo: jsonb("insurance_info"),
+  medicalHistory: jsonb("medical_history"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Providers (Medical Staff)
-export const providers = pgTable("providers", {
+// Provider Profiles
+export const providerProfiles = pgTable("provider_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   firstName: text("first_name").notNull(),
@@ -39,21 +41,10 @@ export const providers = pgTable("providers", {
   title: text("title").notNull(),
   specialization: text("specialization").notNull(),
   npi: text("npi").unique(),
+  phone: text("phone"),
+  address: text("address"),
   credentials: jsonb("credentials"),
   availability: jsonb("availability"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Appointments
-export const appointments = pgTable("appointments", {
-  id: serial("id").primaryKey(),
-  patientId: integer("patient_id").references(() => patients.id).notNull(),
-  providerId: integer("provider_id").references(() => providers.id).notNull(),
-  dateTime: timestamp("date_time").notNull(),
-  status: text("status", { enum: ["scheduled", "completed", "cancelled"] }).notNull(),
-  type: text("type", { enum: ["initial", "follow_up", "medication_check"] }).notNull(),
-  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -61,13 +52,24 @@ export const appointments = pgTable("appointments", {
 // Medical Records
 export const medicalRecords = pgTable("medical_records", {
   id: serial("id").primaryKey(),
-  patientId: integer("patient_id").references(() => patients.id).notNull(),
-  providerId: integer("provider_id").references(() => providers.id).notNull(),
-  appointmentId: integer("appointment_id").references(() => appointments.id),
-  type: text("type", { 
-    enum: ["diagnosis", "prescription", "lab_result", "progress_note"] 
-  }).notNull(),
+  patientId: integer("patient_id").references(() => users.id).notNull(),
+  providerId: integer("provider_id").references(() => users.id).notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  visitDate: timestamp("visit_date").notNull(),
   content: jsonb("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Appointments
+export const appointments = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  patientId: integer("patient_id").references(() => users.id).notNull(),
+  providerId: integer("provider_id").references(() => users.id).notNull(),
+  dateTime: timestamp("date_time").notNull(),
+  status: text("status", { enum: ["scheduled", "completed", "cancelled"] }).notNull(),
+  type: text("type", { enum: ["initial", "follow_up", "medication_check"] }).notNull(),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -86,47 +88,84 @@ export const auditLogs = pgTable("audit_logs", {
 });
 
 // Define relationships
-export const usersRelations = relations(users, ({ one }) => ({
-  patient: one(patients, {
+export const usersRelations = relations(users, ({ one, many }) => ({
+  patientProfile: one(patientProfiles, {
     fields: [users.id],
-    references: [patients.userId],
+    references: [patientProfiles.userId],
   }),
-  provider: one(providers, {
+  providerProfile: one(providerProfiles, {
     fields: [users.id],
-    references: [providers.userId],
+    references: [providerProfiles.userId],
+  }),
+  providedMedicalRecords: many(medicalRecords, { relationName: "provider_records" }),
+  receivedMedicalRecords: many(medicalRecords, { relationName: "patient_records" }),
+}));
+
+export const patientProfilesRelations = relations(patientProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [patientProfiles.userId],
+    references: [users.id],
+  }),
+  provider: one(users, {
+    fields: [patientProfiles.providerId],
+    references: [users.id],
   }),
 }));
 
-export const patientsRelations = relations(patients, ({ many }) => ({
-  appointments: many(appointments),
-  medicalRecords: many(medicalRecords),
+export const providerProfilesRelations = relations(providerProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [providerProfiles.userId],
+    references: [users.id],
+  }),
 }));
 
-export const providersRelations = relations(providers, ({ many }) => ({
-  appointments: many(appointments),
-  medicalRecords: many(medicalRecords),
+export const medicalRecordsRelations = relations(medicalRecords, ({ one }) => ({
+  patient: one(users, {
+    fields: [medicalRecords.patientId],
+    references: [users.id],
+    relationName: "patient_records",
+  }),
+  provider: one(users, {
+    fields: [medicalRecords.providerId],
+    references: [users.id],
+    relationName: "provider_records",
+  }),
 }));
 
 // Create Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
-export const insertPatientSchema = createInsertSchema(patients);
-export const selectPatientSchema = createSelectSchema(patients);
-export const insertProviderSchema = createInsertSchema(providers);
-export const selectProviderSchema = createSelectSchema(providers);
-export const insertAppointmentSchema = createInsertSchema(appointments);
-export const selectAppointmentSchema = createSelectSchema(appointments);
+export const insertPatientProfileSchema = createInsertSchema(patientProfiles);
+export const selectPatientProfileSchema = createSelectSchema(patientProfiles);
+export const insertProviderProfileSchema = createInsertSchema(providerProfiles);
+export const selectProviderProfileSchema = createSelectSchema(providerProfiles);
 export const insertMedicalRecordSchema = createInsertSchema(medicalRecords);
 export const selectMedicalRecordSchema = createSelectSchema(medicalRecords);
+export const insertAppointmentSchema = createInsertSchema(appointments);
+export const selectAppointmentSchema = createSelectSchema(appointments);
+
 
 // Type definitions
 export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
-export type InsertPatient = typeof patients.$inferInsert;
-export type SelectPatient = typeof patients.$inferSelect;
-export type InsertProvider = typeof providers.$inferInsert;
-export type SelectProvider = typeof providers.$inferSelect;
-export type InsertAppointment = typeof appointments.$inferInsert;
-export type SelectAppointment = typeof appointments.$inferSelect;
+export type InsertPatientProfile = typeof patientProfiles.$inferInsert;
+export type SelectPatientProfile = typeof patientProfiles.$inferSelect;
+export type InsertProviderProfile = typeof providerProfiles.$inferInsert;
+export type SelectProviderProfile = typeof providerProfiles.$inferSelect;
 export type InsertMedicalRecord = typeof medicalRecords.$inferInsert;
 export type SelectMedicalRecord = typeof medicalRecords.$inferSelect;
+export type InsertAppointment = typeof appointments.$inferInsert;
+export type SelectAppointment = typeof appointments.$inferSelect;
+
+// Record types
+export type MedicalRecordType = 'diagnosis' | 'prescription' | 'lab_result' | 'progress_note';
+
+// Content types
+export type MedicalRecordContent = {
+  summary: string;
+  diagnosis?: string;
+  treatment?: string;
+  prescription?: string;
+  vitals?: Record<string, string>;
+  follow_up?: string;
+};

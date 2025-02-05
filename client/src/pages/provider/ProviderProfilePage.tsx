@@ -5,10 +5,30 @@ import { ArrowLeft, User, GraduationCap, Award, BookOpen, Phone, Mail, MapPin } 
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
+interface ProviderProfile {
+  id: number;
+  userId: number;
+  firstName: string;
+  lastName: string;
+  title: string;
+  specialization: string;
+  npi: string | null;
+  phone: string | null;
+  address: string | null;
+  credentials: {
+    education?: string[];
+    certifications?: string[];
+    licenses?: string[];
+  };
+  user: {
+    email: string;
+  };
+}
+
 export default function ProviderProfilePage() {
   const { user } = useAuth();
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading } = useQuery<ProviderProfile>({
     queryKey: ['/api/provider/profile'],
   });
 
@@ -60,14 +80,14 @@ export default function ProviderProfilePage() {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">NPI Number</label>
-                    <p className="text-lg">{profile.npi}</p>
+                    <p className="text-lg">{profile.npi || 'Not provided'}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Contact Information</label>
                     <div className="space-y-2 mt-2">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        <p>{user.email}</p>
+                        <p>{profile.user.email}</p>
                       </div>
                       {profile.phone && (
                         <div className="flex items-center gap-2">
@@ -106,7 +126,7 @@ export default function ProviderProfilePage() {
                 </div>
               ) : profile?.credentials?.education ? (
                 <ul className="space-y-3">
-                  {profile.credentials.education.map((edu: string, index: number) => (
+                  {profile.credentials.education.map((edu, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <BookOpen className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                       <span>{edu}</span>
@@ -123,7 +143,7 @@ export default function ProviderProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Certifications
+                Certifications & Licenses
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -133,7 +153,7 @@ export default function ProviderProfilePage() {
                 </div>
               ) : profile?.credentials?.certifications ? (
                 <ul className="space-y-3">
-                  {profile.credentials.certifications.map((cert: string, index: number) => (
+                  {profile.credentials.certifications.map((cert, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <Award className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                       <span>{cert}</span>
