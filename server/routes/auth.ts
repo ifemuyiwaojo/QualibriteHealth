@@ -81,18 +81,20 @@ router.post("/login", async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {
       // Log failed attempt
-      await db.insert(auditLogs).values({
-        userId: user.id,
-        action: 'failed_login_attempt',
-        resourceType: 'users',
-        resourceId: user.id,
-        details: { method: req.method, path: req.path },
-        ipAddress: req.ip,
-        userAgent: req.get('user-agent'),
-      });
+      await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Set session
+    if (req.session) {
+      req.session.userId = user.id;
+      if (rememberMe) {
+        // Extend session to 30 days if "remember me" is checked
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      }
+    }
+
+    // Also set JWT token for API requests
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
@@ -107,15 +109,7 @@ router.post("/login", async (req, res) => {
     });
 
     // Log successful login
-    await db.insert(auditLogs).values({
-      userId: user.id,
-      action: 'successful_login',
-      resourceType: 'users',
-      resourceId: user.id,
-      details: { method: req.method, path: req.path },
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-    });
+    await auditLog(user.id, 'successful_login', 'users', user.id, req);
 
     res.json({
       message: "Logged in successfully",
@@ -133,42 +127,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Get current user
-router.get("/me", authenticateToken, async (req: any, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, req.user.id),
-  });
-
-  if (!user) {
-      return res.status(401).json({ message: "User not found" });
-  }
-
-  res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      requiresPasswordChange: user.changePasswordRequired,
-      isSuperadmin: user.isSuperadmin
-    }
-  });
-});
-
-// Register new user (public registration - no admin)
+// Register endpoint
 router.post("/register", async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
-
-    // Prevent admin registration through public endpoint
-    if (validatedData.role === 'admin') {
-      return res.status(403).json({ 
-        message: "Admin accounts can only be created by existing administrators" 
-      });
-    }
 
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, validatedData.email),
@@ -191,6 +153,11 @@ router.post("/register", async (req, res) => {
       ...validatedData,
       passwordHash: hashedPassword,
     }).returning();
+
+    // Set session after registration
+    if (req.session) {
+      req.session.userId = user.id;
+    }
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -216,6 +183,31 @@ router.post("/register", async (req, res) => {
       message: error.message || "Registration failed" 
     });
   }
+});
+
+// Get current user
+router.get("/me", authenticateToken, async (req: any, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.user.id),
+  });
+
+  if (!user) {
+    return res.status(401).json({ message: "User not found" });
+  }
+
+  res.json({
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      requiresPasswordChange: user.changePasswordRequired,
+      isSuperadmin: user.isSuperadmin
+    }
+  });
 });
 
 // Create admin user (superadmin only)
@@ -329,13 +321,26 @@ router.post("/change-password", authenticateToken, async (req: any, res) => {
 });
 
 
-// Logout
+// Logout endpoint
 router.post("/logout", authenticateToken, async (req: any, res) => {
   if (req.user) {
     await auditLog(req.user.id, 'logout', 'users', req.user.id, req);
   }
+
+  // Clear both the JWT cookie and session
   res.clearCookie("token");
-  res.json({ message: "Logged out successfully" });
+
+  if (req.session) {
+    req.session.destroy((err: any) => {
+      if (err) {
+        console.error("Session destruction error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  } else {
+    res.json({ message: "Logged out successfully" });
+  }
 });
 
 export default router;

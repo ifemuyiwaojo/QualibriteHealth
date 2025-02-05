@@ -22,8 +22,26 @@ export const authenticateToken = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.cookies.token;
+    // First check session
+    if (req.session && req.session.userId) {
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, req.session.userId),
+      });
 
+      if (user) {
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          isSuperadmin: user.isSuperadmin || false,
+          changePasswordRequired: user.changePasswordRequired || false,
+        };
+        return next();
+      }
+    }
+
+    // Fallback to JWT token
+    const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -42,6 +60,11 @@ export const authenticateToken = async (
       return res.status(401).json({ message: "User not found" });
     }
 
+    // Set session for future requests
+    if (req.session) {
+      req.session.userId = user.id;
+    }
+
     req.user = {
       id: user.id,
       email: user.email,
@@ -52,6 +75,13 @@ export const authenticateToken = async (
 
     next();
   } catch (error) {
+    // Clear invalid token/session
+    res.clearCookie("token");
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) console.error("Session destruction error:", err);
+      });
+    }
     return res.status(401).json({ message: "Invalid token" });
   }
 };
