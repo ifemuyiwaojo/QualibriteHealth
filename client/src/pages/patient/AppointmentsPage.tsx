@@ -166,7 +166,6 @@ export default function AppointmentsPage() {
           </CardContent>
         </Card>
 
-        {/* List of upcoming appointments */}
         <Card>
           <CardHeader>
             <CardTitle>Upcoming Appointments</CardTitle>
