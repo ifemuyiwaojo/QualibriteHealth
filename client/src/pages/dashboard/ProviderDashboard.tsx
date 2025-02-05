@@ -14,7 +14,7 @@ export default function ProviderDashboard() {
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-8">Provider Dashboard</h1>
-      
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -23,7 +23,7 @@ export default function ProviderDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline" className="w-full mt-4">
-              <Link href="/schedule">View Schedule</Link>
+              <Link href="/provider/schedule">View Schedule</Link>
             </Button>
           </CardContent>
         </Card>
@@ -35,7 +35,7 @@ export default function ProviderDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline" className="w-full mt-4">
-              <Link href="/patients">View Patients</Link>
+              <Link href="/provider/patients">View Patients</Link>
             </Button>
           </CardContent>
         </Card>
@@ -47,7 +47,7 @@ export default function ProviderDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline" className="w-full mt-4">
-              <Link href="/records">View Records</Link>
+              <Link href="/provider/records">View Records</Link>
             </Button>
           </CardContent>
         </Card>
@@ -59,7 +59,7 @@ export default function ProviderDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline" className="w-full mt-4">
-              <Link href="/profile">View Profile</Link>
+              <Link href="/provider/profile">View Profile</Link>
             </Button>
           </CardContent>
         </Card>

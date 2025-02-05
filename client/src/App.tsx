@@ -107,7 +107,7 @@ const AdminRoute = memo(function AdminRoute({
   return <Component />;
 });
 
-const Router = memo(function Router() {
+export const Router = memo(function Router() {
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
@@ -162,7 +162,7 @@ const Router = memo(function Router() {
           <Route path="/admin/security" component={() => <AdminRoute component={SecurityCenterPage} />} />
 
           {/* Patient Routes */}
-           <Route path="/telehealth">
+          <Route path="/telehealth">
             {!user ? <Redirect to="/auth/login" /> : <TelehealthPage />}
           </Route>
           <Route path="/patient/appointments">
@@ -174,6 +174,22 @@ const Router = memo(function Router() {
           <Route path="/patient/profile">
             {!user ? <Redirect to="/auth/login" /> : <div>Patient Profile Page</div>}
           </Route>
+
+
+          {/* Provider Routes */}
+          <Route path="/provider/schedule">
+            {!user ? <Redirect to="/auth/login" /> : <div>Schedule Page</div>}
+          </Route>
+          <Route path="/provider/patients">
+            {!user ? <Redirect to="/auth/login" /> : <div>Patient List Page</div>}
+          </Route>
+          <Route path="/provider/records">
+            {!user ? <Redirect to="/auth/login" /> : <div>Provider Records Page</div>}
+          </Route>
+          <Route path="/provider/profile">
+            {!user ? <Redirect to="/auth/login" /> : <div>Provider Profile Page</div>}
+          </Route>
+
           <Route component={NotFound} />
         </Switch>
       </main>
