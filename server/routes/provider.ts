@@ -8,10 +8,6 @@ import {
   patientProfiles,
   medicalRecords,
   providerProfiles,
-  type SelectPatientProfile,
-  type SelectMedicalRecord,
-  type SelectProviderProfile,
-  type MedicalRecordContent
 } from "@db/schema";
 
 const router = Router();
@@ -43,13 +39,13 @@ router.get("/patients", authenticateToken, authorizeRoles("provider"), async (re
     const patients = await db
       .select({
         id: patientProfiles.id,
+        userId: patientProfiles.userId,
         firstName: patientProfiles.firstName,
         lastName: patientProfiles.lastName,
         dateOfBirth: patientProfiles.dateOfBirth,
         phone: patientProfiles.phone,
         address: patientProfiles.address,
-        email: users.email,
-        userId: patientProfiles.userId,
+        email: users.email
       })
       .from(patientProfiles)
       .innerJoin(users, eq(users.id, patientProfiles.userId))
