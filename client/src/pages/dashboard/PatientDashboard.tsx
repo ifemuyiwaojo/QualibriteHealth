@@ -1,7 +1,7 @@
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, UserSquare, Video, User, ArrowLeft } from "lucide-react";
+import { Calendar, FileText, Video, User } from "lucide-react";
 import { Link } from "wouter";
 import { TelehealthSession } from "@/components/TelehealthSession";
 
@@ -14,15 +14,7 @@ export default function PatientDashboard() {
 
   return (
     <div className="container py-10">
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="sm" asChild className="gap-2">
-          <Link href="/dashboard">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">Patient Dashboard</h1>
-      </div>
+      <h1 className="text-3xl font-bold mb-8">Patient Dashboard</h1>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>

@@ -24,6 +24,8 @@ import {
 import { TelehealthSession } from "@/components/TelehealthSession";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 const scheduleFormSchema = z.object({
   scheduledTime: z.date({
@@ -95,7 +97,15 @@ export default function AppointmentsPage() {
 
   return (
     <div className="container py-10">
-      <h1 className="text-3xl font-bold mb-8">Schedule Appointment</h1>
+      <div className="flex items-center gap-4 mb-8">
+        <Button variant="ghost" size="sm" asChild className="gap-2">
+          <Link href="/dashboard">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <h1 className="text-3xl font-bold">Schedule Appointment</h1>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
