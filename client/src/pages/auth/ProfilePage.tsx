@@ -288,7 +288,18 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <MfaSetup />
+              <div className="space-y-6">
+                <MfaSetup />
+                
+                <div className="flex justify-center mt-4">
+                  <Link href="/auth/mfa-setup">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Go to Full MFA Setup Page
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </CardContent>
           </Card>
           

@@ -15,6 +15,7 @@ import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ChangePassword from "@/pages/auth/ChangePassword";
 import ProfilePage from "@/pages/auth/ProfilePage";
+import MfaSetupPage from "@/pages/auth/MfaSetupPage";
 import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
@@ -124,6 +125,9 @@ export const Router = memo(function Router() {
           </Route>
           <Route path="/auth/profile">
             {!user ? <Redirect to="/auth/login" /> : <ProfilePage />}
+          </Route>
+          <Route path="/auth/mfa-setup">
+            {!user ? <Redirect to="/auth/login" /> : <MfaSetupPage />}
           </Route>
 
           {/* Protected Routes */}
