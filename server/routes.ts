@@ -3,11 +3,14 @@ import { createServer, type Server } from "http";
 import authRoutes from "./routes/auth";
 import telehealthRoutes from "./routes/telehealth";
 import providerRoutes from "./routes/provider";
+import setupRoutes from "./routes/setup";
 import { csrfProtection, setCsrfToken } from "./middleware/csrf";
 import { limitAPI, limitAuth } from "./middleware/rate-limiter";
 
 export function registerRoutes(app: Express): Server {
-  // Applying security measures with proper configuration
+  // Setup routes - unprotected to allow initial admin setup
+  app.use("/api/setup", setupRoutes);
+  
   // Authentication routes - without CSRF for initial login
   app.use("/api/auth", authRoutes);
 
