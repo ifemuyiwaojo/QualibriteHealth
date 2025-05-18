@@ -10,134 +10,126 @@ import { users } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { Logger } from './logger';
 
-// Configuration for account lockout
-const MAX_FAILED_ATTEMPTS = 5;          // Max number of failed attempts before locking
-const LOCKOUT_DURATION_MINUTES = 30;    // Time in minutes account remains locked
-const ATTEMPT_RESET_HOURS = 24;         // Time in hours to reset counter if no failed attempts
+// Configuration
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MINUTES = 15;
 
 /**
- * Record a failed login attempt and potentially lock the account
+ * Record a failed login attempt for a user
  * 
- * @param userId User ID that failed authentication
- * @param ipAddress IP address of the request
- * @returns Object containing lockout status and remaining attempts
+ * @param userId User ID that failed to authenticate
+ * @param ipAddress Optional IP address of the client for logging
+ * @returns Object with lock status
  */
 export async function recordFailedLoginAttempt(userId: number, ipAddress?: string): Promise<{
-  accountLocked: boolean;
-  remainingAttempts: number;
+  isLocked: boolean;
+  attempts: number;
   lockExpiresAt?: Date;
 }> {
-  // Get current user data
-  const [user] = await db.select().from(users).where(eq(users.id, userId));
-  
-  if (!user) {
-    throw new Error('User not found');
-  }
-  
-  // Check if account is already locked
-  if (user.accountLocked && user.lockExpiresAt && user.lockExpiresAt > new Date()) {
-    // Account is locked and lock has not expired
-    return {
-      accountLocked: true,
-      remainingAttempts: 0,
-      lockExpiresAt: user.lockExpiresAt
-    };
-  }
-  
-  // If lock has expired, unlock the account
-  if (user.accountLocked && user.lockExpiresAt && user.lockExpiresAt <= new Date()) {
-    await db.update(users)
-      .set({
-        accountLocked: false,
-        lockExpiresAt: null,
-        failedLoginAttempts: 0
-      })
-      .where(eq(users.id, userId));
+  try {
+    // Fetch current user data
+    const [userData] = await db.select({
+      failedLoginAttempts: users.failedLoginAttempts,
+      accountLocked: users.accountLocked,
+      lockExpiresAt: users.lockExpiresAt
+    })
+    .from(users)
+    .where(eq(users.id, userId));
     
-    await Logger.logSecurity('Account automatically unlocked after lock period expired', {
-      userId,
-      details: { ipAddress }
-    });
-    
-    return {
-      accountLocked: false,
-      remainingAttempts: MAX_FAILED_ATTEMPTS
-    };
-  }
-  
-  // Check if we should reset failed attempts counter
-  // If last failed login was more than ATTEMPT_RESET_HOURS ago
-  if (user.lastFailedLogin) {
-    const resetThreshold = new Date();
-    resetThreshold.setHours(resetThreshold.getHours() - ATTEMPT_RESET_HOURS);
-    
-    if (user.lastFailedLogin < resetThreshold) {
-      await db.update(users)
-        .set({ failedLoginAttempts: 0 })
-        .where(eq(users.id, userId));
-        
-      user.failedLoginAttempts = 0;
+    if (!userData) {
+      throw new Error(`User with ID ${userId} not found`);
     }
-  }
-  
-  // Increment failed attempts
-  const failedAttempts = (user.failedLoginAttempts || 0) + 1;
-  const now = new Date();
-  
-  // Check if account should be locked
-  if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
-    // Calculate lock expiration time
-    const lockExpiresAt = new Date();
-    lockExpiresAt.setMinutes(lockExpiresAt.getMinutes() + LOCKOUT_DURATION_MINUTES);
     
-    // Lock the account
-    await db.update(users)
-      .set({
-        failedLoginAttempts: failedAttempts,
-        lastFailedLogin: now,
-        accountLocked: true,
-        lockExpiresAt
-      })
-      .where(eq(users.id, userId));
-    
-    // Log the account lockout  
-    await Logger.logSecurity('Account locked due to multiple failed login attempts', {
-      userId,
-      details: {
-        attemptsBeforeLock: failedAttempts,
-        lockExpiresAt,
-        ipAddress
+    // Check if account is already locked
+    if (userData.accountLocked) {
+      const now = new Date();
+      
+      // If lock has expired, unlock the account
+      if (userData.lockExpiresAt && userData.lockExpiresAt < now) {
+        await db.update(users)
+          .set({
+            accountLocked: false,
+            lockExpiresAt: null,
+            failedLoginAttempts: 1, // Reset counter but add this attempt
+            lastFailedLogin: new Date()
+          })
+          .where(eq(users.id, userId));
+          
+        await Logger.logSecurity("Account lock expired and reset", {
+          userId,
+          ipAddress,
+          details: { newAttemptCount: 1 }
+        });
+        
+        return { isLocked: false, attempts: 1 };
       }
-    });
+      
+      // Account is still locked
+      return { 
+        isLocked: true, 
+        attempts: userData.failedLoginAttempts ?? 0,
+        lockExpiresAt: userData.lockExpiresAt ?? undefined
+      };
+    }
     
-    return {
-      accountLocked: true,
-      remainingAttempts: 0,
-      lockExpiresAt
-    };
-  } else {
-    // Update failed attempts count without locking
-    await db.update(users)
-      .set({
-        failedLoginAttempts: failedAttempts,
-        lastFailedLogin: now
-      })
-      .where(eq(users.id, userId));
+    // Increment failed login counter
+    const newAttemptCount = (userData.failedLoginAttempts ?? 0) + 1;
     
-    // Log the failed attempt
-    await Logger.logSecurity('Failed login attempt', {
-      userId,
-      details: {
-        attempts: failedAttempts,
-        remainingAttempts: MAX_FAILED_ATTEMPTS - failedAttempts,
-        ipAddress
-      }
-    });
-    
-    return {
-      accountLocked: false,
-      remainingAttempts: MAX_FAILED_ATTEMPTS - failedAttempts
-    };
+    // Check if account should be locked
+    if (newAttemptCount >= MAX_FAILED_ATTEMPTS) {
+      // Lock the account
+      const lockExpiresAt = new Date();
+      lockExpiresAt.setMinutes(lockExpiresAt.getMinutes() + LOCKOUT_DURATION_MINUTES);
+      
+      await db.update(users)
+        .set({
+          failedLoginAttempts: newAttemptCount,
+          lastFailedLogin: new Date(),
+          accountLocked: true,
+          lockExpiresAt
+        })
+        .where(eq(users.id, userId));
+      
+      await Logger.logSecurity("Account locked due to too many failed login attempts", {
+        userId,
+        ipAddress,
+        details: { 
+          attempts: newAttemptCount,
+          lockDuration: LOCKOUT_DURATION_MINUTES,
+          expiresAt: lockExpiresAt
+        }
+      });
+      
+      return { 
+        isLocked: true, 
+        attempts: newAttemptCount,
+        lockExpiresAt 
+      };
+    } else {
+      // Update failed attempts counter
+      await db.update(users)
+        .set({
+          failedLoginAttempts: newAttemptCount,
+          lastFailedLogin: new Date()
+        })
+        .where(eq(users.id, userId));
+      
+      await Logger.logSecurity("Failed login attempt recorded", {
+        userId,
+        ipAddress,
+        details: { 
+          attempts: newAttemptCount,
+          maxAttempts: MAX_FAILED_ATTEMPTS,
+          attemptsRemaining: MAX_FAILED_ATTEMPTS - newAttemptCount
+        }
+      });
+      
+      return { isLocked: false, attempts: newAttemptCount };
+    }
+  } catch (error) {
+    console.error("Error recording failed login attempt:", error);
+    // In case of error, fail safe (don't lock the account)
+    return { isLocked: false, attempts: 0 };
   }
 }
 
@@ -147,10 +139,7 @@ export async function recordFailedLoginAttempt(userId: number, ipAddress?: strin
  * @param userId User ID that successfully authenticated
  */
 export async function resetFailedLoginAttempts(userId: number): Promise<void> {
-  // Only reset if there were previously failed attempts
-  const [user] = await db.select().from(users).where(eq(users.id, userId));
-  
-  if (user && user.failedLoginAttempts && user.failedLoginAttempts > 0) {
+  try {
     await db.update(users)
       .set({
         failedLoginAttempts: 0,
@@ -159,10 +148,12 @@ export async function resetFailedLoginAttempts(userId: number): Promise<void> {
         lockExpiresAt: null
       })
       .where(eq(users.id, userId));
-    
+      
     await Logger.log('info', 'auth', 'Failed login attempts reset after successful login', {
       userId
     });
+  } catch (error) {
+    console.error("Error resetting failed login attempts:", error);
   }
 }
 
@@ -173,19 +164,24 @@ export async function resetFailedLoginAttempts(userId: number): Promise<void> {
  * @param adminId ID of admin performing the unlock
  */
 export async function unlockAccount(userId: number, adminId: number): Promise<void> {
-  await db.update(users)
-    .set({
-      failedLoginAttempts: 0,
-      lastFailedLogin: null,
-      accountLocked: false,
-      lockExpiresAt: null
-    })
-    .where(eq(users.id, userId));
-  
-  await Logger.logSecurity('Account manually unlocked by admin', {
-    userId,
-    details: { adminId }
-  });
+  try {
+    await db.update(users)
+      .set({
+        failedLoginAttempts: 0,
+        lastFailedLogin: null,
+        accountLocked: false,
+        lockExpiresAt: null
+      })
+      .where(eq(users.id, userId));
+      
+    await Logger.logSecurity("Account manually unlocked by administrator", {
+      userId,
+      details: { adminId }
+    });
+  } catch (error) {
+    console.error("Error unlocking account:", error);
+    throw new Error("Failed to unlock account");
+  }
 }
 
 /**
@@ -196,33 +192,43 @@ export async function unlockAccount(userId: number, adminId: number): Promise<vo
  */
 export async function checkAccountLockStatus(userId: number): Promise<{
   isLocked: boolean;
+  attempts: number;
   lockExpiresAt?: Date;
 }> {
-  const [user] = await db.select().from(users).where(eq(users.id, userId));
-  
-  if (!user) {
-    throw new Error('User not found');
-  }
-  
-  // Check if account is locked and lock has not expired
-  if (user.accountLocked && user.lockExpiresAt && user.lockExpiresAt > new Date()) {
-    return {
-      isLocked: true,
-      lockExpiresAt: user.lockExpiresAt
-    };
-  }
-  
-  // If lock has expired, unlock the account
-  if (user.accountLocked && user.lockExpiresAt && user.lockExpiresAt <= new Date()) {
-    await db.update(users)
-      .set({
-        accountLocked: false,
-        lockExpiresAt: null
-      })
-      .where(eq(users.id, userId));
+  try {
+    const [userData] = await db.select({
+      failedLoginAttempts: users.failedLoginAttempts,
+      accountLocked: users.accountLocked,
+      lockExpiresAt: users.lockExpiresAt
+    })
+    .from(users)
+    .where(eq(users.id, userId));
     
-    return { isLocked: false };
+    if (!userData) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+    
+    // Check if account is locked but lock has expired
+    if (userData.accountLocked && userData.lockExpiresAt) {
+      const now = new Date();
+      if (userData.lockExpiresAt < now) {
+        // Lock has expired, but account is still marked as locked in DB
+        // We'll not update the DB here, just return the correct status
+        return { 
+          isLocked: false, 
+          attempts: userData.failedLoginAttempts ?? 0
+        };
+      }
+    }
+    
+    return {
+      isLocked: userData.accountLocked ?? false,
+      attempts: userData.failedLoginAttempts ?? 0,
+      lockExpiresAt: userData.lockExpiresAt ?? undefined
+    };
+  } catch (error) {
+    console.error("Error checking account lock status:", error);
+    // In case of error, fail safe (don't block access)
+    return { isLocked: false, attempts: 0 };
   }
-  
-  return { isLocked: false };
 }

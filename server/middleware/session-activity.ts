@@ -1,87 +1,112 @@
 /**
  * Session Activity Middleware
  * 
- * This middleware tracks user activity and implements automatic session timeout
- * after a specified period of inactivity to enhance security.
- * 
- * It follows healthcare security best practices by ensuring sessions are
- * terminated when users have been inactive, preventing unauthorized access.
+ * This middleware tracks user session activity and enforces timeout constraints
+ * as part of Phase 2 security improvements for Qualibrite Health.
  */
 
-import { Request, Response, NextFunction } from "express";
-import { Logger } from "../lib/logger";
-import { AuthRequest } from "./auth";
-import session from "express-session";
+import { Request, Response, NextFunction, Express } from 'express';
 
-// Extend the express-session SessionData interface
-// Note: This is now handled in auth.ts to avoid conflicting declarations
-
-// Constants for session activity tracking
-const ACTIVITY_KEY = 'lastActivity';
-const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes of inactivity (in milliseconds)
-
-/**
- * Middleware to track user activity and implement automatic session timeout
- */
-export const sessionActivityTracker = (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Skip tracking for static assets, health checks, and login/register
-  const skipPaths = ['/favicon.ico', '/api/health', '/api/auth/login', '/api/auth/register'];
-  if (skipPaths.some(path => req.path.startsWith(path))) {
-    return next();
-  }
-
-  // Check if the session exists
-  if (req.session) {
-    const now = Date.now();
-    
-    // Check the last activity time
-    const lastActivity = req.session.lastActivity;
-    
-    // If there's a recorded last activity and the user's session has timed out
-    if (lastActivity && (now - lastActivity > INACTIVITY_TIMEOUT) && req.user) {
-      // Log the session timeout for audit trail
-      Logger.log('security', 'auth', 'Session timed out due to inactivity', {
-        userId: req.user.id,
-        request: req,
-        details: {
-          lastActivityTime: new Date(lastActivity).toISOString(),
-          currentTime: new Date(now).toISOString(),
-          inactiveMinutes: Math.floor((now - lastActivity) / (60 * 1000))
-        }
-      });
-      
-      // Clear cookies
-      res.clearCookie('token');
-      
-      // Reset/destroy the session
-      req.session.destroy((err) => {
-        if (err) {
-          console.error('Error destroying session on timeout:', err);
-        }
-      });
-      
-      // Return an unauthorized response
-      return res.status(401).json({
-        message: 'Session expired due to inactivity',
-        code: 'SESSION_TIMEOUT'
-      });
-    }
-    
-    // Update the last activity time for the current request
-    req.session.lastActivity = now;
-  }
-  
-  // Continue with the request
-  next();
+// Session timeout configuration (in milliseconds)
+const SESSION_TIMEOUT_CONFIG = {
+  DEFAULT: 15 * 60 * 1000,  // 15 minutes for regular users (patients)
+  PROVIDER: 10 * 60 * 1000, // 10 minutes for providers
+  ADMIN: 5 * 60 * 1000      // 5 minutes for admins
 };
 
 /**
- * Sets up and configures the session management middleware
+ * Determines the appropriate timeout duration based on user role
  */
-export function setupSessionActivity(app: any) {
-  // Apply the session activity tracker middleware
-  app.use(sessionActivityTracker);
+function getTimeoutDuration(role?: string): number {
+  if (!role) return SESSION_TIMEOUT_CONFIG.DEFAULT;
   
-  // Return a success indicator for configuration
-  return true;
+  switch (role.toLowerCase()) {
+    case 'admin':
+      return SESSION_TIMEOUT_CONFIG.ADMIN;
+    case 'provider':
+      return SESSION_TIMEOUT_CONFIG.PROVIDER;
+    default:
+      return SESSION_TIMEOUT_CONFIG.DEFAULT;
+  }
+}
+
+/**
+ * Middleware to track session activity and enforce timeouts
+ */
+function sessionActivityMiddleware(req: Request, res: Response, next: NextFunction) {
+  // Skip for public routes
+  const publicRoutes = ['/api/auth/login', '/api/auth/register', '/api/health'];
+  if (publicRoutes.includes(req.path) || req.path.startsWith('/assets/')) {
+    return next();
+  }
+  
+  const session = req.session;
+  if (!session) {
+    return next();
+  }
+  
+  // Check if the session has a user ID (authenticated)
+  if (session.userId) {
+    const currentTime = Date.now();
+    
+    // Check if session has a lastActivity timestamp
+    if (session.lastActivity) {
+      // Get role from session if available
+      const role = session.userRole || 'patient';
+      const timeoutDuration = getTimeoutDuration(role);
+      const elapsedTime = currentTime - session.lastActivity;
+      
+      // Check if session has expired
+      if (elapsedTime > timeoutDuration) {
+        // Session has timed out, destroy it
+        session.destroy((err) => {
+          if (err) {
+            console.error('Error destroying timed-out session:', err);
+          }
+        });
+        
+        // Return timeout response
+        return res.status(440).json({
+          message: 'Your session has expired due to inactivity',
+          code: 'SESSION_TIMEOUT'
+        });
+      }
+    }
+    
+    // Update the last activity timestamp
+    session.lastActivity = currentTime;
+  }
+  
+  next();
+}
+
+/**
+ * Setup session activity tracking for the application
+ */
+export function setupSessionActivity(app: Express): void {
+  // Register the session activity middleware
+  app.use(sessionActivityMiddleware);
+  
+  // Add endpoint to check session activity status
+  app.get('/api/auth/session-status', (req, res) => {
+    const session = req.session;
+    
+    if (!session || !session.userId || !session.lastActivity) {
+      return res.json({ isActive: false });
+    }
+    
+    const currentTime = Date.now();
+    const role = session.userRole || 'patient';
+    const timeoutDuration = getTimeoutDuration(role);
+    const elapsedTime = currentTime - session.lastActivity;
+    const remainingTime = Math.max(0, timeoutDuration - elapsedTime);
+    
+    res.json({
+      isActive: elapsedTime <= timeoutDuration,
+      remainingTime: Math.floor(remainingTime / 1000), // in seconds
+      totalTimeout: Math.floor(timeoutDuration / 1000)  // in seconds
+    });
+  });
+  
+  console.log('Session activity tracking enabled');
 }

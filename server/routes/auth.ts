@@ -949,6 +949,9 @@ router.post("/verify-mfa", asyncHandler(async (req, res) => {
   // Mark MFA as complete in session
   req.session.mfaPending = false;
   
+  // Reset failed login attempts after successful authentication
+  await resetFailedLoginAttempts(userId);
+  
   // Get the current secret from the SecretManager for signing tokens
   const secretManager = SecretManager.getInstance();
   const currentSecret = secretManager.getCurrentSecret();
