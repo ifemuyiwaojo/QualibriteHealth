@@ -92,6 +92,9 @@ function HeaderComponent() {
                     <Button asChild variant="ghost">
                       <Link href="/dashboard">Dashboard</Link>
                     </Button>
+                    <Button asChild variant="ghost">
+                      <Link href="/auth/profile">My Account</Link>
+                    </Button>
                     <Button 
                       variant="outline" 
                       onClick={handleLogout}
