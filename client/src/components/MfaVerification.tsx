@@ -51,8 +51,12 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
         description: "Your identity has been verified",
       });
       
-      // Call the success handler to complete the login process
-      onVerificationSuccess(data.user);
+      console.log("MFA verification successful. User data:", data.user);
+      // Force a small delay before redirecting to ensure state is updated
+      setTimeout(() => {
+        // Call the success handler to complete the login process
+        onVerificationSuccess(data.user);
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
