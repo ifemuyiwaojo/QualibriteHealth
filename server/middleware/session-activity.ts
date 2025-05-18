@@ -6,6 +6,7 @@
  */
 
 import { Request, Response, NextFunction, Express } from 'express';
+import { Logger } from '../lib/logger';
 
 // Session timeout configuration (in milliseconds)
 const SESSION_TIMEOUT_CONFIG = {
@@ -52,7 +53,7 @@ function sessionActivityMiddleware(req: Request, res: Response, next: NextFuncti
     // Check if session has a lastActivity timestamp
     if (session.lastActivity) {
       // Get role from session if available
-      const role = session.userRole || 'patient';
+      const role = typeof session.userRole === 'string' ? session.userRole : 'patient';
       const timeoutDuration = getTimeoutDuration(role);
       const elapsedTime = currentTime - session.lastActivity;
       
@@ -96,7 +97,7 @@ export function setupSessionActivity(app: Express): void {
     }
     
     const currentTime = Date.now();
-    const role = session.userRole || 'patient';
+    const role = typeof session.userRole === 'string' ? session.userRole : 'patient';
     const timeoutDuration = getTimeoutDuration(role);
     const elapsedTime = currentTime - session.lastActivity;
     const remainingTime = Math.max(0, timeoutDuration - elapsedTime);

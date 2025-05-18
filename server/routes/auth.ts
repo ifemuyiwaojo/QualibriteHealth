@@ -191,7 +191,7 @@ router.post("/login", asyncHandler(async (req, res) => {
     // Log failed attempt
     await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
     
-    if (lockoutResult.accountLocked) {
+    if (lockoutResult.isLocked) {
       // Account has been locked
       const lockExpiration = lockoutResult.lockExpiresAt;
       const minutesRemaining = lockExpiration ? 
@@ -204,8 +204,9 @@ router.post("/login", asyncHandler(async (req, res) => {
       );
     } else {
       // Still has attempts remaining
+      const attemptsRemaining = 5 - lockoutResult.attempts; // Using MAX_FAILED_ATTEMPTS constant (5)
       throw new AppError(
-        `Invalid credentials. You have ${lockoutResult.remainingAttempts} attempts remaining before your account is temporarily locked.`, 
+        `Invalid credentials. You have ${attemptsRemaining} attempts remaining before your account is temporarily locked.`, 
         401, 
         "AUTH_FAILED"
       );
