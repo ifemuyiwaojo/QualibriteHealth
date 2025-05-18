@@ -72,8 +72,11 @@ export const authenticateToken = async (
     // Fallback to JWT token
     const token = req.cookies.token;
     if (!token) {
-      await Logger.log("warning", "auth", "Authentication failed: No token provided", {
-        request: req
+      // Only console log for unauthenticated requests since we can't link to a user
+      console.warn(`[${new Date().toISOString()}] WARNING auth: Authentication failed: No token provided`, {
+        path: req.path,
+        method: req.method,
+        ip: req.ip
       });
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -147,9 +150,11 @@ export const authenticateToken = async (
 export const authorizeRoles = (...roles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
-      await Logger.log("warning", "auth", "Role authorization failed: User not authenticated", { 
-        request: req,
-        details: { requiredRoles: roles.join(", ") }
+      // Only console log for unauthenticated requests
+      console.warn(`[${new Date().toISOString()}] WARNING auth: Role authorization failed: User not authenticated`, {
+        path: req.path,
+        method: req.method,
+        requiredRoles: roles.join(", ")
       });
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -200,8 +205,10 @@ export const requireSuperadmin = async (
   next: NextFunction
 ) => {
   if (!req.user) {
-    await Logger.log("warning", "auth", "Superadmin check failed: User not authenticated", { 
-      request: req
+    // Only console log for unauthenticated requests
+    console.warn(`[${new Date().toISOString()}] WARNING auth: Superadmin check failed: User not authenticated`, {
+      path: req.path,
+      method: req.method
     });
     return res.status(401).json({ message: "Authentication required" });
   }

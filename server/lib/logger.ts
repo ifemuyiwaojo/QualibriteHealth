@@ -69,8 +69,17 @@ export class Logger {
       const action = `${level.toUpperCase()}_${category.toUpperCase()}`;
       
       // For audit log compatibility, we need to ensure required fields are present
+      // If no userId is provided, we don't log to the database to avoid foreign key issues
+      if (!userId) {
+        // Only log to console if no user ID (for system actions)
+        this.consoleLog(level, category, message, { 
+          details: sanitizedDetails
+        });
+        return; // Exit early - don't try to insert into database
+      }
+      
       const logEntry = {
-        userId: userId || 0, // Use 0 for system actions with no user
+        userId: userId, // User ID is required due to foreign key constraint
         action: action,
         resourceType: resourceType || category,
         resourceId: resourceId || 0, // Use 0 for general logs with no specific resource
