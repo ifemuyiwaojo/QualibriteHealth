@@ -1,14 +1,13 @@
 import { Router } from "express";
 import { db } from "@db";
 import { users } from "@db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
-import { authenticateToken, authorizeRoles, AuthRequest } from "../middleware/auth";
+import { eq, and, desc } from "drizzle-orm";
+import { authenticateToken, authorizeRoles } from "../middleware/auth";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 import { Logger } from "../lib/logger";
-import { AppError } from "../lib/error-handler";
 
 const router = Router();
 const scryptAsync = promisify(scrypt);
@@ -24,8 +23,8 @@ async function hashPassword(password: string) {
 router.get(
   "/users",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       // Check if user is superadmin or regular admin
       const isSuperadmin = req.user?.isSuperadmin;
@@ -39,7 +38,7 @@ router.get(
         : allUsers.filter(user => !(user.role === "admin" && user.id !== req.user?.id) && !user.isSuperadmin);
       
       // Remove sensitive data
-      const sanitizedUsers = filteredUsers.map(({ password, ...user }) => user);
+      const sanitizedUsers = filteredUsers.map(({ passwordHash, ...user }) => user);
       
       res.json(sanitizedUsers);
     } catch (error) {
@@ -53,8 +52,8 @@ router.get(
 router.post(
   "/users",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       // Validate request body
       const schema = z.object({
@@ -93,19 +92,19 @@ router.post(
         return res.status(409).json({ message: "User with this email already exists" });
       }
       
-      // Create the user
+      // Create the user with appropriate field names for our schema
       const userData = {
         email: email.toLowerCase(),
-        password: await hashPassword(password),
+        passwordHash: await hashPassword(password),
         role,
         isSuperadmin: isSuperadmin || false,
         isActive: true,
-        requiresPasswordChange: requirePasswordChange || true,
+        changePasswordRequired: requirePasswordChange || true,
         emailVerified: result.data.skipEmailVerification || false,
-        metadata: {
+        metadata: JSON.stringify({
           name,
           phone,
-        },
+        }),
       };
       
       const [newUser] = await db.insert(users).values(userData).returning({
@@ -113,7 +112,6 @@ router.post(
         email: users.email,
         role: users.role,
         isSuperadmin: users.isSuperadmin,
-        isActive: users.isActive,
         createdAt: users.createdAt,
         metadata: users.metadata,
       });
@@ -141,8 +139,8 @@ router.post(
 router.get(
   "/users/:id",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -163,7 +161,7 @@ router.get(
       }
       
       // Remove sensitive data
-      const { password, ...userData } = user;
+      const { passwordHash, ...userData } = user;
       
       res.json(userData);
     } catch (error) {
@@ -177,8 +175,8 @@ router.get(
 router.patch(
   "/users/:id",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -263,34 +261,37 @@ router.patch(
         updateData.isSuperadmin = result.data.isSuperadmin;
       }
       
-      // Handle name and phone updates
-      const metadata = { ...user.metadata } as Record<string, any>;
+      // Handle name and phone updates by updating the JSON metadata
+      let userMetadata;
+      try {
+        userMetadata = user.metadata ? JSON.parse(user.metadata as string) : {};
+      } catch (e) {
+        userMetadata = {};
+      }
+      
       let metadataChanged = false;
       
       if (result.data.name) {
-        metadata.name = result.data.name;
+        userMetadata.name = result.data.name;
         metadataChanged = true;
       }
       
       if (result.data.phone) {
-        metadata.phone = result.data.phone;
+        userMetadata.phone = result.data.phone;
         metadataChanged = true;
       }
       
       if (metadataChanged) {
-        updateData.metadata = metadata;
+        updateData.metadata = JSON.stringify(userMetadata);
       }
       
       // Handle password reset
+      let tempPassword;
       if (result.data.resetPassword) {
         // Generate a random password
-        const tempPassword = randomBytes(10).toString('hex');
-        updateData.password = await hashPassword(tempPassword);
-        updateData.requiresPasswordChange = true;
-        
-        // In a real app, you would email this password to the user
-        // For now, we'll return it in the response
-        result.data.generatedPassword = tempPassword;
+        tempPassword = randomBytes(10).toString('hex');
+        updateData.passwordHash = await hashPassword(tempPassword);
+        updateData.changePasswordRequired = true;
       }
       
       // Update the user
@@ -301,7 +302,6 @@ router.patch(
           id: users.id,
           email: users.email,
           role: users.role,
-          isActive: users.isActive,
           isSuperadmin: users.isSuperadmin,
           metadata: users.metadata,
         });
@@ -321,7 +321,7 @@ router.patch(
       // Include generated password in response if reset was requested
       const response = {
         ...updatedUser,
-        ...(result.data.resetPassword ? { generatedPassword: result.data.generatedPassword } : {}),
+        ...(tempPassword ? { generatedPassword: tempPassword } : {}),
       };
       
       res.json(response);
@@ -336,8 +336,8 @@ router.patch(
 router.delete(
   "/users/:id",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -388,8 +388,8 @@ router.delete(
 router.post(
   "/users/:id/lock",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -423,8 +423,11 @@ router.post(
       // Update the user
       await db.update(users)
         .set({
-          lockedUntil: lockUntil,
-          failedLoginAttempts: 5 // Set to max attempts to prevent immediate unlock
+          failedLoginAttempts: 5, // Set to max attempts to prevent immediate unlock
+          metadata: JSON.stringify({
+            ...JSON.parse(user.metadata as string || '{}'),
+            lockedUntil: lockUntil.toISOString()
+          })
         })
         .where(eq(users.id, userId));
       
@@ -453,8 +456,8 @@ router.post(
 router.post(
   "/users/:id/unlock",
   authenticateToken,
-  authorizeRoles(["admin"]), // Only admin or superadmin
-  async (req: AuthRequest, res) => {
+  authorizeRoles("admin"), 
+  async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -476,11 +479,20 @@ router.post(
         });
       }
       
+      // Get current metadata and remove lockedUntil
+      let userMetadata;
+      try {
+        userMetadata = JSON.parse(user.metadata as string || '{}');
+        delete userMetadata.lockedUntil;
+      } catch (e) {
+        userMetadata = {};
+      }
+      
       // Update the user
       await db.update(users)
         .set({
-          lockedUntil: null,
-          failedLoginAttempts: 0
+          failedLoginAttempts: 0,
+          metadata: JSON.stringify(userMetadata)
         })
         .where(eq(users.id, userId));
       
