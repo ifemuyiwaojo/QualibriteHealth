@@ -1,7 +1,7 @@
 import { createContext, useContext, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-interface User {
+export interface User {
   id: number;
   email: string;
   role: "patient" | "provider" | "admin";
@@ -9,7 +9,7 @@ interface User {
   isSuperadmin?: boolean;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<any>;
