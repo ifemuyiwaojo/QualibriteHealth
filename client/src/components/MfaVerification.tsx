@@ -24,6 +24,7 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
   const { toast } = useToast();
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [timeRemaining, setTimeRemaining] = useState<number>(30);
+  const [isUsingBackupCode, setIsUsingBackupCode] = useState(false);
 
   // Set up countdown timer for TOTP code validity period
   useEffect(() => {
@@ -45,8 +46,18 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
   const verifyMutation = useMutation({
     mutationFn: async (code: string) => {
       setErrorMessage(null); // Clear any previous errors
-      const res = await apiRequest("POST", "/api/auth/verify-mfa", { code });
-      return await res.json();
+      if (isUsingBackupCode) {
+        // Use backup code verification endpoint
+        const res = await apiRequest("POST", "/api/mfa/use-backup-code", { 
+          backupCode: code,
+          email
+        });
+        return await res.json();
+      } else {
+        // Use standard MFA verification
+        const res = await apiRequest("POST", "/api/auth/verify-mfa", { code });
+        return await res.json();
+      }
     },
     onSuccess: (data) => {
       toast({
@@ -75,16 +86,35 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
   });
 
   const handleVerify = () => {
-    if (verificationCode.length !== 6) {
-      toast({
-        title: "Invalid code",
-        description: "Please enter a valid 6-digit verification code",
-        variant: "destructive"
-      });
-      return;
+    if (isUsingBackupCode) {
+      // Backup codes have a different format/length
+      if (verificationCode.length < 6) {
+        toast({
+          title: "Invalid backup code",
+          description: "Please enter a valid backup code",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else {
+      // Regular MFA code validation
+      if (verificationCode.length !== 6) {
+        toast({
+          title: "Invalid code",
+          description: "Please enter a valid 6-digit verification code",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     verifyMutation.mutate(verificationCode);
+  };
+  
+  const toggleCodeType = () => {
+    setIsUsingBackupCode(!isUsingBackupCode);
+    setVerificationCode("");
+    setErrorMessage(null);
   };
 
   // Handle Enter key press
@@ -102,7 +132,10 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
           Two-Factor Authentication
         </CardTitle>
         <CardDescription>
-          Enter the verification code from your authenticator app
+          {isUsingBackupCode 
+            ? "Enter a backup code to access your account" 
+            : "Enter the verification code from your authenticator app"
+          }
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -116,26 +149,37 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label htmlFor="verification-code" className="text-sm font-medium">
-              Verification Code
+              {isUsingBackupCode ? "Backup Code" : "Verification Code"}
             </label>
-            <span className="text-xs bg-muted px-2 py-1 rounded-full">
-              Refreshes in {timeRemaining}s
-            </span>
+            {!isUsingBackupCode && (
+              <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                Refreshes in {timeRemaining}s
+              </span>
+            )}
           </div>
           
           <div className="relative">
             <Input
               id="verification-code"
               type="text"
-              inputMode="numeric"
+              inputMode={isUsingBackupCode ? "text" : "numeric"}
               autoComplete="one-time-code"
-              pattern="[0-9]*"
-              maxLength={6}
+              pattern={isUsingBackupCode ? undefined : "[0-9]*"}
+              maxLength={isUsingBackupCode ? 10 : 6}
               className={`text-center text-lg tracking-widest font-mono ${errorMessage ? 'border-red-500' : ''}`}
               value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (isUsingBackupCode) {
+                  // Allow all characters for backup codes
+                  setVerificationCode(value.toUpperCase());
+                } else {
+                  // Only numbers for regular verification codes
+                  setVerificationCode(value.replace(/\D/g, '').substring(0, 6));
+                }
+              }}
               onKeyDown={handleKeyDown}
-              placeholder="000000"
+              placeholder={isUsingBackupCode ? "BACKUP CODE" : "000000"}
               autoFocus
             />
           </div>
@@ -146,14 +190,32 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Open your authenticator app to view your verification code
+              {isUsingBackupCode 
+                ? "Enter one of the backup codes you saved when setting up MFA" 
+                : "Open your authenticator app to view your verification code"
+              }
             </p>
           )}
           
-          {/* Test code hint for demo purposes */}
-          <p className="text-xs text-muted-foreground mt-1">
-            <span className="font-medium">Hint:</span> Use code "123456" for testing
-          </p>
+          {/* Help text and code type toggle */}
+          <div className="flex flex-col space-y-2 pt-2">
+            {!isUsingBackupCode && (
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium">Hint:</span> Use code "123456" for testing
+              </p>
+            )}
+            
+            <Button
+              variant="link"
+              className="px-0 h-auto text-xs text-primary justify-start"
+              onClick={toggleCodeType}
+            >
+              {isUsingBackupCode
+                ? "Use authenticator app instead"
+                : "Lost your device? Use a backup code"
+              }
+            </Button>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -162,7 +224,7 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
         </Button>
         <Button 
           onClick={handleVerify}
-          disabled={verificationCode.length !== 6 || verifyMutation.isPending}
+          disabled={(isUsingBackupCode ? verificationCode.length < 4 : verificationCode.length !== 6) || verifyMutation.isPending}
           className="ml-auto"
         >
           {verifyMutation.isPending ? "Verifying..." : "Verify"}
