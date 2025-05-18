@@ -4,10 +4,13 @@ import { db } from "@db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
 import session from "express-session";
+import { Logger } from "../lib/logger";
+import { AppError } from "../lib/error-handler";
 
 // Ensure JWT_SECRET is available
 if (!process.env.JWT_SECRET) {
-  console.error("CRITICAL SECURITY ERROR: JWT_SECRET environment variable is not set");
+  const error = new AppError("JWT_SECRET environment variable is not set", 500, "SERVER_CONFIG_ERROR");
+  console.error("CRITICAL SECURITY ERROR:", error.message);
   process.exit(1); // Exit the application if the secret is not set
 }
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -49,13 +52,29 @@ export const authenticateToken = async (
           isSuperadmin: user.isSuperadmin || false,
           changePasswordRequired: user.changePasswordRequired || false,
         };
+        
+        // Log successful session authentication
+        await Logger.log("info", "auth", "Session authentication successful", {
+          userId: user.id,
+          request: req
+        });
+        
         return next();
+      } else {
+        // Session contains userId but user not found - potential security issue
+        await Logger.log("security", "auth", "Session contains invalid userId", {
+          userId: req.session.userId,
+          request: req
+        });
       }
     }
 
     // Fallback to JWT token
     const token = req.cookies.token;
     if (!token) {
+      await Logger.log("warning", "auth", "Authentication failed: No token provided", {
+        request: req
+      });
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -70,6 +89,10 @@ export const authenticateToken = async (
     });
 
     if (!user) {
+      await Logger.log("security", "auth", "JWT authentication failed: User not found", {
+        request: req,
+        details: { decodedId: decoded.id, decodedEmail: decoded.email }
+      });
       return res.status(401).json({ message: "User not found" });
     }
 
@@ -86,47 +109,120 @@ export const authenticateToken = async (
       changePasswordRequired: user.changePasswordRequired || false,
     };
 
+    // Log successful JWT authentication
+    await Logger.log("info", "auth", "JWT authentication successful", {
+      userId: user.id,
+      request: req
+    });
+
     next();
   } catch (error) {
+    // Log authentication error
+    if (error instanceof jwt.JsonWebTokenError) {
+      await Logger.log("security", "auth", `JWT authentication failed: ${error.message}`, {
+        request: req,
+        details: { errorType: error.name }
+      });
+    } else {
+      await Logger.logError(error instanceof Error ? error : new Error(String(error)),
+        "auth", { request: req });
+    }
+    
     // Clear invalid token/session
     res.clearCookie("token");
     if (req.session) {
       req.session.destroy((err) => {
-        if (err) console.error("Session destruction error:", err);
+        if (err) {
+          console.error("Session destruction error:", err);
+          Logger.logError(err instanceof Error ? err : new Error(String(err)), 
+            "system", { request: req });
+        }
       });
     }
+    
     return res.status(401).json({ message: "Invalid token" });
   }
 };
 
 export const authorizeRoles = (...roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
+      await Logger.log("warning", "auth", "Role authorization failed: User not authenticated", { 
+        request: req,
+        details: { requiredRoles: roles.join(", ") }
+      });
       return res.status(401).json({ message: "Authentication required" });
     }
 
     // Allow superadmin access to everything
     if (req.user.isSuperadmin) {
+      await Logger.log("info", "auth", "Superadmin access granted", { 
+        userId: req.user.id,
+        request: req,
+        details: { requiredRoles: roles.join(", ") }
+      });
       return next();
     }
 
     // For non-superadmins, check role permissions
     if (!roles.includes(req.user.role)) {
+      await Logger.log("security", "auth", "Access denied: Insufficient permissions", { 
+        userId: req.user.id,
+        request: req,
+        details: { 
+          userRole: req.user.role,
+          requiredRoles: roles.join(", "),
+          path: req.path,
+          method: req.method
+        }
+      });
       return res.status(403).json({ message: "Access denied" });
     }
+
+    // Log successful authorization
+    await Logger.log("info", "auth", "Role-based access granted", { 
+      userId: req.user.id,
+      request: req,
+      details: { 
+        userRole: req.user.role,
+        requiredRoles: roles.join(", ")
+      }
+    });
 
     next();
   };
 };
 
-// Add a superadmin check middleware
-export const requireSuperadmin = (
+// Add a superadmin check middleware with improved logging
+export const requireSuperadmin = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.user?.isSuperadmin) {
+  if (!req.user) {
+    await Logger.log("warning", "auth", "Superadmin check failed: User not authenticated", { 
+      request: req
+    });
+    return res.status(401).json({ message: "Authentication required" });
+  }
+  
+  if (!req.user.isSuperadmin) {
+    await Logger.log("security", "auth", "Superadmin access denied", { 
+      userId: req.user.id,
+      request: req,
+      details: { 
+        userRole: req.user.role,
+        path: req.path,
+        method: req.method
+      }
+    });
     return res.status(403).json({ message: "Superadmin access required" });
   }
+  
+  await Logger.log("info", "auth", "Superadmin access granted", { 
+    userId: req.user.id,
+    request: req
+  });
+  
   next();
 };
