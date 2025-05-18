@@ -9,7 +9,7 @@
  */
 
 import crypto from 'crypto';
-import { totp } from 'otplib';
+import { authenticator } from 'otplib'; // Use authenticator specifically for Google Authenticator compatibility
 import { db } from '@db';
 import { users } from '@db/schema';
 import { eq } from 'drizzle-orm';
@@ -28,22 +28,19 @@ export async function generateMfaSecret(username: string) {
   // Generate a secret compatible with Google Authenticator
   // Using base32 encoding which is compatible with Google Authenticator
   
-  // Create a fixed length base32 encoded string
-  const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let secret = '';
-  for (let i = 0; i < 16; i++) {
-    secret += base32Chars.charAt(Math.floor(Math.random() * base32Chars.length));
-  }
+  // Generate a secret using the authenticator library's built-in method
+  // This ensures proper formatting compatible with Google Authenticator
+  const secret = authenticator.generateSecret();
   
-  // Configure TOTP with standard settings
-  totp.options = { 
+  // Configure authenticator with standard settings
+  authenticator.options = { 
     digits: 6,
     step: 30, // 30 second validity
     window: 2  // Allow more window for time drift
   };
   
   // Create provisioning URI for QR code generation
-  const otpauth = totp.keyuri(username, MFA_ISSUER, secret);
+  const otpauth = authenticator.keyuri(username, MFA_ISSUER, secret);
   
   // Log information about the generated secret for debugging
   console.log('Generated new MFA secret:', {
@@ -67,8 +64,8 @@ export async function generateMfaSecret(username: string) {
  */
 export function verifyMfaToken(token: string, secret: string): boolean {
   try {
-    // Configure TOTP with standard settings used by Google Authenticator
-    totp.options = { 
+    // Configure authenticator with standard settings used by Google Authenticator
+    authenticator.options = { 
       digits: 6,
       step: 30,
       window: 2  // Allow larger window for time drift
@@ -88,8 +85,8 @@ export function verifyMfaToken(token: string, secret: string): boolean {
       return true;
     }
     
-    // Verify the token with the TOTP library
-    return totp.verify({ token, secret });
+    // Verify the token with the authenticator library's correct method
+    return authenticator.verify(token, secret);
   } catch (error) {
     // Log verification errors
     console.error('MFA token verification error:', error);
