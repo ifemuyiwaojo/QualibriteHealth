@@ -10,7 +10,8 @@ import rateLimit from "express-rate-limit";
 import { asyncHandler, AppError } from "../lib/error-handler";
 import { sendEmail } from "../lib/email";
 import { totp } from "otplib";
-import { verifyMfaToken } from "../lib/mfa";
+import { verifyMfaToken, verifyBackupCode, useBackupCode } from "../lib/mfa";
+import { Logger } from "../lib/logger";
 
 const router = Router();
 
