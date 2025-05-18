@@ -7,7 +7,13 @@ import { eq } from "drizzle-orm";
 import { authenticateToken, authorizeRoles } from "../middleware/auth";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// JWT_SECRET is validated in middleware/auth.ts
+// We ensure it's defined here for type safety
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET not defined");
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Audit logging middleware
 const auditLog = async (userId: number, action: string, resourceType: string, resourceId: number, req: any) => {

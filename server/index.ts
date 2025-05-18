@@ -6,6 +6,9 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "@db";
 
+// Get required secrets from environment variables
+const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'temporary_secret_change_me_in_production';
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -20,7 +23,7 @@ app.use(
       tableName: 'session', // Will be created automatically
       createTableIfMissing: true
     }),
-    secret: process.env.JWT_SECRET || 'your-secret-key',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {

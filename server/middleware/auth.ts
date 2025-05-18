@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { db } from "@db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
+import session from "express-session";
 
 // Ensure JWT_SECRET is available
 if (!process.env.JWT_SECRET) {
@@ -10,6 +11,13 @@ if (!process.env.JWT_SECRET) {
   process.exit(1); // Exit the application if the secret is not set
 }
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// Extend the session interface to include our custom properties
+declare module "express-session" {
+  interface SessionData {
+    userId: number;
+  }
+}
 
 export interface AuthRequest extends Request {
   user?: {
