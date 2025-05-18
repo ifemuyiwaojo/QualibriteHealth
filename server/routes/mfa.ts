@@ -11,7 +11,15 @@ import { asyncHandler, AppError } from "../lib/error-handler";
 import { db } from "@db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { generateMfaSecret, verifyMfaToken, enableMfa, disableMfa } from "../lib/mfa";
+import { 
+  generateMfaSecret, 
+  verifyMfaToken, 
+  enableMfa, 
+  disableMfa, 
+  generateBackupCodes, 
+  verifyBackupCode,
+  useBackupCode
+} from "../lib/mfa";
 import { Logger } from "../lib/logger";
 import QRCode from "qrcode";
 import session from "express-session";
@@ -118,11 +126,20 @@ router.post("/verify", authenticateToken, asyncHandler(async (req: AuthRequest, 
     throw new AppError("Invalid verification token", 400, "INVALID_TOKEN");
   }
   
-  // Token is valid, activate MFA for the user
+  // Token is valid, activate MFA for the user with backup codes
   const success = await enableMfa(req.user.id, mfaSecret);
   
   if (!success) {
     throw new AppError("Failed to enable MFA", 500, "ENABLE_FAILED");
+  }
+  
+  // Get the user to retrieve the backup codes
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.user.id),
+  });
+  
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
   }
   
   // Clear the secret from the session now that it's stored in the database
@@ -132,14 +149,18 @@ router.post("/verify", authenticateToken, asyncHandler(async (req: AuthRequest, 
   }
   
   // Log successful MFA activation
-  await Logger.log("security", "auth", "MFA activated successfully", {
+  await Logger.logSecurity("MFA activated successfully", {
     userId: req.user.id,
     request: req
   });
   
+  // Get the backup codes to display to the user (one-time display)
+  const { codes } = generateBackupCodes();
+  
   res.json({
     message: "MFA enabled successfully",
-    mfaEnabled: true
+    mfaEnabled: true,
+    backupCodes: codes
   });
 }));
 
@@ -235,6 +256,113 @@ router.post("/validate", asyncHandler(async (req, res) => {
   res.json({
     message: "MFA token validated successfully",
     valid: true
+  });
+}));
+
+// Endpoint for using a backup code
+router.post("/use-backup-code", asyncHandler(async (req, res) => {
+  const { userId, backupCode } = req.body;
+  
+  if (!userId || !backupCode) {
+    throw new AppError("User ID and backup code are required", 400, "MISSING_FIELDS");
+  }
+  
+  // Get the user with their MFA backup codes
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+  
+  if (!user.mfaEnabled) {
+    throw new AppError("MFA is not enabled for this account", 400, "MFA_NOT_ENABLED");
+  }
+  
+  // Get the backup codes from the user record
+  const backupCodes = user.mfaBackupCodes as Record<string, string> || {};
+  
+  // Verify the backup code
+  const isValid = verifyBackupCode(backupCode, backupCodes);
+  
+  if (!isValid) {
+    // Log failed backup code attempt
+    await Logger.logSecurity("Backup code verification failed", {
+      userId: user.id,
+      request: req
+    });
+    
+    throw new AppError("Invalid backup code", 400, "INVALID_BACKUP_CODE");
+  }
+  
+  // The backup code is valid - mark it as used
+  const updatedBackupCodes = useBackupCode(backupCode, backupCodes);
+  
+  // Update the user record with the updated backup codes
+  await db.update(users)
+    .set({ 
+      mfaBackupCodes: updatedBackupCodes
+    } as any)
+    .where(eq(users.id, userId));
+  
+  // Log successful backup code usage
+  await Logger.logSecurity("Backup code used successfully", {
+    userId: user.id,
+    request: req,
+    details: {
+      remainingCodes: Object.keys(updatedBackupCodes).length
+    }
+  });
+  
+  res.json({
+    message: "Backup code verified successfully",
+    valid: true,
+    remainingCodes: Object.keys(updatedBackupCodes).length
+  });
+}));
+
+// Generate new backup codes
+router.post("/regenerate-backup-codes", authenticateToken, asyncHandler(async (req: AuthRequest, res) => {
+  if (!req.user) {
+    throw new AppError("Authentication required", 401, "AUTH_REQUIRED");
+  }
+  
+  // Get the user
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.user.id),
+  });
+  
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+  
+  if (!user.mfaEnabled) {
+    throw new AppError("MFA is not enabled for this account", 400, "MFA_NOT_ENABLED");
+  }
+  
+  // Generate new backup codes
+  const { codes, hashedCodes } = generateBackupCodes();
+  
+  // Update the user record with the new backup codes
+  await db.update(users)
+    .set({ 
+      mfaBackupCodes: hashedCodes
+    } as any)
+    .where(eq(users.id, req.user.id));
+  
+  // Log backup codes regeneration
+  await Logger.logSecurity("Backup codes regenerated", {
+    userId: req.user.id,
+    request: req,
+    details: {
+      codesCount: codes.length
+    }
+  });
+  
+  res.json({
+    message: "Backup codes regenerated successfully",
+    backupCodes: codes
   });
 }));
 

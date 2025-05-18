@@ -26,6 +26,9 @@ export function MfaSetup() {
   // Local state to immediately reflect MFA status changes in UI
   const [localMfaStatus, setLocalMfaStatus] = useState<boolean | undefined>(user?.mfaEnabled);
 
+  // State for backup codes
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+
   // Define our mutations for MFA setup workflow
   const setupMutation = useMutation({
     mutationFn: async () => {
@@ -59,6 +62,10 @@ export function MfaSetup() {
       });
       // Immediately update local state before server data refresh
       setLocalMfaStatus(true);
+      // Save backup codes if they exist
+      if (data.backupCodes && data.backupCodes.length > 0) {
+        setBackupCodes(data.backupCodes);
+      }
       // Update the user data to reflect that MFA is enabled
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setStep("complete");
