@@ -46,7 +46,7 @@ router.post("/create-admin", asyncHandler(async (req, res) => {
       .set({
         passwordHash: hashedPassword,
         role: 'admin',
-        isSuperadmin: isSuperAdmin === false,
+        isSuperadmin: isSuperAdmin !== false, // Set to true by default, false only if explicitly set to false
         changePasswordRequired: false
       })
       .where(eq(users.id, existingUser.id))
@@ -60,7 +60,7 @@ router.post("/create-admin", asyncHandler(async (req, res) => {
         email,
         passwordHash: hashedPassword,
         role: 'admin',
-        isSuperadmin: isSuperAdmin === false,
+        isSuperadmin: isSuperAdmin !== false, // Set to true by default, false only if explicitly set to false
         changePasswordRequired: false
       })
       .returning();
