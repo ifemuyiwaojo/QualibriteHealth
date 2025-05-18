@@ -18,6 +18,8 @@ declare module "express-session" {
     lastActivity?: number;
     mfaPending?: boolean;
     mfaRememberMe?: boolean;
+    mfaSecret?: string;
+    mfaSetupStarted?: boolean;
   }
 }
 

@@ -363,7 +363,8 @@ router.get("/me", authenticateToken, asyncHandler(async (req: any, res) => {
       email: user.email,
       role: user.role,
       requiresPasswordChange: user.changePasswordRequired,
-      isSuperadmin: user.isSuperadmin
+      isSuperadmin: user.isSuperadmin,
+      mfaEnabled: !!user.mfaEnabled  // Add MFA status to the response
     }
   });
 }));

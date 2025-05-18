@@ -16,15 +16,9 @@ import { Logger } from "../lib/logger";
 import QRCode from "qrcode";
 import session from "express-session";
 
-// Extend session type for MFA properties
-declare module "express-session" {
-  interface SessionData {
-    userId: number;
-    lastActivity: number;
-    mfaSecret?: string;
-    mfaSetupStarted?: boolean;
-  }
-}
+// We use the session declaration from middleware/auth.ts
+// Just adding the MFA-specific properties here for documentation
+// (No actual declaration needed as it would conflict with auth.ts)
 
 // QRCode module is now properly typed with @types/qrcode
 
