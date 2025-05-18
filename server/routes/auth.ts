@@ -29,12 +29,9 @@ const registrationLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// JWT_SECRET is validated in middleware/auth.ts
-// We ensure it's defined here for type safety
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET not defined");
-}
-const JWT_SECRET = process.env.JWT_SECRET;
+// JWT secrets are now managed by the SecretManager
+// Import the SecretManager for token signing
+import { SecretManager } from "../lib/secret-manager";
 
 // Audit logging middleware
 const auditLog = async (userId: number, action: string, resourceType: string, resourceId: number, req: any) => {
@@ -170,6 +167,10 @@ router.post("/login", asyncHandler(async (req, res) => {
     }
   }
 
+  // Get the current secret from the SecretManager for signing new tokens
+  const secretManager = SecretManager.getInstance();
+  const currentSecret = secretManager.getCurrentSecret();
+  
   // Also set JWT token for API requests with secure practices
   const token = jwt.sign(
     { 
@@ -179,7 +180,7 @@ router.post("/login", asyncHandler(async (req, res) => {
       // Add issued time for token security
       iat: Math.floor(Date.now() / 1000)
     },
-    JWT_SECRET,
+    currentSecret,
     { 
       expiresIn: rememberMe ? "30d" : "24h",
       // Add audience and issuer claims for better security

@@ -6,14 +6,10 @@ import { eq } from "drizzle-orm";
 import session from "express-session";
 import { Logger } from "../lib/logger";
 import { AppError } from "../lib/error-handler";
+import { SecretManager } from "../lib/secret-manager";
 
-// Ensure JWT_SECRET is available
-if (!process.env.JWT_SECRET) {
-  const error = new AppError("JWT_SECRET environment variable is not set", 500, "SERVER_CONFIG_ERROR");
-  console.error("CRITICAL SECURITY ERROR:", error.message);
-  process.exit(1); // Exit the application if the secret is not set
-}
-const JWT_SECRET = process.env.JWT_SECRET;
+// SecretManager will throw an error if JWT_SECRET is not set
+// This is handled at instantiation of the SecretManager
 
 // Extend the session interface to include our custom properties
 declare module "express-session" {
@@ -81,11 +77,38 @@ export const authenticateToken = async (
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as {
-      id: number;
-      email: string;
-      role: string;
-    };
+    // Get secret manager instance
+    const secretManager = SecretManager.getInstance();
+    
+    // Try to verify with all valid secrets (supports secret rotation)
+    let decoded: any = null;
+    let isValid = false;
+    
+    // Get all valid secrets (current and not-yet-expired previous ones)
+    const validSecrets = secretManager.getAllValidSecrets();
+    
+    // Try each secret until one works or all fail
+    for (const secret of validSecrets) {
+      try {
+        decoded = jwt.verify(token, secret) as {
+          id: number;
+          email: string;
+          role: string;
+        };
+        isValid = true;
+        break;
+      } catch (err) {
+        // Continue to next secret
+      }
+    }
+    
+    if (!isValid || !decoded) {
+      // If all secrets failed, token is invalid
+      await Logger.log("security", "auth", "JWT authentication failed: Invalid token", {
+        request: req
+      });
+      return res.status(401).json({ message: "Invalid token" });
+    }
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, decoded.id),
