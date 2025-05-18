@@ -35,23 +35,36 @@ export function useAuthProvider() {
   }, []);
 
   const login = useCallback(async (email: string, password: string, rememberMe: boolean = false) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password, rememberMe }),
-      credentials: 'include'
-    });
+    console.log("Attempting login...");
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, rememberMe }),
+        credentials: 'include'
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Login failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Login failed';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorMessage;
+        } catch (e) {
+          // If not JSON, use the text directly
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      const data = await response.json();
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error;
     }
-
-    const data = await response.json();
-    setUser(data.user);
-    return data;
   }, []);
 
   const register = useCallback(async (

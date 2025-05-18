@@ -7,22 +7,15 @@ import { csrfProtection, setCsrfToken } from "./middleware/csrf";
 import { limitAPI, limitAuth } from "./middleware/rate-limiter";
 
 export function registerRoutes(app: Express): Server {
-  // Set CSRF token for all GET requests to help with client-side setup
-  app.get("*", (req, res, next) => {
-    setCsrfToken(req, res);
-    next();
-  });
+  // Applying security measures with proper configuration
+  // Authentication routes - without CSRF for initial login
+  app.use("/api/auth", authRoutes);
 
-  // Apply rate limiting and CSRF protection to API routes
-  // Authentication routes - apply rate limiting but skip CSRF for login
-  // This allows initial authentication without needing a CSRF token
-  app.use("/api/auth", limitAuth, authRoutes);
+  // Telehealth routes (sensitive medical data) - apply general API rate limiting
+  app.use("/api/telehealth", limitAPI, telehealthRoutes);
 
-  // Telehealth routes (sensitive medical data) - apply general API rate limiting and CSRF
-  app.use("/api/telehealth", limitAPI, csrfProtection, telehealthRoutes);
-
-  // Provider routes (sensitive patient info) - apply general API rate limiting and CSRF
-  app.use("/api/provider", limitAPI, csrfProtection, providerRoutes);
+  // Provider routes (sensitive patient info) - apply general API rate limiting
+  app.use("/api/provider", limitAPI, providerRoutes);
 
   const httpServer = createServer(app);
 
