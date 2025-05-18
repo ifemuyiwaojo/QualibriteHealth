@@ -366,7 +366,7 @@ export default function IntakeCoordinatorDashboard() {
                               </div>
                               <div>
                                 {appt.checkedIn ? (
-                                  <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-100">Checked In</Badge>
+                                  <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Checked In</Badge>
                                 ) : (
                                   <Button size="sm" variant="outline">Check In</Button>
                                 )}

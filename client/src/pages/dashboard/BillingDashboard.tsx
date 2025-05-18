@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
-import { Calendar, DollarSign, AlertTriangle, FileText, BarChart3, CheckCircle2, FileWarning } from "lucide-react";
+import { Calendar, DollarSign, AlertTriangle, FileText, BarChart3, CheckCircle2, FileWarning, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Progress } from "@/components/ui/progress";
@@ -441,7 +441,7 @@ export default function BillingDashboard() {
                     <CheckCircle2 className="text-green-500 w-4 h-4 mr-2" />
                     <span className="text-2xl font-bold">1.2</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Target: < 2 days</p>
+                  <p className="text-xs text-muted-foreground">Target: less than 2 days</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -459,7 +459,7 @@ export default function BillingDashboard() {
                     <FileWarning className="text-amber-500 w-4 h-4 mr-2" />
                     <span className="text-2xl font-bold">12.4%</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Target: < 10%</p>
+                  <p className="text-xs text-muted-foreground">Target: less than 10%</p>
                 </div>
               </div>
             </CardContent>

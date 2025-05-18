@@ -19,6 +19,11 @@ import MfaSetupPage from "@/pages/auth/MfaSetupPage";
 import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
+import PracticeManagerDashboard from "@/pages/dashboard/PracticeManagerDashboard";
+import BillingDashboard from "@/pages/dashboard/BillingDashboard";
+import IntakeCoordinatorDashboard from "@/pages/dashboard/IntakeCoordinatorDashboard";
+import ITSupportDashboard from "@/pages/dashboard/ITSupportDashboard";
+import MarketingDashboard from "@/pages/dashboard/MarketingDashboard";
 import NotFound from "@/pages/not-found";
 import { memo } from "react";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
@@ -58,6 +63,16 @@ const DashboardRouter = memo(function DashboardRouter() {
       return <ProviderDashboard />;
     case "admin":
       return <AdminDashboard />;
+    case "practice_manager":
+      return <PracticeManagerDashboard />;
+    case "billing":
+      return <BillingDashboard />;
+    case "intake_coordinator":
+      return <IntakeCoordinatorDashboard />;
+    case "it_support":
+      return <ITSupportDashboard />;
+    case "marketing":
+      return <MarketingDashboard />;
     default:
       return <Redirect to="/auth/login" />;
   }
