@@ -38,13 +38,12 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
     return () => clearInterval(timer);
   }, [timeRemaining]);
 
-  // Get the verify function from auth context
-  const { verifyMfa } = useAuth();
-
+  // Direct API-based verification
   // Mutation for MFA verification
   const verifyMutation = useMutation({
     mutationFn: async (code: string) => {
-      return await verifyMfa(code);
+      const res = await apiRequest("POST", "/api/auth/verify-mfa", { code });
+      return await res.json();
     },
     onSuccess: (data) => {
       toast({
