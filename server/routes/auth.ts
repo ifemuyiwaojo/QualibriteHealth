@@ -89,67 +89,83 @@ const initializeSuperadmin = async () => {
 // Initialize superadmin on module load
 initializeSuperadmin().catch(console.error);
 
-// Login endpoint
-router.post("/login", loginLimiter, async (req, res) => {
-  try {
-    const { email, password, rememberMe } = req.body;
+// Login endpoint with improved error handling
+import { asyncHandler, AppError } from "../lib/error-handler";
 
-    const user = await db.query.users.findFirst({
-      where: eq(users.email, email),
-    });
+router.post("/login", loginLimiter, asyncHandler(async (req, res) => {
+  const { email, password, rememberMe } = req.body;
 
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.passwordHash);
-    if (!validPassword) {
-      // Log failed attempt
-      await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // Set session
-    if (req.session) {
-      req.session.userId = user.id;
-      if (rememberMe) {
-        // Extend session to 30 days if "remember me" is checked
-        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-      }
-    }
-
-    // Also set JWT token for API requests
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: rememberMe ? "30d" : "24h" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
-    });
-
-    // Log successful login
-    await auditLog(user.id, 'successful_login', 'users', user.id, req);
-
-    res.json({
-      message: "Logged in successfully",
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        requiresPasswordChange: user.changePasswordRequired,
-        isSuperadmin: user.isSuperadmin
-      },
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(400).json({ message: "Login failed" });
+  if (!email || !password) {
+    throw new AppError("Email and password are required", 400, "VALIDATION_ERROR");
   }
-});
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (!user) {
+    // Use generic message for security - don't reveal if email exists
+    throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
+  }
+
+  const validPassword = await bcrypt.compare(password, user.passwordHash);
+  if (!validPassword) {
+    // Log failed attempt
+    await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
+    // Always use same error for security
+    throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
+  }
+
+  // Set session
+  if (req.session) {
+    req.session.userId = user.id;
+    if (rememberMe) {
+      // Extend session to 30 days if "remember me" is checked
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    }
+  }
+
+  // Also set JWT token for API requests with secure practices
+  const token = jwt.sign(
+    { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      // Add issued time for token security
+      iat: Math.floor(Date.now() / 1000)
+    },
+    JWT_SECRET,
+    { 
+      expiresIn: rememberMe ? "30d" : "24h",
+      // Add audience and issuer claims for better security
+      audience: 'qualibrite-health-app',
+      issuer: 'qualibrite-health-api'
+    }
+  );
+
+  // Set cookie with secure options
+  res.cookie("token", token, {
+    httpOnly: true, // Prevents JavaScript access
+    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: "strict", // Prevents CSRF
+    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    path: '/' // Accessible throughout the app
+  });
+
+  // Log successful login
+  await auditLog(user.id, 'successful_login', 'users', user.id, req);
+
+  res.json({
+    message: "Logged in successfully",
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      requiresPasswordChange: user.changePasswordRequired,
+      isSuperadmin: user.isSuperadmin
+    },
+  });
+}));
 
 // Register endpoint
 router.post("/register", registrationLimiter, async (req, res) => {

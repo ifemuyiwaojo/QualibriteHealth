@@ -6,6 +6,7 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "@db";
 import rateLimit from "express-rate-limit";
+import { errorHandler } from "./lib/error-handler";
 
 // Get required secrets from environment variables
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'temporary_secret_change_me_in_production';
@@ -84,21 +85,8 @@ app.use((req, res, next) => {
   
   const server = registerRoutes(app);
 
-  // Global error handler
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    
-    // Log the error but don't expose details to client in production
-    console.error(`[ERROR] ${status}: ${err.stack || err.message}`);
-    
-    // Return a sanitized error message
-    res.status(status).json({ 
-      message: process.env.NODE_ENV === 'production' 
-        ? "An error occurred. Please try again later." 
-        : message 
-    });
-  });
+  // Use our centralized error handler middleware
+  app.use(errorHandler);
 
   if (app.get("env") === "development") {
     await setupVite(app, server);
