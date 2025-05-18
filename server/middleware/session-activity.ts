@@ -40,7 +40,7 @@ export const sessionActivityTracker = (req: AuthRequest, res: Response, next: Ne
     const now = Date.now();
     
     // Check the last activity time
-    const lastActivity = req.session[ACTIVITY_KEY] as number;
+    const lastActivity = req.session.lastActivity;
     
     // If there's a recorded last activity and the user's session has timed out
     if (lastActivity && (now - lastActivity > INACTIVITY_TIMEOUT) && req.user) {
@@ -73,7 +73,7 @@ export const sessionActivityTracker = (req: AuthRequest, res: Response, next: Ne
     }
     
     // Update the last activity time for the current request
-    req.session[ACTIVITY_KEY] = now;
+    req.session.lastActivity = now;
   }
   
   // Continue with the request

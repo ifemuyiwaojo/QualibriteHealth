@@ -12,6 +12,10 @@ export const users = pgTable("users", {
   changePasswordRequired: boolean("change_password_required").default(false),
   resetPasswordToken: text("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
+  // MFA-related fields for Phase 2 security improvements
+  mfaEnabled: boolean("mfa_enabled").default(false),
+  mfaSecret: text("mfa_secret"),
+  mfaBackupCodes: jsonb("mfa_backup_codes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -5,6 +5,7 @@ import telehealthRoutes from "./routes/telehealth";
 import providerRoutes from "./routes/provider";
 import setupRoutes from "./routes/setup";
 import adminRoutes from "./routes/admin";
+import mfaRoutes from "./routes/mfa";
 import { csrfProtection, setCsrfToken } from "./middleware/csrf";
 import { limitAPI, limitAuth } from "./middleware/rate-limiter";
 

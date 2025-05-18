@@ -104,6 +104,9 @@ app.use((req, res, next) => {
   // Apply the global rate limiter to all API routes
   app.use("/api", apiLimiter);
   
+  // Set up session activity tracking for automatic logout after inactivity
+  setupSessionActivity(app);
+  
   const server = registerRoutes(app);
 
   // Use our centralized error handler middleware
