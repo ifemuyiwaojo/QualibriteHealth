@@ -1,22 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Redirect } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Shield, ArrowLeft, CheckCircle2, Key } from "lucide-react";
 import { Link } from "wouter";
 
 export default function MfaSetupPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [step, setStep] = useState<"initial" | "setup" | "verify" | "complete">("initial");
+  const [step, setStep] = useState<"initial" | "setup" | "verify" | "complete" | "already-enabled">("initial");
   const [qrCode, setQrCode] = useState<string>("");
   const [mfaSecret, setMfaSecret] = useState<string>("");
   const [verificationCode, setVerificationCode] = useState<string>("");
+  
+  // Check if MFA is already enabled
+  useEffect(() => {
+    if (user?.mfaEnabled) {
+      setStep("already-enabled");
+    }
+  }, [user]);
   
   // If not logged in, redirect to login
   if (!user) {
@@ -223,6 +230,52 @@ export default function MfaSetupPage() {
                   Go to Dashboard
                 </Button>
               </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {step === "already-enabled" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              MFA Already Enabled
+            </CardTitle>
+            <CardDescription>
+              Your account is already protected with two-factor authentication
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col items-center py-4 space-y-4">
+              <div className="flex items-center space-x-2 p-4 bg-muted rounded-md w-full">
+                <div className="p-2 bg-background rounded-full">
+                  <Key className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">MFA is currently enabled</p>
+                  <p className="text-xs text-muted-foreground">
+                    Your account has an extra layer of security
+                  </p>
+                </div>
+              </div>
+              
+              <p className="text-center">
+                You can disable MFA from your security settings page.
+              </p>
+              
+              <div className="flex w-full gap-4">
+                <Link href="/auth/profile" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    Back to Profile
+                  </Button>
+                </Link>
+                <Link href="/dashboard" className="w-full">
+                  <Button className="w-full">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>
