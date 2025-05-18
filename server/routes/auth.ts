@@ -1,12 +1,14 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { db } from "@db";
 import { users, auditLogs, insertUserSchema } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, or, sql } from "drizzle-orm";
 import { authenticateToken, authorizeRoles, AuthRequest } from "../middleware/auth";
 import rateLimit from "express-rate-limit";
 import { asyncHandler, AppError } from "../lib/error-handler";
+import { sendEmail } from "../lib/email";
 
 const router = Router();
 

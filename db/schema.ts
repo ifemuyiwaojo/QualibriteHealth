@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   role: text("role", { enum: ["patient", "provider", "admin"] }).notNull(),
   isSuperadmin: boolean("is_superadmin").default(false),
   changePasswordRequired: boolean("change_password_required").default(false),
+  resetPasswordToken: text("reset_password_token"),
+  resetPasswordExpires: timestamp("reset_password_expires"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
