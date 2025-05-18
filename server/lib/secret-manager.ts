@@ -131,4 +131,51 @@ export class SecretManager {
       Logger.log('security', 'system', `Removed ${removedCount} expired secrets`, {});
     }
   }
+  
+  /**
+   * Get status information about the current secrets
+   * This only returns metadata, never the actual secret values
+   */
+  public getStatus(): any {
+    const now = new Date();
+    
+    // Clean up expired secrets first
+    this.cleanupExpiredSecrets();
+    
+    // Get the current active secret
+    const currentSecret = this.secrets.find(s => s.expiresAt === null);
+    
+    // Get previous secrets that are still valid
+    const previousSecrets = this.secrets.filter(s => s.expiresAt !== null)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    // Current secret age in days
+    const currentSecretAge = currentSecret 
+      ? Math.floor((now.getTime() - currentSecret.createdAt.getTime()) / (1000 * 60 * 60 * 24)) 
+      : 0;
+    
+    // Process previous secrets to return age and expiry information
+    const previousSecretsInfo = previousSecrets.map(s => {
+      const ageInDays = Math.floor((now.getTime() - s.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = s.expiresAt 
+        ? Math.floor((s.expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+      
+      return {
+        ageInDays,
+        daysUntilExpiry,
+        isExpired: s.expiresAt ? s.expiresAt <= now : false
+      };
+    });
+    
+    return {
+      currentSecret: currentSecret ? {
+        ageInDays: currentSecretAge,
+        createdAt: currentSecret.createdAt.toISOString()
+      } : null,
+      totalValidSecrets: this.secrets.length,
+      previousSecrets: previousSecretsInfo,
+      lastRotation: previousSecrets.length > 0 ? previousSecrets[0].createdAt.toISOString() : null
+    };
+  }
 }

@@ -255,6 +255,10 @@ router.post("/register", registrationLimiter, asyncHandler(async (req, res) => {
     req.session.userId = user.id;
   }
 
+  // Get the current secret from the SecretManager for signing new tokens
+  const secretManager = SecretManager.getInstance();
+  const currentSecret = secretManager.getCurrentSecret();
+  
   // Create JWT with enhanced security
   const token = jwt.sign(
     { 
@@ -263,7 +267,7 @@ router.post("/register", registrationLimiter, asyncHandler(async (req, res) => {
       role: user.role,
       iat: Math.floor(Date.now() / 1000)
     },
-    JWT_SECRET,
+    currentSecret,
     { 
       expiresIn: "24h",
       audience: 'qualibrite-health-app',

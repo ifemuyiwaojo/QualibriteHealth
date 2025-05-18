@@ -9,8 +9,22 @@ import rateLimit from "express-rate-limit";
 import { errorHandler } from "./lib/error-handler";
 import { securityHeaders } from "./middleware/security-headers";
 
-// Get required secrets from environment variables
-const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'temporary_secret_change_me_in_production';
+import { SecretManager } from "./lib/secret-manager";
+
+// Get required secrets using the SecretManager
+// This ensures proper validation of environment variables
+let SESSION_SECRET: string;
+try {
+  const secretManager = SecretManager.getInstance();
+  SESSION_SECRET = process.env.SESSION_SECRET || secretManager.getCurrentSecret();
+  
+  if (!SESSION_SECRET) {
+    throw new Error("SESSION_SECRET must be set or JWT_SECRET must be available as fallback");
+  }
+} catch (error) {
+  console.error("CRITICAL SECURITY ERROR: Unable to initialize secrets", error);
+  process.exit(1); // Exit the application if secret initialization fails
+}
 
 // Global rate limiter for API endpoints
 const apiLimiter = rateLimit({
