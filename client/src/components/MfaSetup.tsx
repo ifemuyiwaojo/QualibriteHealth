@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ export function MfaSetup() {
     }
   });
 
+  // Use the existing queryClient from our lib
   const verifyMutation = useMutation({
     mutationFn: async (token: string) => {
       const res = await apiRequest("POST", "/api/mfa/verify", { token });
@@ -54,6 +55,8 @@ export function MfaSetup() {
         title: "MFA Enabled",
         description: "Multi-factor authentication has been successfully enabled for your account.",
       });
+      // Update the user data to reflect that MFA is enabled
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setStep("complete");
     },
     onError: (error: Error) => {
@@ -75,6 +78,8 @@ export function MfaSetup() {
         title: "MFA Disabled",
         description: "Multi-factor authentication has been turned off for your account.",
       });
+      // Also update the user data to reflect MFA is disabled
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setStep("initial");
       setIsDialogOpen(false);
     },
