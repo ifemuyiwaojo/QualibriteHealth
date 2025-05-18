@@ -129,20 +129,36 @@ export default function Login() {
   
   // Handle MFA verification completion
   const handleMfaSuccess = useCallback((userData: any) => {
+    console.log("MFA success handler called with user data:", userData);
+    
     // MFA verification successful, complete login
     setMfaRequired(false);
     setPendingUser(null);
     
-    // Check if password change is required
-    if (userData.requiresPasswordChange) {
-      setLocation("/auth/change-password");
-    } else {
-      setLocation("/dashboard");
-      toast({
-        title: "Login Successful",
-        description: "Identity verified successfully",
-      });
-    }
+    // Show toast first before navigation
+    toast({
+      title: "Login Successful",
+      description: "Identity verified successfully",
+    });
+    
+    // Force a query invalidation to refresh auth state
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(res => res.json())
+      .then(() => {
+        console.log("Auth state refreshed, redirecting to dashboard");
+        
+        // Add a small delay before redirecting
+        setTimeout(() => {
+          // Check if password change is required
+          if (userData.requiresPasswordChange) {
+            window.location.href = "/auth/change-password";
+          } else {
+            window.location.href = "/dashboard";
+          }
+        }, 300);
+      })
+      .catch(err => console.error("Error refreshing auth state:", err));
+    
   }, [setLocation, toast]);
   
   // Handle MFA verification cancellation
