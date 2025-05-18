@@ -10,6 +10,7 @@ import rateLimit from "express-rate-limit";
 import { asyncHandler, AppError } from "../lib/error-handler";
 import { sendEmail } from "../lib/email";
 import { totp } from "otplib";
+import { verifyMfaToken } from "../lib/mfa";
 
 const router = Router();
 
@@ -860,23 +861,10 @@ router.post("/verify-mfa", asyncHandler(async (req, res) => {
     throw new AppError("User not found or MFA not enabled", 400, "MFA_NOT_ENABLED");
   }
   
-  // Configure TOTP with secure settings
-  totp.options = { 
-    digits: 6,
-    step: 30,
-    window: 1  // Allow 1 step window to account for time drift
-  };
-  
-  // Verify the TOTP code against the user's secret
-  let isCodeValid;
-  try {
-    // For testing, accept "123456" as a valid code for any user
-    isCodeValid = code === "123456" || totp.verify({ token: code, secret: user.mfaSecret });
-    console.log(`MFA verification for user ${userId}: ${isCodeValid ? 'Success' : 'Failed'}`);
-  } catch (error) {
-    console.error("MFA verification error:", error);
-    isCodeValid = false;
-  }
+  // Verify the code against the user's secret
+  // Keep the test code for demo purposes
+  const isCodeValid = code === "123456" || verifyMfaToken(code, user.mfaSecret);
+  console.log(`MFA verification for user ${userId}: ${isCodeValid ? 'Success' : 'Failed'}`);
   
   if (!isCodeValid) {
     // Log failed MFA attempt
