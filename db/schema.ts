@@ -153,7 +153,11 @@ export const selectAppointmentSchema = createSelectSchema(appointments);
 
 // Type definitions
 export type InsertUser = typeof users.$inferInsert;
-export type SelectUser = typeof users.$inferSelect;
+export type SelectUser = typeof users.$inferSelect & {
+  mfaEnabled?: boolean;
+  mfaSecret?: string | null;
+  mfaBackupCodes?: Record<string, any> | null;
+};
 export type InsertPatientProfile = typeof patientProfiles.$inferInsert;
 export type SelectPatientProfile = typeof patientProfiles.$inferSelect;
 export type InsertProviderProfile = typeof providerProfiles.$inferInsert;

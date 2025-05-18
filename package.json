@@ -46,6 +46,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/jsonwebtoken": "^9.0.8",
+    "@types/qrcode": "^1.5.5",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",

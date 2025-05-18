@@ -26,8 +26,7 @@ declare module "express-session" {
   }
 }
 
-// Type declaration for QRCode module
-declare module "qrcode";
+// QRCode module is now properly typed with @types/qrcode
 
 const router = Router();
 
