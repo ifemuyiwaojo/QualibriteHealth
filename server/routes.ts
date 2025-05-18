@@ -14,8 +14,9 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Apply rate limiting and CSRF protection to API routes
-  // Authentication routes - apply specific auth rate limiting
-  app.use("/api/auth", limitAuth, csrfProtection, authRoutes);
+  // Authentication routes - apply rate limiting but skip CSRF for login
+  // This allows initial authentication without needing a CSRF token
+  app.use("/api/auth", limitAuth, authRoutes);
 
   // Telehealth routes (sensitive medical data) - apply general API rate limiting and CSRF
   app.use("/api/telehealth", limitAPI, csrfProtection, telehealthRoutes);

@@ -14,11 +14,11 @@ export const generalLimiter = new RateLimiterMemory({
   duration: 60, // Per minute
 });
 
-// Authentication rate limiter - more strict to prevent brute force
+// Authentication rate limiter - making it more lenient for development testing
 export const authLimiter = new RateLimiterMemory({
-  points: 10, // Number of login/registration attempts
+  points: 30, // Increased number of login/registration attempts
   duration: 60, // Per minute
-  blockDuration: 300, // Block for 5 minutes after exceeding limit
+  blockDuration: 120, // Block for 2 minutes after exceeding limit
 });
 
 // Password reset rate limiter - prevent abuse

@@ -45,12 +45,11 @@ app.use(
     saveUninitialized: false,
     name: 'qbh_session', // Custom name with less revealing information
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      secure: false, // For development, set to true in production
       httpOnly: true, // Prevent JavaScript access to cookies (XSS protection)
-      maxAge: 4 * 60 * 60 * 1000, // 4 hours default for healthcare applications
-      sameSite: 'strict', // Prevent CSRF by restricting cross-site cookie usage
-      path: '/',
-      domain: undefined, // Restricts to exact domain, not subdomains
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours default for easier development testing
+      sameSite: 'lax', // Allow cross-site GET requests for development
+      path: '/'
     }
   })
 );

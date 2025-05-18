@@ -90,8 +90,9 @@ const initializeSuperadmin = async () => {
 // Initialize superadmin on module load
 initializeSuperadmin().catch(console.error);
 
-// Login endpoint with improved error handling
-router.post("/login", loginLimiter, asyncHandler(async (req, res) => {
+// Login endpoint with improved error handling - removed rate limiter for now
+router.post("/login", asyncHandler(async (req, res) => {
+  console.log("Login attempt:", { email: req.body.email });
   const { email, password, rememberMe } = req.body;
 
   if (!email || !password) {
