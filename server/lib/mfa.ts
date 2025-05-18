@@ -25,19 +25,30 @@ const MFA_ISSUER = 'Qualibrite Health';
  * @returns Object containing the secret and provisioning URL for QR code
  */
 export async function generateMfaSecret(username: string) {
-  // Generate a secure random secret
+  // Generate a secret compatible with Google Authenticator
+  // Using base32 encoding which is compatible with Google Authenticator
   const secretBuffer = crypto.randomBytes(MFA_SECRET_LENGTH);
-  const secret = secretBuffer.toString('base64');
   
-  // Configure TOTP with our application settings
+  // Use the authenticator-library compatible encoding
+  const secret = totp.utils.generateSecret(); // This creates a properly formatted secret
+  
+  // Configure TOTP with standard settings used by authenticator apps
   totp.options = { 
     digits: 6,
     step: 30, // 30 second validity
-    window: 1  // Allow 1 step before/after for time drift 
+    window: 2  // Allow more window for time drift
   };
   
   // Create provisioning URI for QR code generation
   const otpauth = totp.keyuri(username, MFA_ISSUER, secret);
+  
+  // Log information about the generated secret for debugging
+  console.log('Generated new MFA secret:', {
+    username,
+    secretLength: secret.length,
+    secretStart: secret.substring(0, 5) + '...',
+    timestamp: new Date().toISOString()
+  });
   
   return {
     secret,
@@ -53,14 +64,23 @@ export async function generateMfaSecret(username: string) {
  */
 export function verifyMfaToken(token: string, secret: string): boolean {
   try {
-    // Configure TOTP with our application settings
+    // Configure TOTP with standard settings
     totp.options = { 
       digits: 6,
       step: 30,
-      window: 1
+      window: 2  // Allow 2 step windows to account for time drift on client devices
     };
     
-    // Verify the token
+    // Debug information for verification
+    console.log('Verifying token:', {
+      tokenLength: token.length,
+      secretLength: secret.length,
+      secretStart: secret.substring(0, 5) + '...',
+      timestamp: new Date().toISOString()
+    });
+    
+    // For Google Authenticator, we need to ensure the secret is correctly formatted
+    // Verify the token with base32 encoded secret
     return totp.verify({ token, secret });
   } catch (error) {
     // Log verification errors
