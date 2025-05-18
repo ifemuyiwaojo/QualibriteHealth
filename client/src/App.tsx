@@ -122,6 +122,9 @@ export const Router = memo(function Router() {
           <Route path="/auth/change-password">
             {!user ? <Redirect to="/auth/login" /> : <ChangePassword />}
           </Route>
+          <Route path="/auth/profile">
+            {!user ? <Redirect to="/auth/login" /> : <ProfilePage />}
+          </Route>
           <Route path="/auth/mfa-setup" component={() => <ProtectedRoute component={MFASetup} />} />
 
           {/* Protected Routes */}
