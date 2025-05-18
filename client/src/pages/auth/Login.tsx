@@ -47,6 +47,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotMode, setForgotMode] = useState<'none' | 'password' | 'email'>('none');
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
@@ -60,6 +61,9 @@ export default function Login() {
 
   const onSubmit = useCallback(async (data: LoginFormValues) => {
     if (isSubmitting) return;
+
+    // Clear any previous error message
+    setLoginError(null);
 
     try {
       setIsSubmitting(true);
@@ -82,9 +86,25 @@ export default function Login() {
       }
     } catch (error: any) {
       console.error("Login failed:", error);
+      
+      // Set appropriate error message based on error type/message
+      let errorMessage = "Please check your credentials and try again.";
+      
+      if (error.message && error.message.includes("credentials")) {
+        errorMessage = "Incorrect email or password. Please try again.";
+      } else if (error.message && error.message.includes("Too many")) {
+        errorMessage = "Too many login attempts. Please try again later.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Set error message to display on the form
+      setLoginError(errorMessage);
+      
+      // Also show a toast for immediate feedback
       toast({
         title: "Login Failed",
-        description: error.message || "Please check your credentials and try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -121,6 +141,12 @@ export default function Login() {
             <ForgotEmailForm onCancel={() => setForgotMode('none')} />
           ) : (
             <>
+              {loginError && (
+                <div className="mb-4 p-3 rounded-md border border-destructive bg-destructive/10 text-destructive text-sm">
+                  <p className="font-medium">Login failed</p>
+                  <p>{loginError}</p>
+                </div>
+              )}
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
