@@ -47,10 +47,11 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
     mutationFn: async (code: string) => {
       setErrorMessage(null); // Clear any previous errors
       if (isUsingBackupCode) {
-        // Use backup code verification endpoint
-        const res = await apiRequest("POST", "/api/mfa/use-backup-code", { 
-          backupCode: code,
-          email
+        // For backup codes during login, we need to handle this differently
+        // We need to get the user ID from the login response
+        const res = await apiRequest("POST", "/api/auth/verify-mfa", { 
+          code,
+          isBackupCode: true
         });
         return await res.json();
       } else {

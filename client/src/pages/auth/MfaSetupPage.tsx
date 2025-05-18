@@ -95,9 +95,9 @@ export default function MfaSetupPage() {
   return (
     <div className="container max-w-4xl py-8 space-y-8">
       <div className="flex items-center gap-2">
-        <Link href="/settings/security">
+        <Link href="/auth/profile">
           <Button variant="ghost" size="sm" className="gap-1">
-            <ArrowLeft className="h-4 w-4" /> Back to Security Settings
+            <ArrowLeft className="h-4 w-4" /> Back to Profile
           </Button>
         </Link>
         <h1 className="text-2xl font-bold">MFA Setup</h1>
@@ -269,9 +269,9 @@ export default function MfaSetupPage() {
               </p>
               
               <div className="flex w-full gap-4">
-                <Link href="/settings/security" className="w-full">
+                <Link href="/auth/profile" className="w-full">
                   <Button className="w-full" variant="outline">
-                    Back to Security Settings
+                    Back to Profile
                   </Button>
                 </Link>
                 <Link href="/dashboard" className="w-full">

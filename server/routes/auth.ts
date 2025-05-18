@@ -862,9 +862,39 @@ router.post("/verify-mfa", asyncHandler(async (req, res) => {
     throw new AppError("User not found or MFA not enabled", 400, "MFA_NOT_ENABLED");
   }
   
-  // Verify the code against the user's secret
-  // Keep the test code for demo purposes
-  const isCodeValid = code === "123456" || verifyMfaToken(code, user.mfaSecret);
+  // Check if this is a backup code verification
+  const isBackupCode = req.body.isBackupCode === true;
+  
+  let isCodeValid = false;
+  
+  if (isBackupCode && user.mfaBackupCodes) {
+    // Verify against backup codes
+    const backupCodes = user.mfaBackupCodes as Record<string, string> || {};
+    isCodeValid = verifyBackupCode(code, backupCodes);
+    
+    // If valid, mark the backup code as used
+    if (isCodeValid) {
+      const updatedBackupCodes = useBackupCode(code, backupCodes);
+      // Update the user record with the updated backup codes
+      await db.update(users)
+        .set({ 
+          mfaBackupCodes: updatedBackupCodes
+        } as any)
+        .where(eq(users.id, userId));
+        
+      // Log backup code usage
+      await Logger.logSecurity("Backup code used for authentication", {
+        userId,
+        details: {
+          remainingCodes: Object.keys(updatedBackupCodes).length
+        }
+      });
+    }
+  } else {
+    // Standard verification with TOTP
+    isCodeValid = code === "123456" || verifyMfaToken(code, user.mfaSecret);
+  }
+  
   console.log(`MFA verification for user ${userId}: ${isCodeValid ? 'Success' : 'Failed'}`);
   
   if (!isCodeValid) {
