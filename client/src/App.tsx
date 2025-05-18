@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ConvaiWidget } from "@/components/ConvaiWidget";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Loading } from "@/components/ui/loading";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Services from "@/pages/Services";
@@ -25,21 +27,17 @@ import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
-import SchedulePage from "@/pages/provider/SchedulePage"; // Added import
-import PatientListPage from "@/pages/provider/PatientListPage"; // Added import
-import RecordsPage from "@/pages/provider/RecordsPage"; // Added import
-import ProviderProfilePage from "@/pages/provider/ProviderProfilePage"; // Added import
+import SchedulePage from "@/pages/provider/SchedulePage";
+import PatientListPage from "@/pages/provider/PatientListPage";
+import RecordsPage from "@/pages/provider/RecordsPage";
+import ProviderProfilePage from "@/pages/provider/ProviderProfilePage";
 
 
 const DashboardRouter = memo(function DashboardRouter() {
   const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
+    return <Loading fullScreen text="Loading your dashboard..." />;
   }
 
   if (!user) {
@@ -63,53 +61,24 @@ const DashboardRouter = memo(function DashboardRouter() {
   }
 });
 
+// Replaced with ProtectedRoute component
+// This component is kept for backward compatibility but now just delegates to ProtectedRoute
 const AuthenticatedRoute = memo(function AuthenticatedRoute({
-  component: Component
+  component
 }: {
   component: React.ComponentType
 }) {
-  const { user, isLoading } = useAuthProvider();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Redirect to="/auth/login" />;
-  }
-
-  // Force password change for authenticated routes as well
-  if (user.changePasswordRequired) {
-    return <Redirect to="/auth/change-password" />;
-  }
-
-  return <Component />;
+  return <ProtectedRoute component={component} />;
 });
 
+// Role-restricted route specifically for admin users
 const AdminRoute = memo(function AdminRoute({
-  component: Component,
+  component,
 }: {
   component: React.ComponentType;
 }) {
-  const { user, isLoading } = useAuthProvider();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user || user.role !== "admin") {
-    return <Redirect to="/dashboard" />;
-  }
-
-  return <Component />;
+  // Use our reusable ProtectedRoute with role restriction
+  return <ProtectedRoute component={component} roles={["admin"]} />;
 });
 
 export const Router = memo(function Router() {
@@ -154,46 +123,28 @@ export const Router = memo(function Router() {
           </Route>
 
           {/* Protected Routes */}
-          <Route path="/dashboard">
-            {!user ? <Redirect to="/auth/login" /> : <DashboardRouter />}
-          </Route>
+          <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardRouter} />} />
 
           {/* Admin Routes */}
-          <Route path="/admin/users" component={() => <AdminRoute component={AdminUsersPage} />} />
-          <Route path="/admin/providers" component={() => <AdminRoute component={ProvidersPage} />} />
-          <Route path="/admin/audit-logs" component={() => <AdminRoute component={AuditLogsPage} />} />
-          <Route path="/admin/settings" component={() => <AdminRoute component={SettingsPage} />} />
-          <Route path="/admin/compliance" component={() => <AdminRoute component={CompliancePage} />} />
-          <Route path="/admin/security" component={() => <AdminRoute component={SecurityCenterPage} />} />
+          <Route path="/admin/users" component={() => <ProtectedRoute component={AdminUsersPage} roles={["admin"]} />} />
+          <Route path="/admin/providers" component={() => <ProtectedRoute component={ProvidersPage} roles={["admin"]} />} />
+          <Route path="/admin/audit-logs" component={() => <ProtectedRoute component={AuditLogsPage} roles={["admin"]} />} />
+          <Route path="/admin/settings" component={() => <ProtectedRoute component={SettingsPage} roles={["admin"]} />} />
+          <Route path="/admin/compliance" component={() => <ProtectedRoute component={CompliancePage} roles={["admin"]} />} />
+          <Route path="/admin/security" component={() => <ProtectedRoute component={SecurityCenterPage} roles={["admin"]} />} />
 
           {/* Patient Routes */}
-          <Route path="/telehealth">
-            {!user ? <Redirect to="/auth/login" /> : <TelehealthPage />}
-          </Route>
-          <Route path="/patient/appointments">
-            {!user ? <Redirect to="/auth/login" /> : <AppointmentsPage />}
-          </Route>
-          <Route path="/patient/records">
-            {!user ? <Redirect to="/auth/login" /> : <div>Medical Records Page</div>}
-          </Route>
-          <Route path="/patient/profile">
-            {!user ? <Redirect to="/auth/login" /> : <div>Patient Profile Page</div>}
-          </Route>
+          <Route path="/telehealth" component={() => <ProtectedRoute component={TelehealthPage} />} />
+          <Route path="/patient/appointments" component={() => <ProtectedRoute component={AppointmentsPage} roles={["patient"]} />} />
+          <Route path="/patient/records" component={() => <ProtectedRoute component={() => <div>Medical Records Page</div>} roles={["patient"]} />} />
+          <Route path="/patient/profile" component={() => <ProtectedRoute component={() => <div>Patient Profile Page</div>} roles={["patient"]} />} />
 
 
           {/* Provider Routes */}
-          <Route path="/provider/schedule">
-            {!user ? <Redirect to="/auth/login" /> : <SchedulePage />}
-          </Route>
-          <Route path="/provider/patients">
-            {!user ? <Redirect to="/auth/login" /> : <PatientListPage />}
-          </Route>
-          <Route path="/provider/records">
-            {!user ? <Redirect to="/auth/login" /> : <RecordsPage />}
-          </Route>
-          <Route path="/provider/profile">
-            {!user ? <Redirect to="/auth/login" /> : <ProviderProfilePage />}
-          </Route>
+          <Route path="/provider/schedule" component={() => <ProtectedRoute component={SchedulePage} roles={["provider"]} />} />
+          <Route path="/provider/patients" component={() => <ProtectedRoute component={PatientListPage} roles={["provider"]} />} />
+          <Route path="/provider/records" component={() => <ProtectedRoute component={RecordsPage} roles={["provider"]} />} />
+          <Route path="/provider/profile" component={() => <ProtectedRoute component={ProviderProfilePage} roles={["provider"]} />} />
 
           <Route component={NotFound} />
         </Switch>
