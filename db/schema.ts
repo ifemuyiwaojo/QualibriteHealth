@@ -7,7 +7,18 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").unique().notNull(),
   passwordHash: text("password_hash").notNull(),
-  role: text("role", { enum: ["patient", "provider", "admin"] }).notNull(),
+  role: text("role", { 
+    enum: [
+      "patient", 
+      "provider", 
+      "admin", 
+      "practice_manager", 
+      "billing", 
+      "intake_coordinator", 
+      "it_support", 
+      "marketing"
+    ] 
+  }).notNull(),
   isSuperadmin: boolean("is_superadmin").default(false),
   changePasswordRequired: boolean("change_password_required").default(false),
   resetPasswordToken: text("reset_password_token"),
@@ -74,15 +85,79 @@ export const medicalRecords = pgTable("medical_records", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Staff Profiles - Base table with common fields for all staff roles
+export const staffProfiles = pgTable("staff_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  phone: text("phone"),
+  hireDate: timestamp("hire_date"),
+  department: text("department").notNull(),
+  supervisor: integer("supervisor_id").references(() => staffProfiles.id),
+  status: text("status", { enum: ["active", "on_leave", "terminated"] }).default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Practice Manager Profile (specific data for practice managers)
+export const practiceManagerProfiles = pgTable("practice_manager_profiles", {
+  id: serial("id").primaryKey(),
+  staffId: integer("staff_id").references(() => staffProfiles.id).notNull().unique(),
+  managementCertifications: jsonb("management_certifications"),
+  managementAreas: jsonb("management_areas"),
+  responsibilities: jsonb("responsibilities"),
+});
+
+// Billing/RCM Profile
+export const billingProfiles = pgTable("billing_profiles", {
+  id: serial("id").primaryKey(),
+  staffId: integer("staff_id").references(() => staffProfiles.id).notNull().unique(),
+  billingCertifications: jsonb("billing_certifications"),
+  insuranceSpecialties: jsonb("insurance_specialties"),
+  billingSystemAccess: jsonb("billing_system_access"),
+});
+
+// Intake Coordinator Profile
+export const intakeCoordinatorProfiles = pgTable("intake_coordinator_profiles", {
+  id: serial("id").primaryKey(),
+  staffId: integer("staff_id").references(() => staffProfiles.id).notNull().unique(),
+  intakeCertifications: jsonb("intake_certifications"),
+  languages: jsonb("languages"),
+  schedulingAccess: boolean("scheduling_access").default(true),
+});
+
+// IT / Telehealth Support Profile
+export const itSupportProfiles = pgTable("it_support_profiles", {
+  id: serial("id").primaryKey(),
+  staffId: integer("staff_id").references(() => staffProfiles.id).notNull().unique(),
+  techCertifications: jsonb("tech_certifications"),
+  systemAccess: jsonb("system_access"),
+  supportAreas: jsonb("support_areas"),
+});
+
+// Marketing & Community Outreach Profile
+export const marketingProfiles = pgTable("marketing_profiles", {
+  id: serial("id").primaryKey(),
+  staffId: integer("staff_id").references(() => staffProfiles.id).notNull().unique(),
+  marketingCertifications: jsonb("marketing_certifications"),
+  specialtyAreas: jsonb("specialty_areas"),
+  communityConnections: jsonb("community_connections"),
+});
+
 // Appointments
 export const appointments = pgTable("appointments", {
   id: serial("id").primaryKey(),
   patientId: integer("patient_id").references(() => users.id).notNull(),
   providerId: integer("provider_id").references(() => users.id).notNull(),
   dateTime: timestamp("date_time").notNull(),
-  status: text("status", { enum: ["scheduled", "completed", "cancelled"] }).notNull(),
-  type: text("type", { enum: ["initial", "follow_up", "medication_check"] }).notNull(),
+  status: text("status", { enum: ["scheduled", "confirmed", "completed", "cancelled", "no_show"] }).notNull(),
+  type: text("type", { enum: ["initial", "follow_up", "medication_check", "telehealth", "emergency"] }).notNull(),
   notes: text("notes"),
+  coordinatorId: integer("coordinator_id").references(() => staffProfiles.id),
+  billingStatus: text("billing_status", { enum: ["unbilled", "billed", "paid", "denied", "appealed"] }),
+  telehealthLink: text("telehealth_link"),
+  supportAssignedId: integer("support_assigned_id").references(() => staffProfiles.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
