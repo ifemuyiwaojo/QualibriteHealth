@@ -5,8 +5,26 @@ import { db } from "@db";
 import { users, auditLogs, insertUserSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateToken, authorizeRoles } from "../middleware/auth";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
+
+// Rate limiters for authentication endpoints
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window per IP
+  message: { message: "Too many login attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // 3 registration attempts per hour
+  message: { message: "Too many registration attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // JWT_SECRET is validated in middleware/auth.ts
 // We ensure it's defined here for type safety
@@ -72,7 +90,7 @@ const initializeSuperadmin = async () => {
 initializeSuperadmin().catch(console.error);
 
 // Login endpoint
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
 
@@ -134,7 +152,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Register endpoint
-router.post("/register", async (req, res) => {
+router.post("/register", registrationLimiter, async (req, res) => {
   try {
     const validatedData = insertUserSchema.parse(req.body);
 

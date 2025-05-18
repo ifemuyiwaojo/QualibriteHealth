@@ -5,9 +5,19 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "@db";
+import rateLimit from "express-rate-limit";
 
 // Get required secrets from environment variables
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'temporary_secret_change_me_in_production';
+
+// Global rate limiter for API endpoints
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { message: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const app = express();
 app.use(express.json());
@@ -21,16 +31,19 @@ app.use(
     store: new PgSession({
       pool,
       tableName: 'session', // Will be created automatically
-      createTableIfMissing: true
+      createTableIfMissing: true,
+      pruneSessionInterval: 60 * 15 // Automatically remove expired sessions every 15 min
     }),
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    name: 'qbh.sid', // Custom name instead of default 'connect.sid'
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: 'strict'
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours default, gets extended on remember me
+      sameSite: 'strict',
+      path: '/'
     }
   })
 );
@@ -66,14 +79,25 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Apply the global rate limiter to all API routes
+  app.use("/api", apiLimiter);
+  
   const server = registerRoutes(app);
 
+  // Global error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
+    
+    // Log the error but don't expose details to client in production
+    console.error(`[ERROR] ${status}: ${err.stack || err.message}`);
+    
+    // Return a sanitized error message
+    res.status(status).json({ 
+      message: process.env.NODE_ENV === 'production' 
+        ? "An error occurred. Please try again later." 
+        : message 
+    });
   });
 
   if (app.get("env") === "development") {
