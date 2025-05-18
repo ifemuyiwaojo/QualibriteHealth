@@ -4,7 +4,12 @@ import { db } from "@db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+// Ensure JWT_SECRET is available
+if (!process.env.JWT_SECRET) {
+  console.error("CRITICAL SECURITY ERROR: JWT_SECRET environment variable is not set");
+  process.exit(1); // Exit the application if the secret is not set
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export interface AuthRequest extends Request {
   user?: {
