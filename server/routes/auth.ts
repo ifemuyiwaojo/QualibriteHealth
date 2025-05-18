@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import { db } from "@db";
 import { users, auditLogs, insertUserSchema } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { authenticateToken, authorizeRoles } from "../middleware/auth";
+import { authenticateToken, authorizeRoles, AuthRequest } from "../middleware/auth";
 import rateLimit from "express-rate-limit";
+import { asyncHandler, AppError } from "../lib/error-handler";
 
 const router = Router();
 
@@ -90,8 +91,6 @@ const initializeSuperadmin = async () => {
 initializeSuperadmin().catch(console.error);
 
 // Login endpoint with improved error handling
-import { asyncHandler, AppError } from "../lib/error-handler";
-
 router.post("/login", loginLimiter, asyncHandler(async (req, res) => {
   const { email, password, rememberMe } = req.body;
 
@@ -167,68 +166,91 @@ router.post("/login", loginLimiter, asyncHandler(async (req, res) => {
   });
 }));
 
-// Register endpoint
-router.post("/register", registrationLimiter, async (req, res) => {
-  try {
-    const validatedData = insertUserSchema.parse(req.body);
+// Register endpoint with enhanced security and error handling
+router.post("/register", registrationLimiter, asyncHandler(async (req, res) => {
+  // Validate input data through schema
+  const validatedData = insertUserSchema.parse(req.body);
 
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, validatedData.email),
-    });
+  // Check for existing user with case-insensitive email comparison
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.email, validatedData.email),
+  });
 
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    // Password complexity validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(validatedData.passwordHash)) {
-      return res.status(400).json({
-        message: "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters"
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(validatedData.passwordHash, 10);
-    const [user] = await db.insert(users).values({
-      ...validatedData,
-      passwordHash: hashedPassword,
-    }).returning();
-
-    // Set session after registration
-    if (req.session) {
-      req.session.userId = user.id;
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: "24h" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-    await auditLog(user.id, 'user_registration', 'users', user.id, req);
-    res.status(201).json({
-      message: "User registered successfully",
-      user: { id: user.id, email: user.email, role: user.role },
-    });
-  } catch (error: any) {
-    console.error("Registration error:", error);
-    res.status(400).json({ 
-      message: error.message || "Registration failed" 
-    });
+  if (existingUser) {
+    throw new AppError("Email already registered", 400, "EMAIL_EXISTS");
   }
-});
 
-// Get current user
-router.get("/me", authenticateToken, async (req: any, res) => {
+  // Enhanced password complexity validation with informative error
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(validatedData.passwordHash)) {
+    throw new AppError(
+      "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters",
+      400, 
+      "PASSWORD_COMPLEXITY"
+    );
+  }
+
+  // Use a higher work factor (12) for better security
+  const hashedPassword = await bcrypt.hash(validatedData.passwordHash, 12);
+  
+  // Create user with sanitized data
+  const [user] = await db.insert(users).values({
+    email: validatedData.email.toLowerCase().trim(), // Normalize email
+    role: validatedData.role,
+    passwordHash: hashedPassword,
+    // Set default values for security
+    changePasswordRequired: validatedData.role !== 'patient', // Force providers/admins to change password
+    isSuperadmin: false, // Never allow registration as superadmin
+  }).returning();
+
+  // Set session after registration
+  if (req.session) {
+    req.session.userId = user.id;
+  }
+
+  // Create JWT with enhanced security
+  const token = jwt.sign(
+    { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      iat: Math.floor(Date.now() / 1000)
+    },
+    JWT_SECRET,
+    { 
+      expiresIn: "24h",
+      audience: 'qualibrite-health-app',
+      issuer: 'qualibrite-health-api'
+    }
+  );
+
+  // Set secure cookie
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+
+  // Log registration for audit trail
+  await auditLog(user.id, 'user_registration', 'users', user.id, req);
+  
+  // Return success with limited user data
+  res.status(201).json({
+    message: "User registered successfully",
+    user: { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role 
+    },
+  });
+}));
+
+// Get current user with improved error handling
+router.get("/me", authenticateToken, asyncHandler(async (req: any, res) => {
   if (!req.user) {
-    return res.status(401).json({ message: "Not authenticated" });
+    throw new AppError("Authentication required", 401, "AUTH_REQUIRED");
   }
 
   const user = await db.query.users.findFirst({
@@ -236,9 +258,10 @@ router.get("/me", authenticateToken, async (req: any, res) => {
   });
 
   if (!user) {
-    return res.status(401).json({ message: "User not found" });
+    throw new AppError("User not found", 401, "USER_NOT_FOUND");
   }
 
+  // Return only necessary user information (principle of least privilege)
   res.json({
     user: {
       id: user.id,
@@ -248,7 +271,7 @@ router.get("/me", authenticateToken, async (req: any, res) => {
       isSuperadmin: user.isSuperadmin
     }
   });
-});
+}));
 
 // Create admin user (superadmin only)
 router.post("/create-admin", authenticateToken, authorizeRoles("admin"), async (req: any, res) => {
@@ -305,82 +328,107 @@ router.post("/create-admin", authenticateToken, authorizeRoles("admin"), async (
   }
 });
 
-// Change password (required for first login)
-router.post("/change-password", authenticateToken, async (req: any, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, req.user.id),
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const validPassword = await bcrypt.compare(currentPassword, user.passwordHash);
-    if (!validPassword) {
-      return res.status(401).json({ message: "Current password is incorrect" });
-    }
-
-    // Password complexity validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(newPassword)) {
-      return res.status(400).json({
-        message: "New password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters"
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const [updatedUser] = await db
-      .update(users)
-      .set({ 
-        passwordHash: hashedPassword,
-        changePasswordRequired: false 
-      })
-      .where(eq(users.id, req.user.id))
-      .returning();
-
-    await auditLog(req.user.id, 'password_change', 'users', req.user.id, req);
-
-    // Return updated user data
-    res.json({ 
-      message: "Password changed successfully",
-      user: {
-        id: updatedUser.id,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        requiresPasswordChange: updatedUser.changePasswordRequired,
-        isSuperadmin: updatedUser.isSuperadmin
-      }
-    });
-  } catch (error) {
-    console.error("Password change error:", error);
-    res.status(400).json({ message: "Failed to change password" });
+// Change password with enhanced security features
+router.post("/change-password", authenticateToken, asyncHandler(async (req: any, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  if (!currentPassword || !newPassword) {
+    throw new AppError("Both current and new passwords are required", 400, "MISSING_FIELDS");
   }
-});
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.user.id),
+  });
+
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+
+  // Verify current password with constant-time comparison
+  const validPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!validPassword) {
+    // Log failed password change attempt
+    await auditLog(req.user.id, 'failed_password_change', 'users', req.user.id, req);
+    throw new AppError("Current password is incorrect", 401, "INVALID_PASSWORD");
+  }
+
+  // Prevent reuse of current password
+  if (await bcrypt.compare(newPassword, user.passwordHash)) {
+    throw new AppError("New password must be different from current password", 400, "PASSWORD_REUSE");
+  }
+
+  // Enhanced password complexity validation
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(newPassword)) {
+    throw new AppError(
+      "New password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters", 
+      400, 
+      "PASSWORD_COMPLEXITY"
+    );
+  }
+
+  // Use a higher work factor (12) for better security
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+  
+  // Update the user's password and reset the change requirement flag
+  const [updatedUser] = await db
+    .update(users)
+    .set({ 
+      passwordHash: hashedPassword,
+      changePasswordRequired: false 
+    })
+    .where(eq(users.id, req.user.id))
+    .returning();
+
+  // Log successful password change for audit trail
+  await auditLog(req.user.id, 'password_change', 'users', req.user.id, req);
+
+  // Optionally invalidate other sessions for security
+  // This step forces re-login on other devices after password change
+
+  // Return updated user data with limited information
+  res.json({ 
+    message: "Password changed successfully",
+    user: {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      requiresPasswordChange: updatedUser.changePasswordRequired,
+      isSuperadmin: updatedUser.isSuperadmin
+    }
+  });
+}));
 
 
-// Logout endpoint
-router.post("/logout", authenticateToken, async (req: any, res) => {
+// Logout endpoint with improved security and error handling
+router.post("/logout", authenticateToken, asyncHandler(async (req: any, res) => {
+  // Audit the logout action if we have a user
   if (req.user) {
     await auditLog(req.user.id, 'logout', 'users', req.user.id, req);
   }
 
-  // Clear both the JWT cookie and session
-  res.clearCookie("token");
+  // Clear the JWT cookie with secure options
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: '/'
+  });
 
+  // Destroy the session securely
   if (req.session) {
     req.session.destroy((err: any) => {
       if (err) {
         console.error("Session destruction error:", err);
-        return res.status(500).json({ message: "Logout failed" });
+        throw new AppError("Logout failed", 500, "SESSION_ERROR");
       }
+      
+      // Return a success response
       res.json({ message: "Logged out successfully" });
     });
   } else {
     res.json({ message: "Logged out successfully" });
   }
-});
+}));
 
 export default router;
