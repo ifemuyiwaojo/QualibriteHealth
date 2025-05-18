@@ -52,8 +52,8 @@ export const providerProfiles = pgTable("provider_profiles", {
 // Medical Records
 export const medicalRecords = pgTable("medical_records", {
   id: serial("id").primaryKey(),
-  patientId: integer("patient_id").references(() => users.id).notNull(),
-  providerId: integer("provider_id").references(() => users.id).notNull(),
+  patientProfileId: integer("patient_profile_id").references(() => patientProfiles.id),
+  providerProfileId: integer("provider_profile_id").references(() => providerProfiles.id),
   type: varchar("type", { length: 50 }).notNull(),
   visitDate: timestamp("visit_date").notNull(),
   content: jsonb("content").notNull(),
@@ -120,15 +120,15 @@ export const providerProfilesRelations = relations(providerProfiles, ({ one }) =
 }));
 
 export const medicalRecordsRelations = relations(medicalRecords, ({ one }) => ({
-  patient: one(users, {
-    fields: [medicalRecords.patientId],
-    references: [users.id],
-    relationName: "patient_records",
+  patientProfile: one(patientProfiles, {
+    fields: [medicalRecords.patientProfileId],
+    references: [patientProfiles.id],
+    relationName: "patient_medical_records",
   }),
-  provider: one(users, {
-    fields: [medicalRecords.providerId],
-    references: [users.id],
-    relationName: "provider_records",
+  providerProfile: one(providerProfiles, {
+    fields: [medicalRecords.providerProfileId],
+    references: [providerProfiles.id],
+    relationName: "provider_medical_records",
   }),
 }));
 

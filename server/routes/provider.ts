@@ -92,9 +92,13 @@ router.get("/records", authenticateToken, authorizeRoles("provider"), async (req
 
     // Get all medical records for patients assigned to this provider
     const records = await db.query.medicalRecords.findMany({
-      where: eq(medicalRecords.providerId, providerProfile.id),
+      where: eq(medicalRecords.providerProfileId, providerProfile.id),
       with: {
-        patient: true,
+        patientProfile: {
+          with: {
+            user: true
+          }
+        }
       },
       orderBy: [desc(medicalRecords.visitDate)]
     });
@@ -134,9 +138,16 @@ router.get("/records/:patientId", authenticateToken, authorizeRoles("provider"),
 
     const records = await db.query.medicalRecords.findMany({
       where: and(
-        eq(medicalRecords.patientId, parseInt(req.params.patientId)),
-        eq(medicalRecords.providerId, providerProfile.id)
+        eq(medicalRecords.patientProfileId, parseInt(req.params.patientId)),
+        eq(medicalRecords.providerProfileId, providerProfile.id)
       ),
+      with: {
+        patientProfile: {
+          with: {
+            user: true
+          }
+        }
+      },
       orderBy: [desc(medicalRecords.visitDate)]
     });
 
