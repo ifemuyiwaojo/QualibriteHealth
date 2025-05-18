@@ -5,6 +5,7 @@ import { Logger } from "../lib/logger";
 import { SecretManager } from "../lib/secret-manager";
 import { db } from "@db";
 import { auditLogs } from "@db/schema";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -44,12 +45,12 @@ router.post("/rotate-secret", authenticateToken, requireSuperadmin, asyncHandler
       
       // Also log this to the audit_logs table for compliance tracking
       const auditData = {
-        user_id: req.user.id,
+        userId: req.user.id,
         action: 'SECURITY_KEY_ROTATION',
-        resource_type: 'JWT_SECRET',
-        resource_id: null,
-        ip_address: req.ip,
-        user_agent: req.headers['user-agent'] || 'Unknown',
+        resourceType: 'JWT_SECRET',
+        resourceId: null,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'] || 'Unknown',
         details: JSON.stringify({
           description: 'JWT secret rotation performed',
           gracePeriod: `${gracePeriod} days`,
@@ -104,6 +105,95 @@ router.get("/secret-status", authenticateToken, requireSuperadmin, asyncHandler(
       "system", { request: req });
       
     // Re-throw to let the error handler middleware handle it
+    throw error;
+  }
+}));
+
+/**
+ * Testing endpoint for JWT secret rotation
+ * Only accessible by superadmins for testing purposes
+ */
+router.get("/test-jwt-rotation", authenticateToken, requireSuperadmin, asyncHandler(async (req: AuthRequest, res) => {
+  try {
+    // Get secret manager instance
+    const secretManager = SecretManager.getInstance();
+    
+    // 1. Get the current secret
+    const originalSecret = secretManager.getCurrentSecret();
+    
+    // 2. Create a test token with the current secret
+    const testPayload = {
+      id: 999,
+      email: "test@example.com",
+      role: "test"
+    };
+    
+    const originalToken = jwt.sign(testPayload, originalSecret, { expiresIn: '1h' });
+    
+    // 3. Rotate the secret with 7 day grace period
+    const newSecret = secretManager.rotateSecret(7);
+    
+    // 4. Verify the original token can still be verified using the verification algorithm
+    const validSecrets = secretManager.getAllValidSecrets();
+    
+    let originalTokenValid = false;
+    let originalTokenError: Error | null = null;
+    
+    for (const secret of validSecrets) {
+      try {
+        const decoded = jwt.verify(originalToken, secret);
+        originalTokenValid = true;
+        break;
+      } catch (err) {
+        originalTokenError = err as Error;
+        // Continue to next secret
+      }
+    }
+    
+    // 5. Create a new token with new secret
+    const newToken = jwt.sign(testPayload, secretManager.getCurrentSecret(), { expiresIn: '1h' });
+    
+    // 6. Verify the new token
+    let newTokenValid = false;
+    let newTokenError: Error | null = null;
+    
+    try {
+      const decoded = jwt.verify(newToken, secretManager.getCurrentSecret());
+      newTokenValid = true;
+    } catch (err) {
+      newTokenError = err as Error;
+    }
+    
+    // Get secret status for reporting
+    const status = secretManager.getStatus();
+    
+    // Log the test results
+    await Logger.log("security", "system", "JWT rotation test completed", {
+      userId: req.user?.id,
+      request: req,
+      details: {
+        originalTokenValid,
+        newTokenValid,
+        secretCount: validSecrets.length,
+        errorMessages: {
+          originalTokenError: originalTokenError ? originalTokenError.message : null,
+          newTokenError: newTokenError ? newTokenError.message : null
+        }
+      }
+    });
+    
+    res.status(200).json({
+      message: "JWT rotation test completed",
+      results: {
+        originalTokenValid,
+        newTokenValid,
+        secretsCount: validSecrets.length,
+        secretStatus: status
+      }
+    });
+  } catch (error) {
+    Logger.logError(error instanceof Error ? error : new Error(String(error)), 
+      "system", { request: req });
     throw error;
   }
 }));
