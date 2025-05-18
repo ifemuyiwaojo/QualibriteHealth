@@ -477,4 +477,170 @@ router.post("/logout", authenticateToken, asyncHandler(async (req: any, res) => 
   }
 }));
 
+// Forgot password endpoint
+router.post("/forgot-password", asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    throw new AppError("Email is required", 400, "MISSING_FIELDS");
+  }
+  
+  // Find user with the provided email
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+  
+  // Even if user is not found, return success for security
+  // This prevents email enumeration attacks
+  if (!user) {
+    // Log attempted reset for non-existent email for security monitoring
+    console.log(`Password reset requested for non-existent email: ${email}`);
+    
+    // Still return success response to prevent email enumeration
+    return res.json({
+      message: "If an account with that email exists, a password reset link has been sent."
+    });
+  }
+  
+  // Generate a secure random token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  // Hash the token before storing it (for security)
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  // Set token and expiry (1 hour from now)
+  const expiryDate = new Date();
+  expiryDate.setHours(expiryDate.getHours() + 1);
+  
+  // Update user with reset token and expiry
+  await db.update(users)
+    .set({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: expiryDate
+    })
+    .where(eq(users.id, user.id));
+  
+  // Create reset URL (frontend will handle this route)
+  // In production, use a proper frontend URL config
+  const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+  
+  // Email content
+  const mailOptions = {
+    to: user.email,
+    subject: 'Password Reset Request - Qualibrite Health',
+    text: `You are receiving this email because you (or someone else) requested to reset your password.
+    
+Please click on the following link to complete the process:
+${resetUrl}
+
+This link is valid for 1 hour.
+
+If you did not request this, please ignore this email and your password will remain unchanged.`
+  };
+  
+  try {
+    // Send the email
+    await sendEmail(mailOptions);
+    
+    // Log the action
+    console.log(`Password reset email sent to ${user.email}`);
+    
+    res.json({
+      message: "If an account with that email exists, a password reset link has been sent."
+    });
+  } catch (error) {
+    // Reset the fields if email fails
+    await db.update(users)
+      .set({
+        resetPasswordToken: null,
+        resetPasswordExpires: null
+      })
+      .where(eq(users.id, user.id));
+    
+    throw new AppError("Failed to send reset email", 500, "EMAIL_ERROR");
+  }
+}));
+
+// Reset password with token endpoint
+router.post("/reset-password/:token", asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  
+  if (!password) {
+    throw new AppError("New password is required", 400, "MISSING_FIELDS");
+  }
+  
+  // Hash the provided token to compare with stored hash
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  // Find user with this token and valid expiry
+  const user = await db.query.users.findFirst({
+    where: and(
+      eq(users.resetPasswordToken, hashedToken),
+      sql`${users.resetPasswordExpires} > NOW()`
+    ),
+  });
+  
+  if (!user) {
+    throw new AppError("Password reset token is invalid or has expired", 400, "INVALID_TOKEN");
+  }
+  
+  // Enhanced password complexity validation
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    throw new AppError(
+      "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters", 
+      400, 
+      "PASSWORD_COMPLEXITY"
+    );
+  }
+  
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(password, 12);
+  
+  // Update user with new password and clear reset token fields
+  await db.update(users)
+    .set({
+      passwordHash: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpires: null,
+      changePasswordRequired: false
+    })
+    .where(eq(users.id, user.id));
+  
+  // Log the password reset
+  console.log(`Password reset completed for ${user.email}`);
+  
+  res.json({
+    message: "Password has been reset successfully. Please log in with your new password."
+  });
+}));
+
+// Forgot email endpoint (email recovery)
+router.post("/forgot-email", asyncHandler(async (req, res) => {
+  // Get potential identifier (name, phone, etc.)
+  const { identifier } = req.body;
+  
+  if (!identifier) {
+    throw new AppError("Please provide some information to find your account", 400, "MISSING_FIELDS");
+  }
+  
+  // This is a placeholder for a more sophisticated lookup
+  // In a real application, you might search patient/provider profiles 
+  // or other user metadata to find matching accounts
+  
+  res.json({
+    message: "If we can identify your account, we'll send an email with your login information to your registered email address."
+  });
+  
+  // Note: For security reasons, the actual email lookup and sending would happen
+  // asynchronously after the response to prevent timing attacks
+}));
+
 export default router;
