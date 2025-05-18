@@ -14,6 +14,7 @@ import FAQ from "@/pages/FAQ";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ChangePassword from "@/pages/auth/ChangePassword";
+import MFASetup from "@/pages/auth/MFASetup";
 import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
@@ -121,6 +122,7 @@ export const Router = memo(function Router() {
           <Route path="/auth/change-password">
             {!user ? <Redirect to="/auth/login" /> : <ChangePassword />}
           </Route>
+          <Route path="/auth/mfa-setup" component={() => <ProtectedRoute component={MFASetup} />} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardRouter} />} />
