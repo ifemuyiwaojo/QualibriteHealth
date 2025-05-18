@@ -33,6 +33,15 @@ const registrationLimiter = rateLimit({
 // Import the SecretManager for token signing
 import { SecretManager } from "../lib/secret-manager";
 
+// Define custom JWT payload interface for type safety
+interface JwtPayloadWithId extends jwt.JwtPayload {
+  id: number;
+  email?: string;
+  role?: string;
+  tokenType?: string;
+  iat?: number;
+}
+
 // Audit logging middleware
 const auditLog = async (userId: number, action: string, resourceType: string, resourceId: number, req: any) => {
   try {
@@ -478,7 +487,8 @@ router.post("/refresh-token", asyncHandler(async (req, res) => {
           issuer: 'qualibrite-health-api'
         });
         tokenValid = true;
-        userId = decoded.id;
+        // Type assertion for JWT payload
+        userId = (decoded as { id: number }).id;
         break;
       } catch (err) {
         // Continue to next secret or token
@@ -495,7 +505,8 @@ router.post("/refresh-token", asyncHandler(async (req, res) => {
           issuer: 'qualibrite-health-api'
         });
         tokenValid = true;
-        userId = decoded.id;
+        // Type assertion for JWT payload
+        userId = (decoded as { id: number }).id;
         break;
       } catch (err) {
         // Continue to next secret

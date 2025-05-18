@@ -8,7 +8,7 @@ import { pool } from "@db";
 import rateLimit from "express-rate-limit";
 import { errorHandler } from "./lib/error-handler";
 import { securityHeaders } from "./middleware/security-headers";
-
+import { setupSessionActivity } from "./middleware/session-activity";
 import { SecretManager } from "./lib/secret-manager";
 
 // Get required secrets using the SecretManager
@@ -59,12 +59,14 @@ app.use(
     saveUninitialized: false,
     name: 'qbh_session', // Custom name with less revealing information
     cookie: {
-      secure: false, // For development, set to true in production
+      secure: process.env.NODE_ENV === 'production', // Only use secure in production
       httpOnly: true, // Prevent JavaScript access to cookies (XSS protection)
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours default for easier development testing
-      sameSite: 'lax', // Allow cross-site GET requests for development
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours default session timeout
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Stricter in production
       path: '/'
-    }
+    },
+    rolling: true, // Reset the cookie expiration time when the user interacts with the site
+    unset: 'destroy' // Remove session from store when destroyed
   })
 );
 
