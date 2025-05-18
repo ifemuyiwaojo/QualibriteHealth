@@ -59,8 +59,16 @@ router.post("/setup", authenticateToken, asyncHandler(async (req: AuthRequest, r
     req.session.mfaSetupStarted = true;
   }
   
-  // Generate QR code
-  const qrCodeDataUrl = await QRCode.toDataURL(otpauth);
+  // Generate QR code with improved settings for better scanning
+  const qrCodeDataUrl = await QRCode.toDataURL(otpauth, {
+    errorCorrectionLevel: 'H',  // High error correction for better scanning
+    margin: 2,                  // Proper margin
+    scale: 8,                   // Larger size for better scanning
+    color: {
+      dark: '#000000',
+      light: '#ffffff'
+    }
+  });
   
   // Log MFA setup start for audit trail
   await Logger.log("security", "auth", "MFA setup initiated", {
