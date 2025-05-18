@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,8 @@ export function MfaSetup() {
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [mfaSecret, setMfaSecret] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // Local state to immediately reflect MFA status changes in UI
+  const [localMfaStatus, setLocalMfaStatus] = useState<boolean | undefined>(user?.mfaEnabled);
 
   // Define our mutations for MFA setup workflow
   const setupMutation = useMutation({
@@ -55,6 +57,8 @@ export function MfaSetup() {
         title: "MFA Enabled",
         description: "Multi-factor authentication has been successfully enabled for your account.",
       });
+      // Immediately update local state before server data refresh
+      setLocalMfaStatus(true);
       // Update the user data to reflect that MFA is enabled
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setStep("complete");
@@ -78,6 +82,8 @@ export function MfaSetup() {
         title: "MFA Disabled",
         description: "Multi-factor authentication has been turned off for your account.",
       });
+      // Immediately update local state before server data refresh
+      setLocalMfaStatus(false);
       // Also update the user data to reflect MFA is disabled
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setStep("initial");
@@ -267,7 +273,13 @@ export function MfaSetup() {
     }
   };
 
-  const isMfaEnabled = user?.mfaEnabled === true;
+  // Use either local state or user state to determine MFA status
+  const isMfaEnabled = localMfaStatus !== undefined ? localMfaStatus : user?.mfaEnabled === true;
+  
+  // Update local state when user data changes
+  useEffect(() => {
+    setLocalMfaStatus(user?.mfaEnabled);
+  }, [user?.mfaEnabled]);
 
   return (
     <div className="space-y-6">
