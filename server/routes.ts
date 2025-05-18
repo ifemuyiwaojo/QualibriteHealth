@@ -22,6 +22,12 @@ export function registerRoutes(app: Express): Server {
   // Provider routes (sensitive patient info) - apply general API rate limiting
   app.use("/api/provider", limitAPI, providerRoutes);
   
+  // Create CSRF token middleware that just sets the token
+  app.use((req, res, next) => {
+    setCsrfToken(req, res);
+    next();
+  });
+
   // Admin routes for superadmin-only functionality - apply rate limiting as protection
   app.use("/api/admin", limitAPI, adminRoutes);
   

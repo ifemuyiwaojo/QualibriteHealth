@@ -51,7 +51,8 @@ import {
   UnlockIcon, 
   Trash2, 
   Edit, 
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import {
   AlertDialog,
@@ -67,6 +68,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function UserManagement() {
   const { user } = useAuth();
@@ -83,21 +85,22 @@ export default function UserManagement() {
     email: z.string().email({ message: "Please enter a valid email address" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
     role: z.string({ required_error: "Please select a role" }),
-    isSuperadmin: z.boolean().default(false),
-    requirePasswordChange: z.boolean().default(true),
     name: z.string().optional(),
     phone: z.string().optional(),
+    isSuperadmin: z.boolean().default(false),
+    requirePasswordChange: z.boolean().default(true),
+    skipEmailVerification: z.boolean().default(false),
   });
 
   // Schema for user update
   const updateUserSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
     role: z.string({ required_error: "Please select a role" }),
-    isSuperadmin: z.boolean().default(false),
-    isActive: z.boolean().default(true),
-    resetPassword: z.boolean().default(false),
     name: z.string().optional(),
     phone: z.string().optional(),
+    isActive: z.boolean().default(true),
+    isSuperadmin: z.boolean().default(false),
+    resetPassword: z.boolean().default(false),
   });
 
   // Create user form
@@ -107,8 +110,11 @@ export default function UserManagement() {
       email: "",
       password: "",
       role: "patient",
+      name: "",
+      phone: "",
       isSuperadmin: false,
       requirePasswordChange: true,
+      skipEmailVerification: false,
     },
   });
 
@@ -118,8 +124,10 @@ export default function UserManagement() {
     defaultValues: {
       email: "",
       role: "patient",
-      isSuperadmin: false,
+      name: "",
+      phone: "",
       isActive: true,
+      isSuperadmin: false,
       resetPassword: false,
     },
   });
@@ -129,31 +137,12 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
-  // Helper to get CSRF token
-  const getCsrfToken = () => {
-    return document.cookie.split('; ')
-      .find(row => row.startsWith('XSRF-TOKEN-COOKIE='))
-      ?.split('=')[1] || '';
-  };
-
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken(),
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-
+      const response = await apiRequest("GET", "/api/admin/users");
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -167,20 +156,8 @@ export default function UserManagement() {
   // Create user
   const onCreateUserSubmit = async (data) => {
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken(), // Use the helper function
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create user');
-      }
+      const response = await apiRequest("POST", "/api/admin/users", data);
+      const newUser = await response.json();
 
       toast({
         title: "User created",
@@ -204,21 +181,7 @@ export default function UserManagement() {
     if (!selectedUser) return;
 
     try {
-      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken(),
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update user');
-      }
-
+      const response = await apiRequest("PATCH", `/api/admin/users/${selectedUser.id}`, data);
       const responseData = await response.json();
       
       // If a temporary password was generated, show it to the admin
@@ -249,19 +212,7 @@ export default function UserManagement() {
   // Delete user
   const handleDeleteUser = async (id) => {
     try {
-      const response = await fetch(`/api/admin/users/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken(),
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete user');
-      }
+      await apiRequest("DELETE", `/api/admin/users/${id}`);
 
       toast({
         title: "User deleted",
@@ -281,19 +232,7 @@ export default function UserManagement() {
   // Lock/unlock user
   const handleToggleLock = async (id, action) => {
     try {
-      const response = await fetch(`/api/admin/users/${id}/${action}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken(),
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to ${action} user account`);
-      }
+      await apiRequest("POST", `/api/admin/users/${id}/${action}`);
 
       toast({
         title: action === 'lock' ? "Account locked" : "Account unlocked",
@@ -329,11 +268,11 @@ export default function UserManagement() {
     updateUserForm.reset({
       email: user.email,
       role: user.role,
-      isSuperadmin: user.isSuperadmin || false,
+      name: metadata?.name || "",
+      phone: metadata?.phone || "",
       isActive: user.isActive !== false, // Default to true if not specified
+      isSuperadmin: user.isSuperadmin || false,
       resetPassword: false,
-      name: metadata.name || "",
-      phone: metadata.phone || "",
     });
     
     setIsEditDialogOpen(true);
@@ -361,20 +300,14 @@ export default function UserManagement() {
   const isUserLocked = (user) => {
     if (!user) return false;
     
-    // Check if the user has locked metadata
-    if (user.metadata) {
-      try {
-        const metadata = typeof user.metadata === 'string' ? 
-          JSON.parse(user.metadata) : user.metadata;
-        
-        if (metadata.lockedUntil) {
-          const lockTime = new Date(metadata.lockedUntil);
-          if (lockTime > new Date()) {
-            return true;
-          }
-        }
-      } catch (e) {
-        console.error("Error parsing metadata", e);
+    // Check account locked flag
+    if (user.accountLocked) return true;
+    
+    // Check lock expiration
+    if (user.lockExpiresAt) {
+      const lockTime = new Date(user.lockExpiresAt);
+      if (lockTime > new Date()) {
+        return true;
       }
     }
     
@@ -415,7 +348,7 @@ export default function UserManagement() {
 
       {isLoading && (
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
 
@@ -424,7 +357,7 @@ export default function UserManagement() {
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2 text-destructive">
               <AlertCircle className="h-5 w-5" />
-              <span>Error loading users. Please try again.</span>
+              <span>Error loading users: {error}</span>
             </div>
           </CardContent>
         </Card>
@@ -452,7 +385,7 @@ export default function UserManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Email / Name</TableHead>
+                  <TableHead className="w-[250px]">Email</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
@@ -461,29 +394,12 @@ export default function UserManagement() {
               </TableHeader>
               <TableBody>
                 {users.map((user) => {
-                  // Parse metadata for each user
-                  let metadata = {};
-                  try {
-                    if (user.metadata && typeof user.metadata === 'string') {
-                      metadata = JSON.parse(user.metadata);
-                    } else if (user.metadata && typeof user.metadata === 'object') {
-                      metadata = user.metadata;
-                    }
-                  } catch (e) {
-                    console.error("Error parsing user metadata", e);
-                  }
-
                   const userLocked = isUserLocked(user);
                   
                   return (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
-                        <div>
-                          <div>{user.email}</div>
-                          {metadata.name && (
-                            <div className="text-sm text-muted-foreground">{metadata.name}</div>
-                          )}
-                        </div>
+                        {user.email}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
