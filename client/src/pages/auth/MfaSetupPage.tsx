@@ -143,9 +143,10 @@ export default function MfaSetupPage() {
           <CardContent className="space-y-6">
             <div className="flex justify-center">
               {qrCode && (
-                <div 
-                  className="p-4 bg-white rounded-md" 
-                  dangerouslySetInnerHTML={{ __html: qrCode }}
+                <img 
+                  src={qrCode}
+                  alt="MFA QR Code" 
+                  className="p-4 bg-white rounded-md w-48 h-48" 
                 />
               )}
             </div>
@@ -166,11 +167,14 @@ export default function MfaSetupPage() {
               </label>
               <Input
                 id="verification-code"
-                placeholder="Enter 6-digit code from your app"
+                placeholder="000000"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
                 maxLength={6}
-                className="text-center text-lg tracking-widest font-mono"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                className="text-center text-xl tracking-[0.5em] font-mono"
+                autoComplete="one-time-code"
               />
               <p className="text-xs text-muted-foreground">
                 Enter the 6-digit code shown in your authenticator app
