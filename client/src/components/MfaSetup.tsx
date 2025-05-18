@@ -121,8 +121,38 @@ export function MfaSetup() {
     verifyMutation.mutate(verificationCode);
   };
 
+  // Mutation to regenerate backup codes
+  const regenerateBackupCodesMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/mfa/regenerate-backup-codes");
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Backup Codes Regenerated",
+        description: "Your new backup codes are displayed below. Please save them securely.",
+      });
+      
+      // Store the new backup codes
+      if (data.backupCodes && data.backupCodes.length > 0) {
+        setBackupCodes(data.backupCodes);
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Regeneration Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleDisable = () => {
     disableMutation.mutate();
+  };
+  
+  const handleRegenerateBackupCodes = () => {
+    regenerateBackupCodesMutation.mutate();
   };
 
   // Reset the flow if dialog closes
@@ -249,17 +279,42 @@ export function MfaSetup() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center py-4 space-y-4">
-                <Shield className="h-16 w-16 text-primary" />
-                <p className="text-center">
-                  Two-factor authentication has been successfully enabled for your account.
-                </p>
+              <div className="flex flex-col py-4 space-y-4">
+                <div className="flex flex-col items-center mb-4">
+                  <Shield className="h-16 w-16 text-primary" />
+                  <p className="text-center mt-2">
+                    Two-factor authentication has been successfully enabled for your account.
+                  </p>
+                </div>
+                
+                {backupCodes.length > 0 && (
+                  <div className="border border-amber-200 rounded-md p-4 bg-amber-50">
+                    <h3 className="text-sm font-medium text-amber-800 mb-2">Save Your Backup Codes</h3>
+                    <p className="text-xs text-amber-700 mb-3">
+                      Save these backup codes in a secure place. You can use them to sign in if you lose access to your authenticator app.
+                      Each code can only be used once.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {backupCodes.map((code, index) => (
+                        <div key={index} className="bg-white p-2 rounded text-center font-mono text-sm">
+                          {code}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-amber-200">
+                      <p className="text-xs text-amber-700">
+                        <strong>Important:</strong> These codes will only be shown once. Make sure to save them now.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="bg-muted p-4 rounded-md w-full">
                   <h4 className="font-medium mb-2">Important:</h4>
                   <ul className="list-disc list-inside text-sm space-y-1">
                     <li>You'll now need a verification code when you sign in</li>
                     <li>Keep your authenticator app accessible</li>
-                    <li>Consider saving backup codes in a secure location</li>
+                    <li>If you lose access to your authenticator, use your backup codes</li>
                   </ul>
                 </div>
               </div>
@@ -324,15 +379,41 @@ export function MfaSetup() {
                     </p>
                   </div>
                 </div>
+                {backupCodes.length > 0 && (
+                  <div className="border border-amber-200 rounded-md p-4 bg-amber-50 my-4">
+                    <h3 className="text-sm font-medium text-amber-800 mb-2">Your Backup Codes</h3>
+                    <p className="text-xs text-amber-700 mb-3">
+                      Each code can only be used once. Save these codes in a secure place.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {backupCodes.map((code, index) => (
+                        <div key={index} className="bg-white p-2 rounded text-center font-mono text-sm">
+                          {code}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 <DialogFooter className="flex flex-col sm:flex-row gap-2">
-                  <Button 
-                    variant="destructive"
-                    onClick={handleDisable}
-                    disabled={disableMutation.isPending}
-                    className="w-full sm:w-auto"
-                  >
-                    {disableMutation.isPending ? "Disabling..." : "Disable 2FA"}
-                  </Button>
+                  <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={handleRegenerateBackupCodes}
+                      disabled={regenerateBackupCodesMutation.isPending}
+                      className="w-full"
+                    >
+                      {regenerateBackupCodesMutation.isPending ? "Generating..." : "Generate New Backup Codes"}
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      onClick={handleDisable}
+                      disabled={disableMutation.isPending}
+                      className="w-full"
+                    >
+                      {disableMutation.isPending ? "Disabling..." : "Disable 2FA"}
+                    </Button>
+                  </div>
                   <Button 
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
