@@ -27,12 +27,15 @@ const MFA_ISSUER = 'Qualibrite Health';
 export async function generateMfaSecret(username: string) {
   // Generate a secret compatible with Google Authenticator
   // Using base32 encoding which is compatible with Google Authenticator
-  const secretBuffer = crypto.randomBytes(MFA_SECRET_LENGTH);
   
-  // Use the authenticator-library compatible encoding
-  const secret = totp.utils.generateSecret(); // This creates a properly formatted secret
+  // Create a fixed length base32 encoded string
+  const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let secret = '';
+  for (let i = 0; i < 16; i++) {
+    secret += base32Chars.charAt(Math.floor(Math.random() * base32Chars.length));
+  }
   
-  // Configure TOTP with standard settings used by authenticator apps
+  // Configure TOTP with standard settings
   totp.options = { 
     digits: 6,
     step: 30, // 30 second validity
