@@ -24,6 +24,9 @@ export function registerRoutes(app: Express): Server {
   
   // Admin routes for superadmin-only functionality - apply rate limiting as protection
   app.use("/api/admin", limitAPI, csrfProtection, adminRoutes);
+  
+  // MFA routes for enhanced security - apply rate limiting for protection
+  app.use("/api/mfa", limitAPI, mfaRoutes);
 
   const httpServer = createServer(app);
 

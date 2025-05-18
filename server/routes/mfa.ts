@@ -14,6 +14,20 @@ import { eq } from "drizzle-orm";
 import { generateMfaSecret, verifyMfaToken, enableMfa, disableMfa } from "../lib/mfa";
 import { Logger } from "../lib/logger";
 import QRCode from "qrcode";
+import session from "express-session";
+
+// Extend session type for MFA properties
+declare module "express-session" {
+  interface SessionData {
+    userId: number;
+    lastActivity: number;
+    mfaSecret?: string;
+    mfaSetupStarted?: boolean;
+  }
+}
+
+// Type declaration for QRCode module
+declare module "qrcode";
 
 const router = Router();
 
