@@ -120,11 +120,32 @@ export function useAuthProvider() {
     await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
   }, [queryClient]);
 
+  const verifyMfa = useCallback(async (code: string) => {
+    const res = await fetch("/api/auth/verify-mfa", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "MFA verification failed");
+    }
+
+    const data = await res.json();
+    await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    return data;
+  }, [queryClient]);
+
   return {
     user,
     isLoading,
     login,
     logout,
     register,
+    verifyMfa,
   };
 }
