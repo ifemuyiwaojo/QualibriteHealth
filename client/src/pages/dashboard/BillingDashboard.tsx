@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
-import { Calendar, DollarSign, AlertTriangle, FileText, BarChart3, CheckCircle2, FileWarning, ArrowUpRight } from "lucide-react";
+import { Calendar, DollarSign, AlertTriangle, FileText, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Progress } from "@/components/ui/progress";
@@ -418,52 +418,6 @@ export default function BillingDashboard() {
               </CardContent>
             </Card>
           </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Financial Performance Metrics</CardTitle>
-              <CardDescription>Key financial indicators for the practice</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">Net Collection Rate</span>
-                  <div className="flex items-center">
-                    <CheckCircle2 className="text-green-500 w-4 h-4 mr-2" />
-                    <span className="text-2xl font-bold">96.8%</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Target: 95%</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">Charge Lag (days)</span>
-                  <div className="flex items-center">
-                    <CheckCircle2 className="text-green-500 w-4 h-4 mr-2" />
-                    <span className="text-2xl font-bold">1.2</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Target: less than 2 days</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">Clean Claim Rate</span>
-                  <div className="flex items-center">
-                    <CheckCircle2 className="text-green-500 w-4 h-4 mr-2" />
-                    <span className="text-2xl font-bold">94.5%</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Target: 92%</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">Days in A/R > 90</span>
-                  <div className="flex items-center">
-                    <FileWarning className="text-amber-500 w-4 h-4 mr-2" />
-                    <span className="text-2xl font-bold">12.4%</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Target: less than 10%</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
