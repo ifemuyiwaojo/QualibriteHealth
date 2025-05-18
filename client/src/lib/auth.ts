@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<any>;
   logout: () => Promise<void>;
   register: (email: string, password: string, role: string) => Promise<void>;
+  verifyMfa: (code: string) => Promise<any>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
