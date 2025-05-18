@@ -48,18 +48,18 @@ router.post("/rotate-secret", authenticateToken, requireSuperadmin, asyncHandler
         userId: req.user.id,
         action: 'SECURITY_KEY_ROTATION',
         resourceType: 'JWT_SECRET',
-        resourceId: null,
-        ipAddress: req.ip,
-        userAgent: req.headers['user-agent'] || 'Unknown',
+        resourceId: 0, // Using 0 as a placeholder for system-wide operations
         details: JSON.stringify({
           description: 'JWT secret rotation performed',
           gracePeriod: `${gracePeriod} days`,
           timestamp: new Date().toISOString()
-        })
+        }),
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'] || 'Unknown'
       };
       
       try {
-        await db.insert(auditLogs).values(auditData);
+        await db.insert(auditLogs).values([auditData]);
       } catch (auditError) {
         // Don't fail the request if audit logging fails, but log the error
         Logger.logError(auditError instanceof Error ? auditError : new Error(String(auditError)), 

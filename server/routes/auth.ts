@@ -451,6 +451,134 @@ router.post("/change-password", authenticateToken, asyncHandler(async (req: any,
 }));
 
 
+// Token refresh endpoint - implements OAuth2.0-like refresh flow
+router.post("/refresh-token", asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+  const token = req.cookies.token;
+  
+  if (!token && !refreshToken) {
+    throw new AppError("No token provided", 401, "AUTH_REQUIRED");
+  }
+  
+  // Get instance of secret manager
+  const secretManager = SecretManager.getInstance();
+  const validSecrets = secretManager.getAllValidSecrets();
+  
+  // Verify either the token from cookie or the provided refresh token
+  let userId = null;
+  let decoded = null;
+  let tokenValid = false;
+  
+  // First try the token in the cookie
+  if (token) {
+    for (const secret of validSecrets) {
+      try {
+        decoded = jwt.verify(token, secret, {
+          audience: 'qualibrite-health-app',
+          issuer: 'qualibrite-health-api'
+        });
+        tokenValid = true;
+        userId = decoded.id;
+        break;
+      } catch (err) {
+        // Continue to next secret or token
+      }
+    }
+  }
+  
+  // If cookie token failed, try the refresh token
+  if (!tokenValid && refreshToken) {
+    for (const secret of validSecrets) {
+      try {
+        decoded = jwt.verify(refreshToken, secret, {
+          audience: 'qualibrite-health-refresh',
+          issuer: 'qualibrite-health-api'
+        });
+        tokenValid = true;
+        userId = decoded.id;
+        break;
+      } catch (err) {
+        // Continue to next secret
+      }
+    }
+  }
+  
+  if (!tokenValid || !userId) {
+    throw new AppError("Invalid or expired token", 401, "INVALID_TOKEN");
+  }
+  
+  // Fetch the user to ensure they exist and are active
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+  
+  // Create new access token with the current secret
+  const currentSecret = secretManager.getCurrentSecret();
+  const newToken = jwt.sign(
+    { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      iat: Math.floor(Date.now() / 1000)
+    },
+    currentSecret,
+    { 
+      expiresIn: "24h",
+      audience: 'qualibrite-health-app',
+      issuer: 'qualibrite-health-api'
+    }
+  );
+  
+  // Create new refresh token with longer expiry
+  const newRefreshToken = jwt.sign(
+    { 
+      id: user.id, 
+      tokenType: 'refresh',
+      iat: Math.floor(Date.now() / 1000)
+    },
+    currentSecret,
+    { 
+      expiresIn: "30d",
+      audience: 'qualibrite-health-refresh',
+      issuer: 'qualibrite-health-api'
+    }
+  );
+  
+  // Update session if it exists
+  if (req.session) {
+    req.session.userId = user.id;
+  }
+  
+  // Set new token cookie
+  res.cookie("token", newToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+  
+  // Log token refresh for audit trail
+  await auditLog(user.id, 'token_refresh', 'users', user.id, req);
+  
+  // Return new tokens and user data
+  res.json({
+    message: "Token refreshed successfully",
+    refreshToken: newRefreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      requiresPasswordChange: user.changePasswordRequired,
+      isSuperadmin: user.isSuperadmin
+    },
+  });
+}));
+
 // Logout endpoint with improved security and error handling
 router.post("/logout", authenticateToken, asyncHandler(async (req: any, res) => {
   // Audit the logout action if we have a user
