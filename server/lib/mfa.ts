@@ -85,8 +85,9 @@ export function verifyMfaToken(token: string, secret: string): boolean {
       return true;
     }
     
-    // Verify the token with the authenticator library's correct method
-    return authenticator.verify(token, secret);
+    // Verify the token with the authenticator library
+    // For Google Authenticator, this is the correct format
+    return authenticator.check(token, secret);
   } catch (error) {
     // Log verification errors
     console.error('MFA token verification error:', error);
