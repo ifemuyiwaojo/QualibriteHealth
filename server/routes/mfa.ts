@@ -20,8 +20,6 @@ import session from "express-session";
 // Just adding the MFA-specific properties here for documentation
 // (No actual declaration needed as it would conflict with auth.ts)
 
-// QRCode module is now properly typed with @types/qrcode
-
 const router = Router();
 
 // Setup MFA (requires authentication)
@@ -151,46 +149,7 @@ router.post("/disable", authenticateToken, asyncHandler(async (req: AuthRequest,
     throw new AppError("Authentication required", 401, "AUTH_REQUIRED");
   }
   
-  // Get the user with their MFA secret
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, req.user.id),
-  });
-  
-  if (!user) {
-    throw new AppError("User not found", 404, "USER_NOT_FOUND");
-  }
-  
-  if (!user.mfaEnabled) {
-    throw new AppError("MFA is not enabled for this account", 400, "MFA_NOT_ENABLED");
-  }
-  
-  // For simplicity, we're not requiring token verification to disable MFA
-  // In a production environment, you might want to require password or token verification for extra security
-  
-  // Token is valid, disable MFA for the user
-  const success = await disableMfa(req.user.id);
-  
-  if (!success) {
-    throw new AppError("Failed to disable MFA", 500, "DISABLE_FAILED");
-  }
-  
-  // Log successful MFA deactivation
-  await Logger.log("security", "auth", "MFA disabled successfully", {
-    userId: req.user.id,
-    request: req
-  });
-  
-  res.json({
-    message: "MFA disabled successfully",
-    mfaEnabled: false
-  });
-}));
-
-// Disable MFA (requires authentication)
-router.post("/disable", authenticateToken, asyncHandler(async (req: AuthRequest, res) => {
-  if (!req.user) {
-    throw new AppError("Authentication required", 401, "AUTH_REQUIRED");
-  }
+  console.log("Attempting to disable MFA for user:", req.user.id);
   
   // Get the user
   const user = await db.query.users.findFirst({
@@ -205,23 +164,31 @@ router.post("/disable", authenticateToken, asyncHandler(async (req: AuthRequest,
     throw new AppError("MFA is not enabled for this account", 400, "MFA_NOT_ENABLED");
   }
   
-  // Disable MFA for the user
-  const success = await disableMfa(req.user.id);
-  
-  if (!success) {
+  try {
+    // Directly update the database to disable MFA
+    await db.update(users)
+      .set({
+        mfaEnabled: false,
+        mfaSecret: null
+      })
+      .where(eq(users.id, req.user.id));
+    
+    console.log("MFA successfully disabled for user:", req.user.id);
+    
+    // Log successful MFA deactivation
+    await Logger.log("security", "auth", "MFA disabled successfully", {
+      userId: req.user.id,
+      request: req
+    });
+    
+    res.json({
+      message: "MFA disabled successfully",
+      mfaEnabled: false
+    });
+  } catch (error) {
+    console.error("Error disabling MFA:", error);
     throw new AppError("Failed to disable MFA", 500, "DISABLE_FAILED");
   }
-  
-  // Log successful MFA deactivation
-  await Logger.log("security", "auth", "MFA disabled successfully", {
-    userId: req.user.id,
-    request: req
-  });
-  
-  res.json({
-    message: "MFA disabled successfully",
-    mfaEnabled: false
-  });
 }));
 
 // Validate an MFA token (used during login with MFA)
