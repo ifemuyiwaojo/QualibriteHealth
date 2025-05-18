@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,11 +38,13 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
     return () => clearInterval(timer);
   }, [timeRemaining]);
 
+  // Get the verify function from auth context
+  const { verifyMfa } = useAuth();
+
   // Mutation for MFA verification
   const verifyMutation = useMutation({
     mutationFn: async (code: string) => {
-      const res = await apiRequest("POST", "/api/auth/verify-mfa", { code });
-      return await res.json();
+      return await verifyMfa(code);
     },
     onSuccess: (data) => {
       toast({
