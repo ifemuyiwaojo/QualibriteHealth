@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<any>;
   register: (email: string, password: string, role: string, headers?: Record<string, string>) => Promise<any>;
   logout: () => Promise<void>;
+  verifyMfa: (code: string) => Promise<any>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -106,7 +107,40 @@ export function useAuthProvider() {
     checkAuth();
   });
 
-  return { user, isLoading, login, register, logout };
+  // Implement MFA verification
+  const verifyMfa = useCallback(async (code: string) => {
+    try {
+      const response = await fetch('/api/auth/verify-mfa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'MFA verification failed';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorMessage;
+        } catch (e) {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      console.error("MFA verification failed:", error);
+      throw error;
+    }
+  }, []);
+
+  return { user, isLoading, login, register, logout, verifyMfa };
 }
 
 export function useAuth() {

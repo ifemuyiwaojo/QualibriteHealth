@@ -21,6 +21,7 @@ import { useState, useCallback } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { ForgotPasswordForm } from "@/components/ForgotPasswordForm";
 import { ForgotEmailForm } from "@/components/ForgotEmailForm";
+import { MfaVerification } from "@/components/MfaVerification";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -32,12 +33,13 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginResponse {
   message: string;
+  mfaRequired?: boolean;
   user: {
     id: number;
     email: string;
     role: string;
-    requiresPasswordChange: boolean;
-    isSuperadmin: boolean;
+    requiresPasswordChange?: boolean;
+    isSuperadmin?: boolean;
   };
 }
 
@@ -48,6 +50,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [forgotMode, setForgotMode] = useState<'none' | 'password' | 'email'>('none');
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [pendingUser, setPendingUser] = useState<LoginResponse["user"] | null>(null);
   const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
@@ -69,12 +73,23 @@ export default function Login() {
       setIsSubmitting(true);
       console.log("Attempting login...");
       const response = await login(data.email, data.password, data.rememberMe);
-      console.log("Login successful");
+      console.log("Login response:", response);
 
       if (response?.user) {
-        if (response.user.requiresPasswordChange) {
+        // Check if MFA verification is required
+        if (response.mfaRequired) {
+          // Store user data and show MFA verification screen
+          setMfaRequired(true);
+          setPendingUser(response.user);
+          toast({
+            title: "Additional Verification Required",
+            description: "Please enter the verification code from your authenticator app",
+          });
+        } else if (response.user.requiresPasswordChange) {
+          // Password change required
           setLocation("/auth/change-password");
         } else {
+          // Normal login successful
           setLocation("/dashboard");
           toast({
             title: "Login Successful",
@@ -111,6 +126,38 @@ export default function Login() {
       setIsSubmitting(false);
     }
   }, [login, toast, isSubmitting, setLocation]);
+  
+  // Handle MFA verification completion
+  const handleMfaSuccess = useCallback((userData: any) => {
+    // MFA verification successful, complete login
+    setMfaRequired(false);
+    setPendingUser(null);
+    
+    // Check if password change is required
+    if (userData.requiresPasswordChange) {
+      setLocation("/auth/change-password");
+    } else {
+      setLocation("/dashboard");
+      toast({
+        title: "Login Successful",
+        description: "Identity verified successfully",
+      });
+    }
+  }, [setLocation, toast]);
+  
+  // Handle MFA verification cancellation
+  const handleMfaCancel = useCallback(() => {
+    // Reset MFA state
+    setMfaRequired(false);
+    setPendingUser(null);
+    
+    // Show message
+    toast({
+      title: "Verification Cancelled",
+      description: "The MFA verification was cancelled",
+      variant: "default",
+    });
+  }, [toast]);
 
   if (isLoading) {
     return (
@@ -130,12 +177,19 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
-            {forgotMode === 'password' ? 'Forgot Password' :
+            {mfaRequired ? 'Two-Factor Authentication' :
+             forgotMode === 'password' ? 'Forgot Password' :
              forgotMode === 'email' ? 'Forgot Email' : 'Sign in'}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {forgotMode === 'password' ? (
+          {mfaRequired && pendingUser ? (
+            <MfaVerification
+              email={pendingUser.email}
+              onVerificationSuccess={handleMfaSuccess}
+              onCancel={handleMfaCancel}
+            />
+          ) : forgotMode === 'password' ? (
             <ForgotPasswordForm onCancel={() => setForgotMode('none')} />
           ) : forgotMode === 'email' ? (
             <ForgotEmailForm onCancel={() => setForgotMode('none')} />
