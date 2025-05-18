@@ -26,7 +26,7 @@ import ITSupportDashboard from "@/pages/dashboard/ITSupportDashboard";
 import MarketingDashboard from "@/pages/dashboard/MarketingDashboard";
 import NotFound from "@/pages/not-found";
 import { memo } from "react";
-import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import UserManagement from "@/pages/admin/UserManagement";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
 import SecurityCenterPage from "@/pages/admin/SecurityCenterPage";
 import CompliancePage from "@/pages/admin/CompliancePage";
@@ -149,7 +149,7 @@ export const Router = memo(function Router() {
           <Route path="/dashboard" component={() => <ProtectedRoute component={DashboardRouter} />} />
 
           {/* Admin Routes */}
-          <Route path="/admin/users" component={() => <ProtectedRoute component={AdminUsersPage} roles={["admin"]} />} />
+          <Route path="/admin/users" component={() => <ProtectedRoute component={UserManagement} roles={["admin"]} />} />
           <Route path="/admin/providers" component={() => <ProtectedRoute component={ProvidersPage} roles={["admin"]} />} />
           <Route path="/admin/audit-logs" component={() => <ProtectedRoute component={AuditLogsPage} roles={["admin"]} />} />
           <Route path="/admin/settings" component={() => <ProtectedRoute component={SettingsPage} roles={["admin"]} />} />
