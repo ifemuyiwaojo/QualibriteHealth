@@ -167,9 +167,41 @@ router.post("/login", asyncHandler(async (req, res) => {
   throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
   }
 
+  // Check if MFA is enabled for this user
+  if (user.mfaEnabled) {
+    // Store user ID in session but mark as requiring MFA verification
+    if (req.session) {
+      req.session.userId = user.id;
+      req.session.mfaPending = true;
+      req.session.mfaRememberMe = rememberMe || false;
+      
+      if (rememberMe) {
+        // Extend session for remember me
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      }
+    }
+    
+    // Log successful password verification but pending MFA
+    await auditLog(user.id, 'password_verified_mfa_pending', 'users', user.id, req);
+    
+    // Return success but indicate MFA is required
+    return res.json({
+      message: "Password verified, MFA required",
+      mfaRequired: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
+    });
+  }
+  
+  // If no MFA required, proceed with normal login flow
   // Set session
   if (req.session) {
     req.session.userId = user.id;
+    req.session.mfaPending = false;
+    
     if (rememberMe) {
       // Extend session to 30 days if "remember me" is checked
       req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
@@ -212,6 +244,7 @@ router.post("/login", asyncHandler(async (req, res) => {
 
   res.json({
     message: "Logged in successfully",
+    mfaRequired: false,
     user: {
       id: user.id,
       email: user.email,
@@ -799,6 +832,92 @@ router.post("/forgot-email", asyncHandler(async (req, res) => {
   
   // Note: For security reasons, the actual email lookup and sending would happen
   // asynchronously after the response to prevent timing attacks
+}));
+
+// MFA verification endpoint for two-factor authentication
+router.post("/verify-mfa", asyncHandler(async (req, res) => {
+  const { code } = req.body;
+  
+  if (!code) {
+    throw new AppError("Verification code is required", 400, "MISSING_CODE");
+  }
+  
+  // Check if user has an active session with pending MFA
+  if (!req.session || !req.session.userId || !req.session.mfaPending) {
+    throw new AppError("No active authentication session with pending MFA", 401, "INVALID_SESSION");
+  }
+  
+  const userId = req.session.userId;
+  const rememberMe = req.session.mfaRememberMe || false;
+  
+  // Get user from database to retrieve MFA secret
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  
+  if (!user || !user.mfaEnabled || !user.mfaSecret) {
+    throw new AppError("User not found or MFA not enabled", 400, "MFA_NOT_ENABLED");
+  }
+  
+  // Import verification function from MFA library
+  const { verifyMfaToken } = require("../lib/mfa");
+  
+  // Verify the MFA token
+  const isCodeValid = verifyMfaToken(code, user.mfaSecret);
+  
+  if (!isCodeValid) {
+    // Log failed MFA attempt
+    await auditLog(userId, 'failed_mfa_verification', 'users', userId, req);
+    throw new AppError("Invalid verification code", 401, "INVALID_CODE");
+  }
+  
+  // Mark MFA as complete in session
+  req.session.mfaPending = false;
+  
+  // Get the current secret from the SecretManager for signing tokens
+  const secretManager = SecretManager.getInstance();
+  const currentSecret = secretManager.getCurrentSecret();
+  
+  // Generate JWT with full user details
+  const token = jwt.sign(
+    { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      // Add issued time for token security
+      iat: Math.floor(Date.now() / 1000)
+    },
+    currentSecret,
+    { 
+      expiresIn: rememberMe ? "30d" : "24h",
+      audience: 'qualibrite-health-app',
+      issuer: 'qualibrite-health-api'
+    }
+  );
+  
+  // Set cookie with secure options
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+  
+  // Log successful MFA verification
+  await auditLog(userId, 'successful_mfa_login', 'users', userId, req);
+  
+  // Return success response with user information
+  res.json({
+    message: "MFA verification successful",
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      requiresPasswordChange: user.changePasswordRequired,
+      isSuperadmin: user.isSuperadmin
+    }
+  });
 }));
 
 export default router;

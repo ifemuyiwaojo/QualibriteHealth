@@ -15,6 +15,9 @@ import { SecretManager } from "../lib/secret-manager";
 declare module "express-session" {
   interface SessionData {
     userId: number;
+    lastActivity?: number;
+    mfaPending?: boolean;
+    mfaRememberMe?: boolean;
   }
 }
 
@@ -36,6 +39,24 @@ export const authenticateToken = async (
   try {
     // First check session
     if (req.session && req.session.userId) {
+      // Check if MFA verification is pending
+      if (req.session.mfaPending === true) {
+        // If MFA is pending, only allow access to the MFA verification endpoint
+        if (req.path === '/api/auth/verify-mfa') {
+          return next();
+        } else {
+          // For all other endpoints, require MFA completion
+          await Logger.log("security", "auth", "Access denied: MFA verification required", {
+            userId: req.session.userId,
+            request: req
+          });
+          return res.status(403).json({ 
+            message: "MFA verification required", 
+            mfaRequired: true 
+          });
+        }
+      }
+      
       const user = await db.query.users.findFirst({
         where: eq(users.id, req.session.userId),
       });

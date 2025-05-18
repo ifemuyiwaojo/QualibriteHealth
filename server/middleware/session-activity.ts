@@ -14,12 +14,7 @@ import { AuthRequest } from "./auth";
 import session from "express-session";
 
 // Extend the express-session SessionData interface
-declare module "express-session" {
-  interface SessionData {
-    userId: number;
-    lastActivity: number;
-  }
-}
+// Note: This is now handled in auth.ts to avoid conflicting declarations
 
 // Constants for session activity tracking
 const ACTIVITY_KEY = 'lastActivity';
