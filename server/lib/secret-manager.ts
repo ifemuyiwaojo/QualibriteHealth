@@ -25,17 +25,29 @@ export class SecretManager {
     const currentSecret = process.env.JWT_SECRET;
     
     if (!currentSecret) {
-      throw new Error('JWT_SECRET environment variable must be set');
+      // Generate an initial secret if JWT_SECRET is not set (only for development)
+      const initialSecret = randomBytes(32).toString('hex');
+      
+      // Set it in memory for this instance
+      this.secrets.push({
+        key: initialSecret,
+        createdAt: new Date(),
+        expiresAt: null // Current secret doesn't expire until rotated
+      });
+      
+      Logger.log('security', 'system', 'Generated initial JWT secret (DEVELOPMENT ONLY)', {
+        details: { warning: 'JWT_SECRET environment variable should be set in production' }
+      });
+    } else {
+      // Add the current secret from environment
+      this.secrets.push({
+        key: currentSecret,
+        createdAt: new Date(),
+        expiresAt: null // Current secret doesn't expire until rotated
+      });
+      
+      Logger.log('info', 'system', 'Secret manager initialized with environment secret', {});
     }
-    
-    // Add the current secret
-    this.secrets.push({
-      key: currentSecret,
-      createdAt: new Date(),
-      expiresAt: null // Current secret doesn't expire until rotated
-    });
-    
-    Logger.log('info', 'system', 'Secret manager initialized', {});
   }
 
   /**

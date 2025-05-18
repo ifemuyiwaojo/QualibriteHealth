@@ -3,6 +3,8 @@ import { authenticateToken, requireSuperadmin, AuthRequest } from "../middleware
 import { asyncHandler, AppError } from "../lib/error-handler";
 import { Logger } from "../lib/logger";
 import { SecretManager } from "../lib/secret-manager";
+import { db } from "@db";
+import { auditLogs } from "@db/schema";
 
 const router = Router();
 
@@ -27,15 +29,46 @@ router.post("/rotate-secret", authenticateToken, requireSuperadmin, asyncHandler
     const secretManager = SecretManager.getInstance();
     
     // Rotate the secret
-    secretManager.rotateSecret(gracePeriod);
+    const newSecret = secretManager.rotateSecret(gracePeriod);
     
     // Log the rotation for audit trail
     if (req.user) {
       await Logger.log("security", "system", `JWT secret rotated by superadmin`, { 
         userId: req.user.id,
         request: req,
-        details: { gracePeriod }
+        details: { 
+          gracePeriod,
+          rotatedAt: new Date().toISOString()
+        }
       });
+      
+      // Also log this to the audit_logs table for compliance tracking
+      const auditData = {
+        user_id: req.user.id,
+        action: 'SECURITY_KEY_ROTATION',
+        resource_type: 'JWT_SECRET',
+        resource_id: null,
+        ip_address: req.ip,
+        user_agent: req.headers['user-agent'] || 'Unknown',
+        details: JSON.stringify({
+          description: 'JWT secret rotation performed',
+          gracePeriod: `${gracePeriod} days`,
+          timestamp: new Date().toISOString()
+        })
+      };
+      
+      try {
+        await db.insert(auditLogs).values(auditData);
+      } catch (auditError) {
+        // Don't fail the request if audit logging fails, but log the error
+        Logger.logError(auditError instanceof Error ? auditError : new Error(String(auditError)), 
+          "system", { 
+            details: { 
+              operation: "JWT secret rotation audit logging",
+              userId: req.user.id
+            } 
+          });
+      }
     }
     
     res.status(200).json({ 
