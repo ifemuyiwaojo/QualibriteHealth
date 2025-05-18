@@ -57,33 +57,44 @@ const auditLog = async (userId: number, action: string, resourceType: string, re
 
 // Set temporary password for superadmin
 const initializeSuperadmin = async () => {
-  const tempPassword = "Admin2024!@QBH";
+  const tempPassword = "Admin123!";  // Simpler password for testing
   const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-  // Check if superadmin exists
-  const existingSuperadmin = await db.query.users.findFirst({
-    where: eq(users.email, 'superadmin@qualibritehealth.com'),
-  });
+  console.log("Initializing superadmin with password:", tempPassword);
 
-  if (!existingSuperadmin) {
-    // Create superadmin if doesn't exist
-    await db.insert(users).values({
-      email: 'superadmin@qualibritehealth.com',
-      passwordHash: hashedPassword,
-      role: 'admin',
-      isSuperadmin: true,
-      changePasswordRequired: true,
+  try {
+    // Check if superadmin exists
+    const existingSuperadmin = await db.query.users.findFirst({
+      where: eq(users.email, 'superadmin@qualibritehealth.com'),
     });
-  } else {
-    // Update existing superadmin
-    await db.update(users)
-      .set({
+
+    if (!existingSuperadmin) {
+      // Create superadmin if doesn't exist
+      const [newAdmin] = await db.insert(users).values({
+        email: 'superadmin@qualibritehealth.com',
         passwordHash: hashedPassword,
-        changePasswordRequired: true,
+        role: 'admin',
         isSuperadmin: true,
-        role: 'admin'
-      })
-      .where(eq(users.email, 'superadmin@qualibritehealth.com'));
+        changePasswordRequired: true,
+      }).returning();
+      
+      console.log("Created superadmin account:", { id: newAdmin.id, email: newAdmin.email });
+    } else {
+      // Update existing superadmin
+      const [updatedAdmin] = await db.update(users)
+        .set({
+          passwordHash: hashedPassword,
+          changePasswordRequired: true,
+          isSuperadmin: true,
+          role: 'admin'
+        })
+        .where(eq(users.email, 'superadmin@qualibritehealth.com'))
+        .returning();
+        
+      console.log("Updated superadmin account:", { id: updatedAdmin.id, email: updatedAdmin.email });
+    }
+  } catch (error) {
+    console.error("Failed to initialize superadmin:", error);
   }
 };
 
@@ -110,10 +121,18 @@ router.post("/login", asyncHandler(async (req, res) => {
 
   const validPassword = await bcrypt.compare(password, user.passwordHash);
   if (!validPassword) {
-    // Log failed attempt
-    await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
-    // Always use same error for security
-    throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
+    // Additional logging for debugging admin login issues
+  console.log("Login attempt failed, password comparison failed:", { 
+    userEmail: user.email,
+    role: user.role,
+    isSuperadmin: user.isSuperadmin
+  });
+  
+  // Log failed attempt
+  await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
+  
+  // Always use same error for security
+  throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
   }
 
   // Set session
