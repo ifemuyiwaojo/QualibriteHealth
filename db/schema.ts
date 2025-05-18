@@ -16,6 +16,13 @@ export const users = pgTable("users", {
   mfaEnabled: boolean("mfa_enabled").default(false),
   mfaSecret: text("mfa_secret"),
   mfaBackupCodes: jsonb("mfa_backup_codes"),
+  
+  // Account security and lockout fields
+  failedLoginAttempts: integer("failed_login_attempts").default(0),
+  lastFailedLogin: timestamp("last_failed_login"),
+  accountLocked: boolean("account_locked").default(false),
+  lockExpiresAt: timestamp("lock_expires_at"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -12,6 +12,7 @@ import { sendEmail } from "../lib/email";
 import { totp } from "otplib";
 import { verifyMfaToken, verifyBackupCode, useBackupCode } from "../lib/mfa";
 import { Logger } from "../lib/logger";
+import { recordFailedLoginAttempt, resetFailedLoginAttempts, checkAccountLockStatus } from "../lib/account-lockout";
 
 const router = Router();
 
@@ -153,21 +154,62 @@ router.post("/login", asyncHandler(async (req, res) => {
     // Use generic message for security - don't reveal if email exists
     throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
   }
-
+  
+  // Check if account is locked before proceeding
+  const lockStatus = await checkAccountLockStatus(user.id);
+  if (lockStatus.isLocked) {
+    // Account is locked
+    const lockExpiration = lockStatus.lockExpiresAt;
+    const minutesRemaining = lockExpiration ? 
+      Math.ceil((lockExpiration.getTime() - Date.now()) / (60 * 1000)) : 30;
+    
+    await Logger.logSecurity('Login attempt on locked account', {
+      userId: user.id,
+      ipAddress: req.ip,
+      details: { lockExpiresAt: lockExpiration }
+    });
+    
+    throw new AppError(
+      `Account is temporarily locked due to multiple failed login attempts. Please try again in ${minutesRemaining} minutes or contact support.`, 
+      401, 
+      "ACCOUNT_LOCKED"
+    );
+  }
+  
   const validPassword = await bcrypt.compare(password, user.passwordHash);
   if (!validPassword) {
     // Additional logging for debugging admin login issues
-  console.log("Login attempt failed, password comparison failed:", { 
-    userEmail: user.email,
-    role: user.role,
-    isSuperadmin: user.isSuperadmin
-  });
-  
-  // Log failed attempt
-  await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
-  
-  // Always use same error for security
-  throw new AppError("Invalid credentials", 401, "AUTH_FAILED");
+    console.log("Login attempt failed, password comparison failed:", { 
+      userEmail: user.email,
+      role: user.role,
+      isSuperadmin: user.isSuperadmin
+    });
+    
+    // Record failed attempt and check if account should be locked
+    const lockoutResult = await recordFailedLoginAttempt(user.id, req.ip);
+    
+    // Log failed attempt
+    await auditLog(user.id, 'failed_login_attempt', 'users', user.id, req);
+    
+    if (lockoutResult.accountLocked) {
+      // Account has been locked
+      const lockExpiration = lockoutResult.lockExpiresAt;
+      const minutesRemaining = lockExpiration ? 
+        Math.ceil((lockExpiration.getTime() - Date.now()) / (60 * 1000)) : 30;
+      
+      throw new AppError(
+        `Account is temporarily locked due to multiple failed login attempts. Please try again in ${minutesRemaining} minutes or contact support.`, 
+        401, 
+        "ACCOUNT_LOCKED"
+      );
+    } else {
+      // Still has attempts remaining
+      throw new AppError(
+        `Invalid credentials. You have ${lockoutResult.remainingAttempts} attempts remaining before your account is temporarily locked.`, 
+        401, 
+        "AUTH_FAILED"
+      );
+    }
   }
 
   // Check if MFA is enabled for this user
