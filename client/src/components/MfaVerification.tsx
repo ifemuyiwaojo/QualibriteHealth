@@ -40,8 +40,11 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
 
   // Direct API-based verification
   // Mutation for MFA verification
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
   const verifyMutation = useMutation({
     mutationFn: async (code: string) => {
+      setErrorMessage(null); // Clear any previous errors
       const res = await apiRequest("POST", "/api/auth/verify-mfa", { code });
       return await res.json();
     },
@@ -59,9 +62,13 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
       }, 100);
     },
     onError: (error: Error) => {
+      // Set error message to display in the UI
+      setErrorMessage("Invalid verification code. Please try again.");
+      
+      // Also show toast notification
       toast({
         title: "Verification failed",
-        description: error.message,
+        description: "The code you entered is incorrect. Please check your authenticator app and try again.",
         variant: "destructive"
       });
     }
@@ -124,7 +131,7 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
               autoComplete="one-time-code"
               pattern="[0-9]*"
               maxLength={6}
-              className="text-center text-lg tracking-widest font-mono"
+              className={`text-center text-lg tracking-widest font-mono ${errorMessage ? 'border-red-500' : ''}`}
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
               onKeyDown={handleKeyDown}
@@ -133,8 +140,19 @@ export function MfaVerification({ email, onVerificationSuccess, onCancel }: MfaV
             />
           </div>
           
-          <p className="text-xs text-muted-foreground">
-            Open your authenticator app to view your verification code
+          {errorMessage ? (
+            <p className="text-xs text-red-500 font-medium mt-1">
+              {errorMessage}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Open your authenticator app to view your verification code
+            </p>
+          )}
+          
+          {/* Test code hint for demo purposes */}
+          <p className="text-xs text-muted-foreground mt-1">
+            <span className="font-medium">Hint:</span> Use code "123456" for testing
           </p>
         </div>
       </CardContent>
