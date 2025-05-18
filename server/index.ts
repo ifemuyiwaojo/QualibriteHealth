@@ -7,6 +7,7 @@ import connectPgSimple from "connect-pg-simple";
 import { pool } from "@db";
 import rateLimit from "express-rate-limit";
 import { errorHandler } from "./lib/error-handler";
+import { securityHeaders } from "./middleware/security-headers";
 
 // Get required secrets from environment variables
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'temporary_secret_change_me_in_production';
@@ -25,6 +26,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// Apply security headers to all responses
+app.use(securityHeaders);
+
 // Setup session store with PostgreSQL
 const PgSession = connectPgSimple(session);
 app.use(
@@ -33,18 +37,20 @@ app.use(
       pool,
       tableName: 'session', // Will be created automatically
       createTableIfMissing: true,
-      pruneSessionInterval: 60 * 15 // Automatically remove expired sessions every 15 min
+      pruneSessionInterval: 60 * 15, // Automatically remove expired sessions every 15 min
+      // Add additional column encryption for sensitive session data (future enhancement)
     }),
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    name: 'qbh.sid', // Custom name instead of default 'connect.sid'
+    name: 'qbh_session', // Custom name with less revealing information
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours default, gets extended on remember me
-      sameSite: 'strict',
-      path: '/'
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      httpOnly: true, // Prevent JavaScript access to cookies (XSS protection)
+      maxAge: 4 * 60 * 60 * 1000, // 4 hours default for healthcare applications
+      sameSite: 'strict', // Prevent CSRF by restricting cross-site cookie usage
+      path: '/',
+      domain: undefined, // Restricts to exact domain, not subdomains
     }
   })
 );
