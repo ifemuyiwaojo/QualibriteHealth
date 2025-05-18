@@ -170,9 +170,10 @@ export function MfaSetup() {
             <CardContent className="space-y-4">
               <div className="flex justify-center">
                 {qrCode && (
-                  <div 
-                    className="p-4 bg-white rounded-md" 
-                    dangerouslySetInnerHTML={{ __html: qrCode }}
+                  <img 
+                    src={qrCode}
+                    alt="MFA QR Code" 
+                    className="p-4 bg-white rounded-md w-48 h-48" 
                   />
                 )}
               </div>
