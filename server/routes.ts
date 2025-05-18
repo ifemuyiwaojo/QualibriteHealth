@@ -20,6 +20,9 @@ export function registerRoutes(app: Express): Server {
 
   // Provider routes (sensitive patient info) - apply general API rate limiting
   app.use("/api/provider", limitAPI, providerRoutes);
+  
+  // Admin routes for superadmin-only functionality - apply rate limiting as protection
+  app.use("/api/admin", limitAPI, csrfProtection, adminRoutes);
 
   const httpServer = createServer(app);
 
