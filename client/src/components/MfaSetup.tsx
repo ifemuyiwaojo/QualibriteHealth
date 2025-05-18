@@ -336,9 +336,17 @@ export function MfaSetup() {
                 </DialogFooter>
               </>
             ) : (
-              <Card className="border-0 shadow-none">
-                {renderStepContent()}
-              </Card>
+              <>
+                <DialogHeader>
+                  <DialogTitle>Two-Factor Authentication Setup</DialogTitle>
+                  <DialogDescription>
+                    Enhance your account security with two-factor authentication
+                  </DialogDescription>
+                </DialogHeader>
+                <Card className="border-0 shadow-none">
+                  {renderStepContent()}
+                </Card>
+              </>
             )}
           </DialogContent>
         </Dialog>
