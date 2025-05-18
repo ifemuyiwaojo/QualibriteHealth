@@ -40,6 +40,8 @@ export default function MfaSetupPage() {
       setQrCode(data.qrCode);
       setMfaSecret(data.secret);
       setStep("setup");
+      // Refresh user data to ensure the latest MFA status is available
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
     onError: (error: Error) => {
       toast({
@@ -61,6 +63,8 @@ export default function MfaSetupPage() {
         title: "MFA Enabled",
         description: "Multi-factor authentication has been successfully enabled for your account.",
       });
+      // Also update the user data to reflect MFA is enabled
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setStep("complete");
     },
     onError: (error: Error) => {

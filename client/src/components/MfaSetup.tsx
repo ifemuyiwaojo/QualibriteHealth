@@ -113,8 +113,13 @@ export function MfaSetup() {
   };
 
   // Reset the flow if dialog closes
+  // Force fetch the latest user data when dialog opens
   const handleDialogChange = (open: boolean) => {
     setIsDialogOpen(open);
+    if (open) {
+      // Refresh user data when dialog opens
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    }
     if (!open && step !== "complete") {
       setStep("initial");
     }
