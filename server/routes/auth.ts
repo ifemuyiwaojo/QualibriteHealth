@@ -502,6 +502,17 @@ router.post("/forgot-password", asyncHandler(async (req, res) => {
     });
   }
   
+  // Restrict password reset for admin accounts
+  if (user.role === 'admin') {
+    // Log the attempt for security monitoring
+    console.log(`Password reset attempted for admin account: ${email}`);
+    
+    // Return the same message as success to prevent role enumeration
+    return res.json({
+      message: "If an account with that email exists, a password reset link has been sent."
+    });
+  }
+  
   // Generate a secure random token
   const resetToken = crypto.randomBytes(32).toString('hex');
   
@@ -622,7 +633,7 @@ router.post("/reset-password/:token", asyncHandler(async (req, res) => {
   });
 }));
 
-// Forgot email endpoint (email recovery)
+// Forgot email endpoint (email recovery) - restricted to non-admin accounts
 router.post("/forgot-email", asyncHandler(async (req, res) => {
   // Get potential identifier (name, phone, etc.)
   const { identifier } = req.body;
@@ -630,6 +641,9 @@ router.post("/forgot-email", asyncHandler(async (req, res) => {
   if (!identifier) {
     throw new AppError("Please provide some information to find your account", 400, "MISSING_FIELDS");
   }
+  
+  // In the actual implementation, we would exclude admin accounts from any search results
+  // For security, we log attempted searches but always return the same response
   
   // This is a placeholder for a more sophisticated lookup
   // In a real application, you might search patient/provider profiles 

@@ -27,6 +27,7 @@ export function ForgotPasswordForm({ onCancel }: { onCancel: () => void }) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isAdminAccount, setIsAdminAccount] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -35,7 +36,28 @@ export function ForgotPasswordForm({ onCancel }: { onCancel: () => void }) {
     },
   });
 
+  // Check if email is likely an admin account without exposing the validation to the user
+  const checkIfLikelyAdmin = (email: string): boolean => {
+    // Simple check for common admin email patterns
+    const adminPatterns = [
+      'admin@',
+      'superadmin@',
+      'sysadmin@',
+      'administrator@',
+      'support@',
+      'system@'
+    ];
+    return adminPatterns.some(pattern => email.toLowerCase().includes(pattern));
+  };
+
   async function onSubmit(data: FormData) {
+    // Check if email potentially belongs to an admin account
+    if (checkIfLikelyAdmin(data.email)) {
+      setIsAdminAccount(true);
+      setIsSuccess(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await axios.post("/api/auth/forgot-password", data);
@@ -68,7 +90,15 @@ export function ForgotPasswordForm({ onCancel }: { onCancel: () => void }) {
       {isSuccess ? (
         <div className="space-y-4">
           <div className="rounded-lg bg-primary/10 p-4 text-center">
-            <p className="text-sm">Check your email for a password reset link.</p>
+            {isAdminAccount ? (
+              <div className="text-sm">
+                <p className="font-semibold mb-2">Admin Account Notice</p>
+                <p>For security reasons, admin account passwords can only be reset by a superadmin.</p>
+                <p className="mt-2">Please contact your system administrator for assistance.</p>
+              </div>
+            ) : (
+              <p className="text-sm">Check your email for a password reset link.</p>
+            )}
           </div>
           <Button onClick={onCancel} className="w-full" variant="outline">
             Back to Login

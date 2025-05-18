@@ -27,6 +27,7 @@ export function ForgotEmailForm({ onCancel }: { onCancel: () => void }) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isAdminRecovery, setIsAdminRecovery] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -35,7 +36,30 @@ export function ForgotEmailForm({ onCancel }: { onCancel: () => void }) {
     },
   });
 
+  // Check if this might be an admin recovery attempt based on the information provided
+  const checkIfPossibleAdminRecovery = (identifier: string): boolean => {
+    // Check for common admin-related terms
+    const adminTerms = [
+      'admin',
+      'administrator',
+      'superadmin',
+      'manager',
+      'system',
+      'supervisor',
+      'security',
+      'dashboard'
+    ];
+    return adminTerms.some(term => identifier.toLowerCase().includes(term));
+  };
+
   async function onSubmit(data: FormData) {
+    // Check if this might be an admin account recovery attempt
+    if (checkIfPossibleAdminRecovery(data.identifier)) {
+      setIsAdminRecovery(true);
+      setIsSuccess(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await axios.post("/api/auth/forgot-email", data);
@@ -68,7 +92,15 @@ export function ForgotEmailForm({ onCancel }: { onCancel: () => void }) {
       {isSuccess ? (
         <div className="space-y-4">
           <div className="rounded-lg bg-primary/10 p-4 text-center">
-            <p className="text-sm">If we can identify your account, we'll send your login information to your registered email address.</p>
+            {isAdminRecovery ? (
+              <div className="text-sm">
+                <p className="font-semibold mb-2">Admin Account Notice</p>
+                <p>For security reasons, admin account email recovery is restricted.</p>
+                <p className="mt-2">Please contact your system administrator or the superadmin for assistance.</p>
+              </div>
+            ) : (
+              <p className="text-sm">If we can identify your account, we'll send your login information to your registered email address.</p>
+            )}
           </div>
           <Button onClick={onCancel} className="w-full" variant="outline">
             Back to Login
