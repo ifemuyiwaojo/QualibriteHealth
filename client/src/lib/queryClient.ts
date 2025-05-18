@@ -1,22 +1,32 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getHeadersWithCsrf, updateCsrfTokenFromResponse } from "./csrf";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
+  
+  // Always update CSRF token from response headers if present
+  updateCsrfTokenFromResponse(res);
 }
 
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  customHeaders?: Record<string, string>
 ): Promise<Response> {
+  // Apply CSRF headers to all non-GET requests
+  const headers = method.toUpperCase() !== 'GET' 
+    ? getHeadersWithCsrf(customHeaders || {})
+    : (customHeaders || {});
+    
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: "include", // Include cookies with all requests
   });
 
   await throwIfResNotOk(res);
@@ -29,8 +39,10 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Use appropriate headers for the request
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      headers: getHeadersWithCsrf()
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
