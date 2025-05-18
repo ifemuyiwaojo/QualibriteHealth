@@ -7,6 +7,7 @@ export interface User {
   role: "patient" | "provider" | "admin";
   changePasswordRequired?: boolean;
   isSuperadmin?: boolean;
+  mfaEnabled?: boolean;
 }
 
 export interface AuthContextType {

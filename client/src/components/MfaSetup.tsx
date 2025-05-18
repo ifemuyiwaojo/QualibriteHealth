@@ -262,7 +262,7 @@ export function MfaSetup() {
     }
   };
 
-  const isMfaEnabled = (user as any)?.mfaEnabled;
+  const isMfaEnabled = user?.mfaEnabled === true;
 
   return (
     <div className="space-y-6">
