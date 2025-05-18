@@ -186,6 +186,44 @@ router.post("/disable", authenticateToken, asyncHandler(async (req: AuthRequest,
   });
 }));
 
+// Disable MFA (requires authentication)
+router.post("/disable", authenticateToken, asyncHandler(async (req: AuthRequest, res) => {
+  if (!req.user) {
+    throw new AppError("Authentication required", 401, "AUTH_REQUIRED");
+  }
+  
+  // Get the user
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, req.user.id),
+  });
+  
+  if (!user) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+  
+  if (!user.mfaEnabled) {
+    throw new AppError("MFA is not enabled for this account", 400, "MFA_NOT_ENABLED");
+  }
+  
+  // Disable MFA for the user
+  const success = await disableMfa(req.user.id);
+  
+  if (!success) {
+    throw new AppError("Failed to disable MFA", 500, "DISABLE_FAILED");
+  }
+  
+  // Log successful MFA deactivation
+  await Logger.log("security", "auth", "MFA disabled successfully", {
+    userId: req.user.id,
+    request: req
+  });
+  
+  res.json({
+    message: "MFA disabled successfully",
+    mfaEnabled: false
+  });
+}));
+
 // Validate an MFA token (used during login with MFA)
 router.post("/validate", asyncHandler(async (req, res) => {
   const { userId, token } = req.body;
