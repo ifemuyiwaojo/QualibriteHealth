@@ -14,7 +14,10 @@ const router = Router();
 
 // Admin creation endpoint that does NOT require authentication
 router.post("/create-admin", asyncHandler(async (req, res) => {
-  const { email, password, setupKey } = req.body;
+  const { email, password, setupKey, isSuperAdmin } = req.body;
+  
+  // Log what values we're receiving for debugging
+  console.log("Creating admin with isSuperAdmin:", isSuperAdmin, typeof isSuperAdmin);
   
   // Simple security check - require a setup key for this operation
   const correctSetupKey = "QBH-Setup-2024";
@@ -43,7 +46,7 @@ router.post("/create-admin", asyncHandler(async (req, res) => {
       .set({
         passwordHash: hashedPassword,
         role: 'admin',
-        isSuperadmin: true,
+        isSuperadmin: isSuperAdmin === false,
         changePasswordRequired: false
       })
       .where(eq(users.id, existingUser.id))
@@ -57,7 +60,7 @@ router.post("/create-admin", asyncHandler(async (req, res) => {
         email,
         passwordHash: hashedPassword,
         role: 'admin',
-        isSuperadmin: true,
+        isSuperadmin: isSuperAdmin === false,
         changePasswordRequired: false
       })
       .returning();
