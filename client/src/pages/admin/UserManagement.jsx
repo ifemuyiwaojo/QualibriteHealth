@@ -129,6 +129,13 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
+  // Helper to get CSRF token
+  const getCsrfToken = () => {
+    return document.cookie.split('; ')
+      .find(row => row.startsWith('XSRF-TOKEN-COOKIE='))
+      ?.split('=')[1] || '';
+  };
+
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
@@ -138,6 +145,7 @@ export default function UserManagement() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
         },
         credentials: 'include',
       });
@@ -163,6 +171,7 @@ export default function UserManagement() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(), // Use the helper function
         },
         body: JSON.stringify(data),
         credentials: 'include',
@@ -199,6 +208,7 @@ export default function UserManagement() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify(data),
         credentials: 'include',
@@ -243,6 +253,7 @@ export default function UserManagement() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
         },
         credentials: 'include',
       });
@@ -274,6 +285,7 @@ export default function UserManagement() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
         },
         credentials: 'include',
       });

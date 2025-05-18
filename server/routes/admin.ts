@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@db";
 import { users } from "@db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { authenticateToken, authorizeRoles } from "../middleware/auth";
+import { authenticateToken, authorizeRoles, AuthRequest } from "../middleware/auth";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { scrypt, randomBytes } from "crypto";
@@ -24,7 +24,7 @@ router.get(
   "/users",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       // Check if user is superadmin or regular admin
       const isSuperadmin = req.user?.isSuperadmin;
@@ -53,7 +53,7 @@ router.post(
   "/users",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       // Validate request body
       const schema = z.object({
@@ -92,29 +92,14 @@ router.post(
         return res.status(409).json({ message: "User with this email already exists" });
       }
       
-      // Create the user with appropriate field names for our schema
-      const userData = {
+      // Create the user
+      const [newUser] = await db.insert(users).values({
         email: email.toLowerCase(),
         passwordHash: await hashPassword(password),
-        role,
+        role: role as any, // Cast to the enum type
         isSuperadmin: isSuperadmin || false,
-        isActive: true,
         changePasswordRequired: requirePasswordChange || true,
-        emailVerified: result.data.skipEmailVerification || false,
-        metadata: JSON.stringify({
-          name,
-          phone,
-        }),
-      };
-      
-      const [newUser] = await db.insert(users).values(userData).returning({
-        id: users.id,
-        email: users.email,
-        role: users.role,
-        isSuperadmin: users.isSuperadmin,
-        createdAt: users.createdAt,
-        metadata: users.metadata,
-      });
+      }).returning();
       
       // Log the creation
       await Logger.logSecurity(`User created by admin: ${newUser.email}`, {
@@ -140,7 +125,7 @@ router.get(
   "/users/:id",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -176,7 +161,7 @@ router.patch(
   "/users/:id",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -236,10 +221,6 @@ router.patch(
         if (typeof result.data.isSuperadmin !== 'undefined' && result.data.isSuperadmin !== user.isSuperadmin) {
           return res.status(403).json({ message: "Cannot change your own superadmin status" });
         }
-        
-        if (typeof result.data.isActive !== 'undefined' && !result.data.isActive) {
-          return res.status(403).json({ message: "Cannot deactivate your own account" });
-        }
       }
       
       // Prepare update data
@@ -253,36 +234,8 @@ router.patch(
         updateData.role = result.data.role;
       }
       
-      if (typeof result.data.isActive !== 'undefined') {
-        updateData.isActive = result.data.isActive;
-      }
-      
       if (typeof result.data.isSuperadmin !== 'undefined' && req.user?.isSuperadmin) {
         updateData.isSuperadmin = result.data.isSuperadmin;
-      }
-      
-      // Handle name and phone updates by updating the JSON metadata
-      let userMetadata;
-      try {
-        userMetadata = user.metadata ? JSON.parse(user.metadata as string) : {};
-      } catch (e) {
-        userMetadata = {};
-      }
-      
-      let metadataChanged = false;
-      
-      if (result.data.name) {
-        userMetadata.name = result.data.name;
-        metadataChanged = true;
-      }
-      
-      if (result.data.phone) {
-        userMetadata.phone = result.data.phone;
-        metadataChanged = true;
-      }
-      
-      if (metadataChanged) {
-        updateData.metadata = JSON.stringify(userMetadata);
       }
       
       // Handle password reset
@@ -298,13 +251,7 @@ router.patch(
       const [updatedUser] = await db.update(users)
         .set(updateData)
         .where(eq(users.id, userId))
-        .returning({
-          id: users.id,
-          email: users.email,
-          role: users.role,
-          isSuperadmin: users.isSuperadmin,
-          metadata: users.metadata,
-        });
+        .returning();
       
       // Log the update
       await Logger.logSecurity(`User updated by admin: ${updatedUser.email}`, {
@@ -337,7 +284,7 @@ router.delete(
   "/users/:id",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -389,7 +336,7 @@ router.post(
   "/users/:id/lock",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -424,10 +371,8 @@ router.post(
       await db.update(users)
         .set({
           failedLoginAttempts: 5, // Set to max attempts to prevent immediate unlock
-          metadata: JSON.stringify({
-            ...JSON.parse(user.metadata as string || '{}'),
-            lockedUntil: lockUntil.toISOString()
-          })
+          accountLocked: true,
+          lockExpiresAt: lockUntil
         })
         .where(eq(users.id, userId));
       
@@ -457,7 +402,7 @@ router.post(
   "/users/:id/unlock",
   authenticateToken,
   authorizeRoles("admin"), 
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -479,20 +424,12 @@ router.post(
         });
       }
       
-      // Get current metadata and remove lockedUntil
-      let userMetadata;
-      try {
-        userMetadata = JSON.parse(user.metadata as string || '{}');
-        delete userMetadata.lockedUntil;
-      } catch (e) {
-        userMetadata = {};
-      }
-      
       // Update the user
       await db.update(users)
         .set({
           failedLoginAttempts: 0,
-          metadata: JSON.stringify(userMetadata)
+          accountLocked: false,
+          lockExpiresAt: null
         })
         .where(eq(users.id, userId));
       
