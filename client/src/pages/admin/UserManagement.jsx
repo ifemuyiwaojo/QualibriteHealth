@@ -452,10 +452,10 @@ export default function UserManagement() {
                         {user.email}
                       </TableCell>
                       <TableCell>
-                        {user.metadata?.name || 'N/A'}
+                        {user.name || user.metadata?.name || 'N/A'}
                       </TableCell>
                       <TableCell>
-                        {user.metadata?.phone || 'N/A'}
+                        {user.phone || user.metadata?.phone || 'N/A'}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
