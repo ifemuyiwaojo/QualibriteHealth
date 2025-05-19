@@ -1,111 +1,164 @@
-import { Router } from "express";
+/**
+ * Admin Temporary Password Routes
+ * These routes enable admins to generate temporary passwords for patient accounts
+ * Part of Phase 3 security improvements for Qualibrite Health
+ */
+
+import express from "express";
 import { db } from "@db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
+import { isAdmin } from "../middleware/role-check";
 import { generateSecurePassword } from "../lib/password-utils";
 import { hashPassword } from "../lib/auth-utils";
-import { isAdmin } from "../middleware/role-check";
-import { isAuthenticated } from "../middleware/auth";
-import { logSecurityAudit, SecurityEventType, SecurityEventSeverity } from "../lib/security-audit-logger";
+import { logSecurityAudit, SecurityEventType } from "../lib/security-audit-logger";
+import { sendEmail } from "../lib/email";
 
-const router = Router();
+const router = express.Router();
 
-// Schema for temporary password generation request
-const tempPasswordSchema = z.object({
-  userId: z.number(),
-  email: z.string().email(),
-  passwordOptions: z.object({
-    length: z.number().int().min(8).max(24),
-    includeUppercase: z.boolean(),
-    includeLowercase: z.boolean(),
-    includeNumbers: z.boolean(),
-    includeSpecialChars: z.boolean(),
-    requireChange: z.boolean(),
-  }),
+/**
+ * Route to get a list of patients for password reset
+ * GET /api/admin/temp-password/patients
+ * Returns a list of patient accounts (id, email, username)
+ */
+router.get("/temp-password/patients", isAdmin, async (req, res) => {
+  try {
+    // Get list of patients for dropdown selection
+    const patientUsers = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        firstName: users.metadata("firstName"),
+        lastName: users.metadata("lastName"),
+        changePasswordRequired: users.changePasswordRequired
+      })
+      .from(users)
+      .where(eq(users.role, "patient"));
+
+    return res.status(200).json(patientUsers);
+  } catch (error) {
+    console.error("Error getting patient list:", error);
+    return res.status(500).json({ message: "Failed to retrieve patient list" });
+  }
 });
 
 /**
- * Route to generate a temporary password for a patient user
- * POST /api/admin/generate-temp-password
- * Restricted to admin users only
+ * Generate a temporary password for a patient account
+ * POST /api/admin/temp-password/generate
+ * Body: { userId: number }
+ * Returns: { success: boolean, tempPassword?: string }
  */
-router.post("/generate-temp-password", isAuthenticated, isAdmin, async (req, res) => {
+router.post("/temp-password/generate", isAdmin, async (req, res) => {
   try {
-    // Validate request body
-    const validatedData = tempPasswordSchema.safeParse(req.body);
-    if (!validatedData.success) {
-      return res.status(400).json({ 
-        message: "Invalid request data", 
-        errors: validatedData.error.format() 
-      });
+    const { userId } = req.body;
+    
+    if (!userId || typeof userId !== "number") {
+      return res.status(400).json({ message: "Valid user ID is required" });
     }
 
-    const { userId, email, passwordOptions } = validatedData.data;
+    // Verify user exists and is a patient
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
 
-    // Check if user exists
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-
-    if (!existingUser) {
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if user's email matches the provided email
-    if (existingUser.email !== email) {
-      return res.status(400).json({ message: "User ID and email do not match" });
+    if (user.role !== "patient") {
+      return res.status(400).json({ 
+        message: "Temporary password generation is only available for patient accounts" 
+      });
     }
 
-    // Generate secure temporary password based on options
-    const temporaryPassword = generateSecurePassword({
-      length: passwordOptions.length,
-      uppercase: passwordOptions.includeUppercase,
-      lowercase: passwordOptions.includeLowercase,
-      numbers: passwordOptions.includeNumbers,
-      specialChars: passwordOptions.includeSpecialChars,
+    // Generate a secure but readable temporary password
+    const tempPassword = generateSecurePassword({ 
+      length: 12, 
+      uppercase: true, 
+      lowercase: true, 
+      numbers: true, 
+      specialChars: true 
     });
 
-    // Hash the temporary password
-    const hashedPassword = await hashPassword(temporaryPassword);
+    // Hash the password before storing
+    const hashedPassword = await hashPassword(tempPassword);
 
-    // Update user's password and set requiresPasswordChange flag if needed
+    // Update the user's password and set changePasswordRequired flag
     await db
       .update(users)
       .set({ 
-        password: hashedPassword, 
-        requiresPasswordChange: passwordOptions.requireChange,
-        updatedAt: new Date()
+        password: hashedPassword,
+        changePasswordRequired: true,
+        lastPasswordChange: new Date()
       })
       .where(eq(users.id, userId));
 
     // Log the security event
     await logSecurityAudit(
       SecurityEventType.PASSWORD_RESET,
-      "Administrator generated temporary password for user",
+      "Admin generated temporary password",
       {
-        userId: req.session.userId,
+        userId: req.session?.userId,
         targetUserId: userId,
         ipAddress: req.ip,
         userAgent: req.headers["user-agent"],
-        sessionId: req.sessionID,
         outcome: "SUCCESS",
         details: {
-          targetUserEmail: email,
-          requiresPasswordChange: passwordOptions.requireChange
+          action: "TEMP_PASSWORD_GENERATION",
+          targetUserRole: user.role,
+          targetUserEmail: user.email,
+          passwordChangeRequired: true
         }
       }
     );
 
-    // Return success response with the generated password
-    return res.status(200).json({
-      message: "Temporary password generated successfully",
-      temporaryPassword,
-      requiresPasswordChange: passwordOptions.requireChange
+    // Optional: Send email notification to user (in production)
+    // Note: This would need proper email configuration in production
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Your Temporary Password for Qualibrite Health",
+        text: `A temporary password has been generated for your Qualibrite Health account. 
+          Temporary Password: ${tempPassword}
+          Please log in and change your password immediately.
+          This temporary password will expire after your first login.`
+      });
+    } catch (emailError) {
+      console.warn("Could not send password email notification:", emailError);
+      // Continue - email failure shouldn't prevent password reset
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      tempPassword,
+      message: "Temporary password generated successfully"
     });
   } catch (error) {
     console.error("Error generating temporary password:", error);
-    return res.status(500).json({ message: "Failed to generate temporary password" });
+    
+    // Log the security event - failure
+    await logSecurityAudit(
+      SecurityEventType.PASSWORD_RESET,
+      "Admin temporary password generation failed",
+      {
+        userId: req.session?.userId,
+        targetUserId: req.body?.userId,
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        outcome: "FAILURE",
+        details: {
+          action: "TEMP_PASSWORD_GENERATION",
+          error: error.message
+        }
+      }
+    );
+    
+    return res.status(500).json({ 
+      success: false,
+      message: "Failed to generate temporary password"
+    });
   }
 });
 

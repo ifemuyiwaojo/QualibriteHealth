@@ -9,7 +9,8 @@ import {
   Shield, 
   FileText,
   AlertTriangle,
-  UserPlus
+  UserPlus,
+  Key
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -134,6 +135,21 @@ export default function AdminDashboard() {
             </p>
             <Button asChild variant="outline" className="w-full">
               <Link href="/admin/settings">View Settings</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Password Management</CardTitle>
+            <Key className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Generate temporary passwords for new patient accounts
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/admin/generate-temp-password">Generate Passwords</Link>
             </Button>
           </CardContent>
         </Card>
