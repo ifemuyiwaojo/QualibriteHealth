@@ -423,7 +423,8 @@ router.get("/me", authenticateToken, asyncHandler(async (req: any, res) => {
       role: user.role,
       requiresPasswordChange: user.changePasswordRequired,
       isSuperadmin: user.isSuperadmin,
-      mfaEnabled: !!user.mfaEnabled  // Add MFA status to the response
+      mfaEnabled: !!user.mfaEnabled,  // Add MFA status to the response
+      metadata: user.metadata  // Include user's metadata which contains mfaRequired flag
     }
   });
 }));

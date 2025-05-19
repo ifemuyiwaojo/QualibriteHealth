@@ -874,7 +874,7 @@ export default function UserManagement() {
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>
-                            Enable MFA
+                            Require MFA
                           </FormLabel>
                         </div>
                       </FormItem>
