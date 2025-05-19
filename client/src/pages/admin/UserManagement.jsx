@@ -821,7 +821,7 @@ export default function UserManagement() {
               </div>
               
               {/* Superadmin-only controls - separate section */}
-              {user?.isSuperadmin && (
+              {user && user.isSuperadmin === true && (
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t mt-4">
                   <h4 className="text-sm font-medium col-span-2 mb-2">Superadmin Controls</h4>
                   

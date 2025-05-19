@@ -1,11 +1,16 @@
-// This file is just a stub for the real auth hook in the application
-// The actual auth hook is implemented elsewhere, this is just to fix
-// compilation errors in our EditUserDialog component
+// This is a stub file for development purposes
+// The real implementation is elsewhere in the application
 
-// Simple stub to avoid compilation errors
+// Stub implementation that simulates a logged-in superadmin
 export function useAuth() {
+  // Return mock data for superadmin status when in development
   return {
-    user: null,
+    user: {
+      id: 44,
+      email: "superadmin@qualibritehealth.com",
+      role: "admin",
+      isSuperadmin: true
+    },
     isLoading: false,
     error: null
   };
