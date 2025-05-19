@@ -29,12 +29,18 @@ router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin",
         id: users.id,
         email: users.email,
         username: users.username,
-        firstName: users.metadata("firstName"),
-        lastName: users.metadata("lastName"),
+        metadata: users.metadata,
         changePasswordRequired: users.changePasswordRequired
       })
       .from(users)
       .where(eq(users.role, "patient"));
+      
+    // Process the metadata field to extract firstName and lastName
+    const processedPatients = patientUsers.map(patient => ({
+      ...patient,
+      firstName: patient.metadata?.firstName || '',
+      lastName: patient.metadata?.lastName || ''
+    }));
 
     return res.status(200).json(patientUsers);
   } catch (error) {

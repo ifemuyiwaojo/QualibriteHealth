@@ -61,8 +61,10 @@ import {
   Edit, 
   Check, 
   X,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from "lucide-react";
+import { Link } from "wouter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -347,8 +349,17 @@ export default function UserManagement() {
 
   return (
     <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center mb-4">
+        <Button variant="ghost" size="sm" asChild className="mr-4">
+          <Link href="/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
         <h1 className="text-3xl font-bold">User Management</h1>
+      </div>
+      
+      <div className="flex justify-end mb-6">
         <Button onClick={() => setIsNewUserDialogOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           Add New User
