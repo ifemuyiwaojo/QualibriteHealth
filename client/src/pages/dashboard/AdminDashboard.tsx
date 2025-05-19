@@ -83,8 +83,28 @@ export default function AdminDashboard() {
               Manage healthcare providers and their credentials
             </p>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/admin/providers">Manage Providers</Link>
+              <Link href="/admin/users?role=provider">Manage Providers</Link>
             </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Staff Management</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Manage staff members including Intake Coordinators
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <Link href="/admin/users?role=intake_coordinator">Intake Coordinators</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <Link href="/admin/users?role=practice_manager">Practice Managers</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

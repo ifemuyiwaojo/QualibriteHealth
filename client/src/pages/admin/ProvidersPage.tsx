@@ -30,9 +30,28 @@ export default function ProvidersPage() {
   const { user } = useAuth();
   const [isAddingProvider, setIsAddingProvider] = useState(false);
 
-  // Use direct API URL with the built-in query client
+  // Fetch provider users properly
   const { data: providers, isLoading, error } = useQuery<Provider[]>({
-    queryKey: ['/api/admin/users?role=provider'],
+    queryKey: ['/api/admin/users', { role: 'provider' }],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/admin/users?role=provider', {
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch providers: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (err) {
+        console.error('Provider fetch error:', err);
+        throw err;
+      }
+    }
   });
 
   if (!user || (user.role !== "admin" && !user.isSuperadmin)) {

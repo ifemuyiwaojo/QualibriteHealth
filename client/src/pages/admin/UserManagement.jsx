@@ -109,7 +109,7 @@ export default function UserManagement() {
     skipEmailVerification: z.boolean().default(false),
   });
 
-  // Schema for user update
+  // Schema for user update with enhanced superadmin privileges
   const updateUserSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
     role: z.string({ required_error: "Please select a role" }),
@@ -118,6 +118,10 @@ export default function UserManagement() {
     isActive: z.boolean().default(true),
     isSuperadmin: z.boolean().default(false),
     resetPassword: z.boolean().default(false),
+    // Enhanced superadmin privileges
+    enableMfa: z.boolean().default(false),
+    archiveUser: z.boolean().default(false),
+    lockAccount: z.boolean().default(false),
   });
 
   // Create user form
@@ -765,7 +769,7 @@ export default function UserManagement() {
                 />
               </div>
 
-              <div className="flex space-x-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={updateUserForm.control}
                   name="isActive"
@@ -805,6 +809,51 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
+
+                {/* Enhanced Superadmin Privileges */}
+                {user?.isSuperadmin && (
+                  <>
+                    <FormField
+                      control={updateUserForm.control}
+                      name="enableMfa"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Enable MFA
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={updateUserForm.control}
+                      name="archiveUser"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Archive user
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 {user?.isSuperadmin && (
                   <FormField
