@@ -77,38 +77,24 @@ export default function ChangePassword() {
 
       const result = await response.json();
 
-      // Update auth state with the new user data
-      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-
+      // Show success message
       toast({
         title: "Password Changed",
         description: "Your password has been updated successfully.",
       });
 
-      // Fetch updated user data
-      const updatedUserResponse = await fetch("/api/auth/me", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-      
-      if (updatedUserResponse.ok) {
-        const { user: updatedUser } = await updatedUserResponse.json();
-        
-        // Check if MFA is required but not set up
-        const mfaRequired = updatedUser?.metadata?.mfaRequired === true;
-        const mfaEnabled = updatedUser?.mfaEnabled === true;
-        
-        if (mfaRequired && !mfaEnabled) {
-          // Redirect to MFA enforcement page
+      // Check if MFA setup is required directly from the change-password response
+      if (result.mfaSetupRequired) {
+        console.log("MFA setup required after password change, redirecting to enforcement page");
+        // Short delay to ensure toast is seen
+        setTimeout(() => {
           setLocation("/auth/mfa-enforce");
-        } else {
-          // Redirect to dashboard
-          setLocation("/dashboard");
-        }
+        }, 500);
       } else {
-        // Fall back to dashboard if we can't check MFA status
+        // Update auth state with the new user data
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        
+        // Redirect to dashboard
         setLocation("/dashboard");
       }
     } catch (error: any) {

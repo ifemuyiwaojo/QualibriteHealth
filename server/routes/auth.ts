@@ -539,12 +539,17 @@ router.post("/change-password", authenticateToken, asyncHandler(async (req: any,
   // Log successful password change for audit trail
   await auditLog(req.user.id, 'password_change', 'users', req.user.id, req);
 
+  // Check if user should be required to set up MFA next
+  const metadata = updatedUser.metadata || {};
+  const mfaRequired = metadata.mfaRequired === true && !updatedUser.mfaEnabled;
+
   // Optionally invalidate other sessions for security
   // This step forces re-login on other devices after password change
 
   // Return updated user data with limited information
   res.json({ 
     message: "Password changed successfully",
+    mfaSetupRequired: mfaRequired,
     user: {
       id: updatedUser.id,
       email: updatedUser.email,
