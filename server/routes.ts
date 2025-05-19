@@ -7,6 +7,7 @@ import setupRoutes from "./routes/setup";
 import adminRoutes from "./routes/admin";
 import mfaRoutes from "./routes/mfa";
 import mobileAuthRoutes from "./routes/mobile-auth";
+import medicalRecordsRoutes from "./routes/medical-records";
 import { csrfProtection, setCsrfToken } from "./middleware/csrf";
 import { limitAPI, limitAuth } from "./middleware/rate-limiter";
 
@@ -22,6 +23,10 @@ export function registerRoutes(app: Express): Server {
 
   // Provider routes (sensitive patient info) - apply general API rate limiting
   app.use("/api/provider", limitAPI, providerRoutes);
+
+  // Medical Records routes with enhanced security (Part of Phase 3 improvements)
+  // Apply CSRF protection and API rate limiting for these sensitive routes
+  app.use("/api/medical-records", limitAPI, csrfProtection, medicalRecordsRoutes);
   
   // Create CSRF token middleware that just sets the token
   app.use((req, res, next) => {

@@ -42,6 +42,10 @@ app.use(cookieParser());
 // Apply security headers to all responses
 app.use(securityHeaders);
 
+// Apply input sanitization to prevent XSS and SQL injection (Phase 3 security improvement)
+import { sanitizeInputs } from "./middleware/input-sanitization";
+app.use(sanitizeInputs);
+
 // Setup session store with PostgreSQL
 const PgSession = connectPgSimple(session);
 app.use(
