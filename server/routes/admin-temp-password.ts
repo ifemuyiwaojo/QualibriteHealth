@@ -6,7 +6,7 @@
 
 import express from "express";
 import { db } from "@db";
-import { users } from "@db/schema";
+import { users, auditLogs } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { authenticateToken, authorizeRoles, AuthRequest } from "../middleware/auth";
 import { generateSecurePassword } from "../lib/password-utils";
