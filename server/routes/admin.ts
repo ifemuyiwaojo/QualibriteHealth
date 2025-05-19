@@ -608,4 +608,66 @@ router.get(
   }
 );
 
+// Delete user endpoint (superadmin only)
+router.delete(
+  "/users/:id",
+  authenticateToken,
+  async (req: AuthRequest, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Only superadmins can delete users
+      if (!req.user?.isSuperadmin) {
+        await Logger.logSecurity("Unauthorized attempt to delete user", {
+          userId: req.user?.id,
+          resourceId: userId,
+          resourceType: "users",
+          ipAddress: req.ip,
+          userAgent: req.headers["user-agent"],
+          details: { message: "Non-superadmin attempted to delete a user" }
+        });
+        
+        return res.status(403).json({ message: "Only superadmins can delete users" });
+      }
+      
+      // Prevent deleting own account
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: "You cannot delete your own account" });
+      }
+      
+      // Get user to be deleted
+      const [userToDelete] = await db.select().from(users).where(eq(users.id, userId));
+      
+      if (!userToDelete) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Delete user from database
+      await db.delete(users).where(eq(users.id, userId));
+      
+      // Log the deletion event
+      await Logger.logSecurity("User account deleted", {
+        userId: req.user.id,
+        resourceId: userId,
+        resourceType: "users",
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        details: { 
+          targetUserEmail: userToDelete.email,
+          targetUserRole: userToDelete.role
+        }
+      });
+      
+      return res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+      Logger.logError(error as Error, "user", { userId: req.user?.id });
+      return res.status(500).json({ message: "Failed to delete user" });
+    }
+  }
+);
+
 export default router;

@@ -1013,4 +1013,46 @@ router.post("/verify-mfa", asyncHandler(async (req, res) => {
   });
 }));
 
+// Verify password for sensitive operations
+router.post("/verify-password", authenticateToken, asyncHandler(async (req: AuthRequest, res) => {
+  const userId = req.user?.id;
+  const { password } = req.body;
+  
+  if (!password) {
+    throw new AppError("Password is required", 400);
+  }
+  
+  // Get user with password for verification
+  const [user] = await db.select()
+    .from(users)
+    .where(eq(users.id, userId));
+  
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+  if (!isPasswordValid) {
+    // Log failed verification attempt
+    await Logger.logSecurity("Failed password verification attempt for critical operation", {
+      userId: userId,
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"],
+    });
+    
+    return res.status(401).json({ message: "Invalid password" });
+  }
+  
+  // Log successful verification
+  await Logger.logSecurity("Password verification successful for critical operation", {
+    userId: userId,
+    ipAddress: req.ip,
+    userAgent: req.headers["user-agent"],
+  });
+  
+  return res.status(200).json({ verified: true });
+}));
+
 export default router;
