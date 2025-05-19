@@ -23,7 +23,7 @@ async function hashPassword(password: string) {
 router.get(
   "/users",
   authenticateToken,
-  authorizeRoles("admin"), 
+  authorizeRoles("admin", "superadmin"), 
   async (req: AuthRequest, res) => {
     try {
       // Check if user is superadmin or regular admin
@@ -100,7 +100,7 @@ router.get(
 router.post(
   "/users",
   authenticateToken,
-  authorizeRoles("admin"), 
+  authorizeRoles("admin", "superadmin"), 
   async (req: AuthRequest, res) => {
     try {
       // Validate request body
@@ -180,7 +180,7 @@ router.post(
 router.get(
   "/users/:id",
   authenticateToken,
-  authorizeRoles("admin"), 
+  authorizeRoles("admin", "superadmin"), 
   async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
@@ -216,7 +216,7 @@ router.get(
 router.patch(
   "/users/:id",
   authenticateToken,
-  authorizeRoles("admin"), 
+  authorizeRoles("admin", "superadmin"), 
   async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
@@ -438,7 +438,7 @@ router.patch(
 router.delete(
   "/users/:id",
   authenticateToken,
-  authorizeRoles("admin"), 
+  authorizeRoles("admin", "superadmin"), 
   async (req: AuthRequest, res) => {
     try {
       const userId = parseInt(req.params.id);
