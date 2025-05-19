@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useCallback, memo } from "react";
-import { useAuthProvider } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-provider";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -15,7 +15,7 @@ const navigation = [
 
 function HeaderComponent() {
   const [open, setOpen] = useState(false);
-  const { user, logout, isLoading } = useAuthProvider();
+  const { user, logout, isLoading } = useAuth();
 
   const handleLogout = useCallback(async () => {
     try {

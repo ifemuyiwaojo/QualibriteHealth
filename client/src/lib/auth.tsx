@@ -1,8 +1,8 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 
-// Import the main auth implementation from auth.ts
+// Import the main auth implementation directly from auth.ts
 import {
-  useAuthProvider as actualUseAuthProvider,
+  useAuthProvider,
   User,
   AuthContextType
 } from './auth';
@@ -11,12 +11,13 @@ import {
 export type { User };
 export type { AuthContextType };
 
-// Re-export the AuthContext 
+// Create a context with null as default value
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 // Create an AuthProvider component for wrapping the app
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = actualUseAuthProvider();
+  // Get the auth implementation from the hook in auth.ts
+  const auth = useAuthProvider();
   
   return (
     <AuthContext.Provider value={auth}>
@@ -25,12 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Export the provider hook for use in App.tsx
-export function useAuthProvider() {
-  return actualUseAuthProvider();
-}
-
-// Export the consumer hook for use in components
+// Export a hook for components to access auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

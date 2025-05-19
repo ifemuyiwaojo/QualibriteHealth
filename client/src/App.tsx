@@ -1,5 +1,5 @@
 import { Switch, Route, Redirect } from "wouter";
-import { useAuthProvider } from "./lib/auth";
+import { useAuth } from "@/lib/auth-provider";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -43,8 +43,8 @@ import ProviderProfilePage from "@/pages/provider/ProviderProfilePage";
 
 
 const DashboardRouter = memo(function DashboardRouter() {
-  // Use direct import from auth.ts to avoid circular dependency issues
-  const { user, isLoading } = useAuthProvider();
+  // Use the useAuth hook from auth.tsx
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return <Loading fullScreen text="Loading your dashboard..." />;
@@ -102,7 +102,7 @@ const AdminRoute = memo(function AdminRoute({
 });
 
 export const Router = memo(function Router() {
-  const { user, isLoading } = useAuthProvider();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
