@@ -31,7 +31,8 @@ export function registerRoutes(app: Express): Server {
   
   // Security Events routes (Part of Phase 4 improvements)
   // Apply API rate limiting and CSRF protection
-  app.use("/api/security-events", limitAPI, csrfProtection, securityEventsRoutes);
+  // TODO: Uncomment when security events routes are fully implemented
+  // app.use("/api/security-events", limitAPI, csrfProtection, securityEventsRoutes);
   
   // Create CSRF token middleware that just sets the token
   app.use((req, res, next) => {

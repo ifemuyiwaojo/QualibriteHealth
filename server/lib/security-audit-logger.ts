@@ -1,17 +1,17 @@
 /**
  * Security Audit Logger
  * 
- * Part of Phase 4 security improvements for Qualibrite Health.
- * This module provides comprehensive security event logging with
- * structured data format suitable for analysis and compliance reporting.
+ * Part of Phase 4 Security Improvements for Qualibrite Health
+ * Provides comprehensive security event logging with detailed contextual information
  */
 
-import { Logger } from './logger';
 import { db } from '@db';
 import { auditLogs } from '@db/schema';
-import { Request } from 'express';
 
-// Security event types for categorization
+/**
+ * Security Event Types
+ * Categorizes different types of security events for better analysis
+ */
 export enum SecurityEventType {
   // Authentication events
   LOGIN_SUCCESS = 'LOGIN_SUCCESS',
@@ -19,198 +19,138 @@ export enum SecurityEventType {
   LOGOUT = 'LOGOUT',
   PASSWORD_CHANGE = 'PASSWORD_CHANGE',
   PASSWORD_RESET = 'PASSWORD_RESET',
+  AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE',
+  
+  // MFA events
   MFA_ENABLED = 'MFA_ENABLED',
   MFA_DISABLED = 'MFA_DISABLED',
-  MFA_CHALLENGE = 'MFA_CHALLENGE',
+  MFA_SETUP = 'MFA_SETUP',
+  MFA_VERIFIED = 'MFA_VERIFIED',
+  MFA_REQUIRED = 'MFA_REQUIRED',
   
-  // Access control events
+  // Authorization events
   ACCESS_DENIED = 'ACCESS_DENIED',
-  PRIVILEGE_CHANGE = 'PRIVILEGE_CHANGE',
-  ROLE_CHANGE = 'ROLE_CHANGE',
+  PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',
+  PERMISSION_CHANGE = 'PERMISSION_CHANGE',
   
-  // Data security events
+  // Data access events
   PHI_ACCESS = 'PHI_ACCESS',
   PHI_EXPORT = 'PHI_EXPORT',
-  RECORD_CREATED = 'RECORD_CREATED',
-  RECORD_UPDATED = 'RECORD_UPDATED',
-  RECORD_DELETED = 'RECORD_DELETED',
+  PHI_MODIFICATION = 'PHI_MODIFICATION',
+  PHI_DELETION = 'PHI_DELETION',
   
-  // System security events
-  SECURITY_CONFIG_CHANGE = 'SECURITY_CONFIG_CHANGE',
-  SECRET_ROTATION = 'SECRET_ROTATION',
-  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
+  // System events
+  CONFIGURATION_CHANGE = 'CONFIGURATION_CHANGE',
+  SYSTEM_ERROR = 'SYSTEM_ERROR',
+  API_USAGE = 'API_USAGE',
+  
+  // Account management
+  ACCOUNT_CREATION = 'ACCOUNT_CREATION',
+  ACCOUNT_MODIFICATION = 'ACCOUNT_MODIFICATION',
+  ACCOUNT_LOCKOUT = 'ACCOUNT_LOCKOUT',
+  ACCOUNT_UNLOCK = 'ACCOUNT_UNLOCK',
+  
+  // Security-specific events
   BRUTE_FORCE_ATTEMPT = 'BRUTE_FORCE_ATTEMPT',
+  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
+  SECURITY_SCAN = 'SECURITY_SCAN',
   
-  // Admin actions
-  USER_CREATED = 'USER_CREATED',
-  USER_UPDATED = 'USER_UPDATED',
-  USER_DELETED = 'USER_DELETED',
-  USER_LOCKED = 'USER_LOCKED',
-  USER_UNLOCKED = 'USER_UNLOCKED'
-}
-
-// Security severity levels
-export enum SecuritySeverity {
-  INFO = 'INFO',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
-}
-
-interface SecurityAuditOptions {
-  // Who performed the action (user ID)
-  userId?: number;
-  
-  // Target of the action (if applicable)
-  targetUserId?: number;
-  
-  // IP address of the client
-  ipAddress?: string;
-  
-  // User agent string
-  userAgent?: string;
-  
-  // Unique session identifier
-  sessionId?: string;
-  
-  // Results or outcome of the action
-  outcome?: 'success' | 'failure' | 'denied' | 'warning';
-  
-  // Severity level of the event
-  severity?: SecuritySeverity;
-  
-  // Additional structured data relevant to the event
-  details?: Record<string, any>;
-  
-  // Resource identifier (like a medical record ID)
-  resourceId?: number | string;
-  
-  // Resource type (like 'medical_record', 'patient', etc)
-  resourceType?: string;
+  // Miscellaneous
+  OTHER = 'OTHER'
 }
 
 /**
- * Log a security audit event with detailed information
+ * Severity levels for security events
+ */
+export enum SecurityEventSeverity {
+  DEBUG = 'DEBUG',
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+  CRITICAL = 'CRITICAL'
+}
+
+/**
+ * Outcome of a security event
+ */
+export enum SecurityEventOutcome {
+  SUCCESS = 'SUCCESS',
+  FAILURE = 'FAILURE',
+  UNKNOWN = 'UNKNOWN'
+}
+
+/**
+ * Optional audit log parameters
+ */
+interface SecurityAuditOptions {
+  userId?: number;
+  targetUserId?: number;
+  resourceId?: number;
+  ipAddress?: string;
+  userAgent?: string;
+  sessionId?: string;
+  outcome?: string;
+  details?: Record<string, any>;
+}
+
+/**
+ * Log a security audit event
  * 
- * @param eventType Type of security event from SecurityEventType enum
- * @param message Human-readable description of the event
- * @param options Additional event details and metadata
+ * @param eventType Type of security event
+ * @param message Human-readable message describing the event
+ * @param options Additional contextual information about the event
  */
 export async function logSecurityAudit(
   eventType: SecurityEventType,
   message: string,
-  options: SecurityAuditOptions
+  options: SecurityAuditOptions = {}
 ): Promise<void> {
   try {
-    // Default severity based on event type if not specified
-    if (!options.severity) {
-      options.severity = getDefaultSeverity(eventType);
+    // Determine severity based on event type
+    let severity = SecurityEventSeverity.INFO;
+    
+    // Set severity based on event type
+    if (eventType.includes('FAILURE') || 
+        eventType === SecurityEventType.ACCESS_DENIED || 
+        eventType === SecurityEventType.ACCOUNT_LOCKOUT) {
+      severity = SecurityEventSeverity.WARNING;
     }
     
-    // Log to database - use the updated schema with event_type column
-    await db.insert(auditLogs).values({
-      event_type: eventType, // Column renamed from 'action' to 'event_type'
-      message,
-      userId: options.userId,
-      target_user_id: options.targetUserId, // New column
-      ipAddress: options.ipAddress,
-      userAgent: options.userAgent,
-      session_id: options.sessionId, // New column
-      outcome: options.outcome, // New column
-      severity: options.severity, // New column
-      details: options.details,
-      resource_id: options.resourceId?.toString(),
-      resource_type: options.resourceType,
-      timestamp: new Date() // Using timestamp instead of createdAt
-    });
+    if (eventType === SecurityEventType.PRIVILEGE_ESCALATION || 
+        eventType === SecurityEventType.BRUTE_FORCE_ATTEMPT ||
+        eventType === SecurityEventType.SUSPICIOUS_ACTIVITY) {
+      severity = SecurityEventSeverity.ERROR;
+    }
     
-    // Also log to application logs for immediate visibility
-    Logger.logSecurity(message, { 
+    if (eventType === SecurityEventType.SYSTEM_ERROR) {
+      severity = SecurityEventSeverity.CRITICAL;
+    }
+    
+    // Insert audit log entry
+    await db.insert(auditLogs).values({
+      userId: options.userId,
+      action: message,
+      resourceType: 'security_event', // Default resource type for security events
+      resourceId: options.resourceId || 0,
       details: {
         eventType,
-        userId: options.userId,
+        severity,
         targetUserId: options.targetUserId,
-        severity: options.severity,
-        outcome: options.outcome,
-        resourceType: options.resourceType,
-        resourceId: options.resourceId
-      }
+        sessionId: options.sessionId,
+        outcome: options.outcome || SecurityEventOutcome.UNKNOWN,
+        ...options.details
+      },
+      ipAddress: options.ipAddress || null,
+      userAgent: options.userAgent || null,
+      timestamp: new Date()
     });
   } catch (error) {
-    // If database logging fails, at least log to application logs
-    Logger.logError(error as Error, 'system', {
-      details: { 
-        context: 'security_audit_logging',
-        eventType,
-        message,
-        ...options
-      }
+    // Log to console if database logging fails
+    console.error('Failed to log security audit:', {
+      eventType,
+      message,
+      options,
+      error
     });
-  }
-}
-
-/**
- * Extract basic security context from a request object
- * 
- * @param req Express request object
- * @returns Object with extracted security context
- */
-export function getSecurityContextFromRequest(req: Request): Pick<SecurityAuditOptions, 'ipAddress' | 'userAgent' | 'sessionId' | 'userId'> {
-  return {
-    ipAddress: req.ip,
-    userAgent: req.headers['user-agent'],
-    sessionId: req.session?.id,
-    userId: req.session?.userId
-  };
-}
-
-/**
- * Get default severity level based on event type
- * 
- * @param eventType Security event type
- * @returns Appropriate severity level
- */
-function getDefaultSeverity(eventType: SecurityEventType): SecuritySeverity {
-  switch (eventType) {
-    // Critical severity events
-    case SecurityEventType.BRUTE_FORCE_ATTEMPT:
-    case SecurityEventType.SUSPICIOUS_ACTIVITY:
-      return SecuritySeverity.CRITICAL;
-      
-    // High severity events
-    case SecurityEventType.LOGIN_FAILURE:
-    case SecurityEventType.ACCESS_DENIED:
-    case SecurityEventType.USER_LOCKED:
-    case SecurityEventType.PHI_EXPORT:
-      return SecuritySeverity.HIGH;
-      
-    // Medium severity events
-    case SecurityEventType.PASSWORD_CHANGE:
-    case SecurityEventType.PASSWORD_RESET:
-    case SecurityEventType.PRIVILEGE_CHANGE:
-    case SecurityEventType.ROLE_CHANGE:
-    case SecurityEventType.MFA_DISABLED:
-    case SecurityEventType.RECORD_DELETED:
-      return SecuritySeverity.MEDIUM;
-      
-    // Low severity events
-    case SecurityEventType.MFA_ENABLED:
-    case SecurityEventType.PHI_ACCESS:
-    case SecurityEventType.RECORD_UPDATED:
-    case SecurityEventType.SECRET_ROTATION:
-    case SecurityEventType.USER_UNLOCKED:
-      return SecuritySeverity.LOW;
-      
-    // Informational events
-    case SecurityEventType.LOGIN_SUCCESS:
-    case SecurityEventType.LOGOUT:
-    case SecurityEventType.RECORD_CREATED:
-    case SecurityEventType.MFA_CHALLENGE:
-    case SecurityEventType.USER_CREATED:
-    case SecurityEventType.USER_UPDATED:
-    case SecurityEventType.SECURITY_CONFIG_CHANGE:
-    default:
-      return SecuritySeverity.INFO;
   }
 }
