@@ -229,7 +229,36 @@ router.post("/login", asyncHandler(async (req, res) => {
     }
   }
 
-  // Check if MFA is enabled for this user
+  // First check if password change is required - this takes priority
+  if (user.changePasswordRequired) {
+    // Set session to authenticated state
+    if (req.session) {
+      req.session.userId = user.id;
+      req.session.mfaPending = false;
+      
+      if (rememberMe) {
+        // Extend session for remember me
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      }
+    }
+    
+    await auditLog(user.id, 'password_change_required', 'users', user.id, req);
+    
+    // Return success and indicate password change is required
+    return res.json({
+      message: "Logged in successfully",
+      passwordChangeRequired: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        requiresPasswordChange: true,
+        isSuperadmin: user.isSuperadmin
+      }
+    });
+  }
+  
+  // Only check MFA if password change is not required
   if (user.mfaEnabled) {
     // Store user ID in session but mark as requiring MFA verification
     if (req.session) {

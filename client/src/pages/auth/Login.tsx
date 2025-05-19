@@ -76,20 +76,29 @@ export default function Login() {
       console.log("Login response:", response);
 
       if (response?.user) {
-        // Check if MFA verification is required
-        if (response.mfaRequired) {
+        // Check if password change is required (this has priority)
+        if (response.passwordChangeRequired || response.user.requiresPasswordChange) {
+          // Password change required
+          console.log("Password change required, redirecting");
+          setLocation("/auth/change-password");
+          toast({
+            title: "Password Change Required",
+            description: "For security reasons, you must change your password before continuing.",
+          });
+        }
+        // Then check if MFA verification is required (only for regular logins)
+        else if (response.mfaRequired) {
           // Store user data and show MFA verification screen
+          console.log("MFA verification required");
           setMfaRequired(true);
           setPendingUser(response.user);
           toast({
             title: "Additional Verification Required",
             description: "Please enter the verification code from your authenticator app",
           });
-        } else if (response.user.requiresPasswordChange) {
-          // Password change required
-          setLocation("/auth/change-password");
         } else {
           // Normal login successful
+          console.log("Login successful, redirecting to dashboard");
           setLocation("/dashboard");
           toast({
             title: "Login Successful",
