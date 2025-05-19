@@ -47,6 +47,7 @@ import {
   Settings, 
   User, 
   Shield, 
+  AlertTriangle,
   LockIcon, 
   UnlockIcon, 
   Trash2, 
@@ -79,6 +80,9 @@ export default function UserManagement() {
   const [isNewUserDialogOpen, setIsNewUserDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   
   // Determine page title based on URL role parameter
   const getPageTitle = () => {
@@ -935,25 +939,44 @@ export default function UserManagement() {
                     )}
                   />
                   
-                  <FormField
-                    control={updateUserForm.control}
-                    name="deleteUser"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-destructive font-bold">
-                            Delete account
-                          </FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="col-span-2 border border-destructive p-3 rounded-md bg-destructive/5">
+                    <h4 className="text-sm font-bold text-destructive mb-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-1" /> Danger Zone
+                    </h4>
+                    
+                    <FormField
+                      control={updateUserForm.control}
+                      name="deleteUser"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 mb-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                
+                                // If checked, open delete confirmation dialog
+                                if (checked) {
+                                  setShowDeleteConfirmation(true);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-destructive font-bold">
+                              Delete account permanently
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <p className="text-xs text-destructive/90">
+                      This action cannot be undone. Deleting an account will permanently remove all user data.
+                      <br /> 
+                      <span className="font-bold">You will be required to enter your password to confirm this action.</span>
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -967,6 +990,103 @@ export default function UserManagement() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center">
+              <AlertTriangle className="h-5 w-5 mr-2" />
+              Confirm Account Deletion
+            </DialogTitle>
+            <DialogDescription>
+              This action is permanent and cannot be undone. All user data will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <p className="mb-4">Please enter your password to confirm this action:</p>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Your Password</Label>
+              <Input 
+                id="confirmPassword"
+                type="password"
+                placeholder="Enter your password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className={passwordError ? "border-red-500" : ""}
+              />
+              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+            </div>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-4">
+              <p className="text-sm text-amber-800">
+                You are about to permanently delete user: <span className="font-bold">{selectedUser?.email}</span>
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteConfirmation(false);
+                setDeletePassword("");
+                setPasswordError("");
+                
+                // Uncheck the delete user checkbox
+                const formValues = updateUserForm.getValues();
+                updateUserForm.setValue("deleteUser", false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={async () => {
+                if (!deletePassword) {
+                  setPasswordError("Password is required");
+                  return;
+                }
+                
+                try {
+                  // Verify password with backend
+                  const response = await fetch("/api/auth/verify-password", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      password: deletePassword
+                    })
+                  });
+                  
+                  if (response.ok) {
+                    // Password verified, proceed with deletion
+                    await handleDeleteUser(selectedUser.id);
+                    setShowDeleteConfirmation(false);
+                    setDeletePassword("");
+                    setPasswordError("");
+                    setIsEditDialogOpen(false);
+                    
+                    toast({
+                      title: "User deleted",
+                      description: "User account has been permanently deleted",
+                    });
+                  } else {
+                    setPasswordError("Incorrect password");
+                  }
+                } catch (error) {
+                  setPasswordError(error.message || "An error occurred");
+                }
+              }}
+            >
+              Confirm Delete
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
