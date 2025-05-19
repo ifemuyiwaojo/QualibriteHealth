@@ -271,8 +271,7 @@ router.post("/login", asyncHandler(async (req, res) => {
   }
 
   // Get the current secret from the SecretManager for signing new tokens
-  const secretManager = SecretManager.getInstance();
-  const currentSecret = secretManager.getCurrentSecret();
+  const currentSecret = SecretManager.getCurrentSecret();
   
   // Also set JWT token for API requests with secure practices
   const token = jwt.sign(
@@ -361,8 +360,7 @@ router.post("/register", registrationLimiter, asyncHandler(async (req, res) => {
   }
 
   // Get the current secret from the SecretManager for signing new tokens
-  const secretManager = SecretManager.getInstance();
-  const currentSecret = secretManager.getCurrentSecret();
+  const currentSecret = SecretManager.getCurrentSecret();
   
   // Create JWT with enhanced security
   const token = jwt.sign(
@@ -971,8 +969,7 @@ router.post("/verify-mfa", asyncHandler(async (req, res) => {
   await resetFailedLoginAttempts(userId);
   
   // Get the current secret from the SecretManager for signing tokens
-  const secretManager = SecretManager.getInstance();
-  const currentSecret = secretManager.getCurrentSecret();
+  const currentSecret = SecretManager.getCurrentSecret();
   
   // Generate JWT with full user details
   const token = jwt.sign(
