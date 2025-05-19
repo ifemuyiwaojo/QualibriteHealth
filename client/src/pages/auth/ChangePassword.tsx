@@ -85,8 +85,32 @@ export default function ChangePassword() {
         description: "Your password has been updated successfully.",
       });
 
-      // Redirect to dashboard
-      setLocation("/dashboard");
+      // Fetch updated user data
+      const updatedUserResponse = await fetch("/api/auth/me", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      
+      if (updatedUserResponse.ok) {
+        const { user: updatedUser } = await updatedUserResponse.json();
+        
+        // Check if MFA is required but not set up
+        const mfaRequired = updatedUser?.metadata?.mfaRequired === true;
+        const mfaEnabled = updatedUser?.mfaEnabled === true;
+        
+        if (mfaRequired && !mfaEnabled) {
+          // Redirect to MFA enforcement page
+          setLocation("/auth/mfa-enforce");
+        } else {
+          // Redirect to dashboard
+          setLocation("/dashboard");
+        }
+      } else {
+        // Fall back to dashboard if we can't check MFA status
+        setLocation("/dashboard");
+      }
     } catch (error: any) {
       toast({
         title: "Error",
