@@ -291,11 +291,18 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 <MfaSetup />
                 
-                <div className="flex justify-center mt-4">
+                <div className="flex flex-col gap-3 items-center mt-4">
                   <Link href="/auth/mfa-setup">
                     <Button variant="outline" className="flex items-center gap-2">
                       <Shield className="h-4 w-4" />
                       Go to Full MFA Setup Page
+                    </Button>
+                  </Link>
+                  
+                  <Link href="/profile/security">
+                    <Button variant="secondary" className="flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Advanced Security Settings
                     </Button>
                   </Link>
                 </div>
