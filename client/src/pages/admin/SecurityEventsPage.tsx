@@ -143,12 +143,20 @@ export default function SecurityEventsPage() {
     <div className="container py-10">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild className="gap-2">
-            <Link href="/admin/security-center">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Security Center
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" asChild className="gap-2">
+              <Link href="/dashboard">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild className="gap-2">
+              <Link href="/admin/security-center">
+                <Shield className="h-4 w-4" />
+                Security Center
+              </Link>
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold">Security Event Logs</h1>
         </div>
         
