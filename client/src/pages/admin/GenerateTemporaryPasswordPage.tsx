@@ -51,18 +51,32 @@ export default function GenerateTemporaryPasswordPage() {
 
   // Mutation to generate temporary password
   const generatePasswordMutation = useMutation({
-    mutationFn: async (data: { userId: number }) => {
+    mutationFn: async (data: { userId: number, forceRegenerate?: boolean }) => {
       const response = await apiRequest("POST", "/api/admin/temp-password/generate", data);
       return await response.json();
     },
     onSuccess: (data) => {
       if (data.success) {
-        setGeneratedPassword(data.tempPassword);
-        toast({
-          title: "Success",
-          description: "Temporary password generated successfully",
-          variant: "default",
-        });
+        if (data.hasExistingTemporaryPassword) {
+          // User already has a temp password
+          setSelectedPatient({
+            ...selectedPatient,
+            hasExistingTemporaryPassword: true
+          });
+          toast({
+            title: "Existing Password",
+            description: "This user already has a temporary password. You can regenerate if needed.",
+            variant: "default",
+          });
+        } else {
+          // New temp password generated
+          setGeneratedPassword(data.tempPassword);
+          toast({
+            title: "Success",
+            description: "Temporary password generated successfully",
+            variant: "default",
+          });
+        }
       } else {
         toast({
           title: "Error",

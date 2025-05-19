@@ -72,7 +72,7 @@ router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin",
  */
 router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin", "superadmin"), async (req: AuthRequest, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, forceRegenerate } = req.body;
     
     if (!userId || typeof userId !== "number") {
       return res.status(400).json({ message: "Valid user ID is required" });
@@ -91,6 +91,17 @@ router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin"
     if (user.role !== "patient") {
       return res.status(400).json({ 
         message: "Temporary password generation is only available for patient accounts" 
+      });
+    }
+    
+    // Check if user already has a temporary password that hasn't been changed yet
+    if (user.changePasswordRequired && forceRegenerate !== true) {
+      return res.status(200).json({ 
+        success: true, 
+        message: "User already has a temporary password that hasn't been changed. Use forceRegenerate to create a new one.",
+        hasExistingTemporaryPassword: true,
+        userId: user.id,
+        email: user.email
       });
     }
 
