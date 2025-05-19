@@ -11,11 +11,11 @@ import {
   medicalRecords, 
   patientProfiles, 
   providerProfiles, 
-  type SelectUser,
   type InsertMedicalRecord,
   type SelectMedicalRecord,
   type MedicalRecordContent
 } from '@db/schema';
+import type { AuthUser } from '../middleware/auth';
 import { encrypt, decrypt } from '../lib/encryption';
 import { AppError } from '../lib/error-handler';
 
@@ -52,7 +52,7 @@ export async function createMedicalRecord(
  */
 export async function getMedicalRecordById(
   id: number, 
-  user: SelectUser
+  user: AuthUser
 ): Promise<SelectMedicalRecord> {
   const [record] = await db.select()
     .from(medicalRecords)
@@ -80,7 +80,7 @@ export async function getMedicalRecordById(
  */
 export async function getPatientMedicalRecords(
   patientProfileId: number,
-  user: SelectUser
+  user: AuthUser
 ): Promise<SelectMedicalRecord[]> {
   // Check if user has permission to access this patient's records
   await checkPatientAccessPermission(patientProfileId, user);
@@ -103,7 +103,7 @@ export async function getPatientMedicalRecords(
 export async function updateMedicalRecord(
   id: number,
   data: Partial<InsertMedicalRecord>,
-  user: SelectUser
+  user: AuthUser
 ): Promise<SelectMedicalRecord> {
   // Get existing record
   const [existingRecord] = await db.select()
@@ -156,7 +156,7 @@ export async function updateMedicalRecord(
  */
 export async function deleteMedicalRecord(
   id: number,
-  user: SelectUser
+  user: AuthUser
 ): Promise<void> {
   // Get existing record
   const [existingRecord] = await db.select()

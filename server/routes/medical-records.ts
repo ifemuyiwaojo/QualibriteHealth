@@ -91,7 +91,7 @@ router.post('/', async (req: AuthRequest, res, next) => {
  * Get a medical record by ID with decrypted data
  * GET /api/medical-records/:id
  */
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req: AuthRequest, res, next) => {
   try {
     const recordId = parseInt(req.params.id);
     if (isNaN(recordId)) {
@@ -116,7 +116,7 @@ router.get('/:id', async (req, res, next) => {
  * Get all medical records for a patient
  * GET /api/medical-records/patient/:patientId
  */
-router.get('/patient/:patientId', async (req, res, next) => {
+router.get('/patient/:patientId', async (req: AuthRequest, res, next) => {
   try {
     const patientId = parseInt(req.params.patientId);
     if (isNaN(patientId)) {
@@ -135,7 +135,7 @@ router.get('/patient/:patientId', async (req, res, next) => {
  * Update a medical record with encrypted sensitive data
  * PATCH /api/medical-records/:id
  */
-router.patch('/:id', async (req, res, next) => {
+router.patch('/:id', async (req: AuthRequest, res, next) => {
   try {
     const recordId = parseInt(req.params.id);
     if (isNaN(recordId)) {
@@ -182,7 +182,7 @@ router.patch('/:id', async (req, res, next) => {
  * Delete a medical record
  * DELETE /api/medical-records/:id
  */
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', async (req: AuthRequest, res, next) => {
   try {
     const recordId = parseInt(req.params.id);
     if (isNaN(recordId)) {

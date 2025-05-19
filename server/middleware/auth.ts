@@ -23,14 +23,16 @@ declare module "express-session" {
   }
 }
 
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: string;
+  isSuperadmin: boolean;
+  changePasswordRequired: boolean;
+}
+
 export interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-    role: string;
-    isSuperadmin: boolean;
-    changePasswordRequired: boolean;
-  };
+  user?: AuthUser;
 }
 
 export const authenticateToken = async (
