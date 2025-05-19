@@ -263,6 +263,9 @@ router.post("/login", asyncHandler(async (req, res) => {
     // Store user ID in session but mark as requiring MFA verification
     if (req.session) {
       req.session.userId = user.id;
+      req.session.email = user.email;
+      req.session.role = user.role;
+      req.session.isSuperadmin = user.isSuperadmin;
       req.session.mfaPending = true;
       req.session.mfaRememberMe = rememberMe || false;
       
@@ -288,9 +291,12 @@ router.post("/login", asyncHandler(async (req, res) => {
   }
   
   // If no MFA required, proceed with normal login flow
-  // Set session
+  // Set session with all necessary user information
   if (req.session) {
     req.session.userId = user.id;
+    req.session.email = user.email;
+    req.session.role = user.role;
+    req.session.isSuperadmin = user.isSuperadmin;
     req.session.mfaPending = false;
     
     if (rememberMe) {

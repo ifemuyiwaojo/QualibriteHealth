@@ -61,11 +61,12 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     return next(new AppError('Authentication required', 401));
   }
   
-  // Set user property on request for backward compatibility
+  // Set user property on request for backward compatibility with all necessary properties
   req.user = {
     id: req.session.userId,
     email: req.session.email || '',
-    role: req.session.role || 'patient'
+    role: req.session.role || 'patient',
+    isSuperadmin: req.session.isSuperadmin || false
   };
   
   next();
