@@ -176,9 +176,17 @@ router.post("/login", asyncHandler(async (req, res) => {
     );
   }
   
-  // Enhanced password validation with better error handling
+  // Enhanced password validation with better error handling and more detailed logging
   let validPassword = false;
   try {
+    // Log hash information for debugging without revealing the actual hash
+    console.log("Attempting password verification for user:", { 
+      email: user.email,
+      role: user.role,
+      hashExists: !!user.passwordHash,
+      hashLength: user.passwordHash ? user.passwordHash.length : 0
+    });
+    
     validPassword = await bcrypt.compare(password, user.passwordHash);
     console.log("Password validation result:", validPassword);
   } catch (error) {
@@ -189,7 +197,8 @@ router.post("/login", asyncHandler(async (req, res) => {
     console.log("Login attempt failed, password comparison failed:", { 
       userEmail: user.email,
       role: user.role,
-      isSuperadmin: user.isSuperadmin
+      isSuperadmin: user.isSuperadmin,
+      emailVerified: user.emailVerified || false
     });
     
     // Record failed attempt and check if account should be locked

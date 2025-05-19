@@ -140,8 +140,13 @@ export async function getUsersByRole(role: string) {
       // Return user with parsed metadata
       return {
         ...user,
-        name: parsedMetadata?.name || '',
-        phone: parsedMetadata?.phone || '',
+        // Safely access name and phone properties
+        name: typeof parsedMetadata === 'object' && parsedMetadata !== null 
+          ? (parsedMetadata as any).name || '' 
+          : '',
+        phone: typeof parsedMetadata === 'object' && parsedMetadata !== null 
+          ? (parsedMetadata as any).phone || '' 
+          : '',
         metadata: parsedMetadata
       };
     });
