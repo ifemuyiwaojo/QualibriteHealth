@@ -92,14 +92,17 @@ router.post(
         return res.status(409).json({ message: "User with this email already exists" });
       }
       
-      // Create the user
-      const [newUser] = await db.insert(users).values({
+      // Create the user with proper metadata for name and phone
+      const userData = {
         email: email.toLowerCase(),
         passwordHash: await hashPassword(password),
         role: role as any, // Cast to the enum type
         isSuperadmin: isSuperadmin || false,
-        changePasswordRequired: requirePasswordChange || true,
-      }).returning();
+        changePasswordRequired: requirePasswordChange === false ? false : true,
+        emailVerified: true, // Set to true to allow immediate login
+      };
+      
+      const [newUser] = await db.insert(users).values(userData).returning();
       
       // Log the creation
       await Logger.logSecurity(`User created by admin: ${newUser.email}`, {

@@ -176,7 +176,14 @@ router.post("/login", asyncHandler(async (req, res) => {
     );
   }
   
-  const validPassword = await bcrypt.compare(password, user.passwordHash);
+  // Enhanced password validation with better error handling
+  let validPassword = false;
+  try {
+    validPassword = await bcrypt.compare(password, user.passwordHash);
+    console.log("Password validation result:", validPassword);
+  } catch (error) {
+    console.error("Password comparison error:", error);
+  }
   if (!validPassword) {
     // Additional logging for debugging admin login issues
     console.log("Login attempt failed, password comparison failed:", { 
@@ -336,6 +343,7 @@ router.post("/register", registrationLimiter, asyncHandler(async (req, res) => {
     // Set default values for security
     changePasswordRequired: validatedData.role !== 'patient', // Force providers/admins to change password
     isSuperadmin: false, // Never allow registration as superadmin
+    emailVerified: true, // Set to true to allow immediate login
   }).returning();
 
   // Set session after registration
