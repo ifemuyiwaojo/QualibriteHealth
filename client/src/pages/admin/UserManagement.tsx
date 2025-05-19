@@ -5,7 +5,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowLeft, UserPlus, UserCog, Users } from "lucide-react";
+import { 
+  ArrowLeft, 
+  UserPlus, 
+  UserCog, 
+  Users, 
+  Shield 
+} from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -352,12 +358,14 @@ export default function UserManagement() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex items-center mb-4">
-        <Button variant="ghost" size="sm" asChild className="mr-4">
-          <Link href="/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <div className="flex gap-2 mr-4">
+          <Button variant="ghost" size="sm" asChild className="gap-2">
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold">User Management</h1>
       </div>
       
