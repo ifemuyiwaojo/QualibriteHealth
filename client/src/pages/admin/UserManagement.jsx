@@ -696,7 +696,7 @@ export default function UserManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit User Dialog - Using the new component */}
+      {/* Edit User Dialog - Using the new component with explicit superadmin flag */}
       <EditUserDialog 
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
@@ -704,6 +704,7 @@ export default function UserManagement() {
         form={updateUserForm}
         onSubmit={onUpdateUserSubmit}
         roleOptions={roleOptions}
+        isSuperadmin={user?.isSuperadmin}
       />
     </div>
   );

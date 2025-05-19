@@ -11,10 +11,10 @@ export function EditUserDialog({
   user, 
   form, 
   onSubmit, 
-  roleOptions 
+  roleOptions,
+  isSuperadmin = false
 }) {
-  // Get isSuperadmin status from the parent component to avoid auth hook issues
-  const isSuperadmin = form.getValues("isSuperadmin") !== undefined;
+  // Use the explicitly passed superadmin flag
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
