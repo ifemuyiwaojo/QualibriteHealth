@@ -1,8 +1,8 @@
 /**
- * Data Encryption Service for Qualibrite Health
+ * Encryption Service for Qualibrite Health
  * 
- * This module provides functionality for encrypting sensitive patient data
- * as part of Phase 3 security improvements.
+ * Part of Phase 3 security improvements, this module provides strong encryption
+ * for sensitive patient data.
  * 
  * Implementation uses Node.js built-in crypto module with strong AES-256-GCM
  * authenticated encryption to provide confidentiality and data integrity.
@@ -26,196 +26,142 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || generateEncryptionKey();
  * This should only be used during initial setup
  */
 function generateEncryptionKey(): string {
-  // Generate a random encryption key
   const key = crypto.randomBytes(KEY_LENGTH).toString('hex');
-  
-  console.warn(
-    'WARNING: No encryption key provided in environment variables. ' +
-    'A random key has been generated for this session. ' +
-    'Data encrypted with this key will not be recoverable if the application restarts. ' +
-    'Set ENCRYPTION_KEY environment variable in production.'
-  );
-  
+  console.warn('WARNING: No encryption key provided in environment variables. A random key has been generated for this session. Data encrypted with this key will not be recoverable if the application restarts. Set ENCRYPTION_KEY environment variable in production.');
   return key;
 }
 
 /**
- * Encrypt sensitive data
- * 
- * @param data The data to encrypt (object or string)
- * @returns Encrypted data object with iv, authTag and encryptedData
+ * Interface for encrypted data structure
  */
-export function encryptData(data: any): { 
-  iv: string;
-  authTag: string;
-  encryptedData: string;
-} {
+export interface EncryptedData {
+  iv: string;         // Initialization vector (unique per encryption)
+  authTag: string;    // Authentication tag from GCM mode (validates integrity)
+  encryptedData: string; // The actual encrypted data
+}
+
+/**
+ * Encrypt a string value using AES-256-GCM
+ * 
+ * @param text The plain text to encrypt
+ * @returns EncryptedData object with iv, authTag and encryptedData
+ */
+export function encrypt(text: string): EncryptedData {
   try {
-    // Convert to string if object
-    const stringData = typeof data === 'string' ? data : JSON.stringify(data);
-    
-    // Generate a random initialization vector
+    // Generate a random initialization vector for each encryption
     const iv = crypto.randomBytes(IV_LENGTH);
     
-    // Create cipher with key, iv, and auth tag length
+    // Create cipher with key, iv, and GCM mode
     const cipher = crypto.createCipheriv(
       ALGORITHM, 
       Buffer.from(ENCRYPTION_KEY, 'hex'), 
-      iv,
-      { authTagLength: AUTH_TAG_LENGTH }
+      iv
     );
     
     // Encrypt the data
-    let encrypted = cipher.update(stringData, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    let encryptedData = cipher.update(text, 'utf8', 'hex');
+    encryptedData += cipher.final('hex');
     
-    // Get the authentication tag
-    const authTag = cipher.getAuthTag().toString('hex');
+    // Get authentication tag
+    const authTag = cipher.getAuthTag();
     
-    // Return the encrypted data with IV and auth tag
+    // Return encrypted data with IV and auth tag
     return {
       iv: iv.toString('hex'),
-      authTag,
-      encryptedData: encrypted,
+      authTag: authTag.toString('hex'),
+      encryptedData
     };
   } catch (error) {
-    Logger.logError(error as Error, 'system', {
-      details: { action: 'encrypt_data' }
+    Logger.logError(error as Error, 'encryption', {
+      details: { action: 'encrypt' }
     });
     throw new Error('Encryption failed');
   }
 }
 
 /**
- * Decrypt encrypted data
+ * Decrypt an encrypted value
  * 
- * @param encryptedData The encrypted data string
- * @param iv The initialization vector used for encryption
- * @param authTag The authentication tag from encryption
- * @param returnObject Whether to parse the decrypted data as JSON object
- * @returns Decrypted data as string or object
+ * @param encryptedData EncryptedData object with iv, authTag, and encryptedData
+ * @returns Decrypted string
  */
-export function decryptData(
-  encryptedData: string,
-  iv: string,
-  authTag: string,
-  returnObject = true
-): any {
+export function decrypt(encryptedData: EncryptedData): string {
   try {
-    // Create decipher with key, iv
+    // Create decipher
     const decipher = crypto.createDecipheriv(
       ALGORITHM,
       Buffer.from(ENCRYPTION_KEY, 'hex'),
-      Buffer.from(iv, 'hex')
+      Buffer.from(encryptedData.iv, 'hex')
     );
     
     // Set auth tag
-    decipher.setAuthTag(Buffer.from(authTag, 'hex'));
+    decipher.setAuthTag(Buffer.from(encryptedData.authTag, 'hex'));
     
     // Decrypt the data
-    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    let decrypted = decipher.update(encryptedData.encryptedData, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
-    // Parse as JSON if requested
-    if (returnObject && decrypted) {
-      return JSON.parse(decrypted);
-    }
     
     return decrypted;
   } catch (error) {
-    Logger.logError(error as Error, 'system', {
-      details: { action: 'decrypt_data' }
+    Logger.logError(error as Error, 'encryption', {
+      details: { action: 'decrypt' }
     });
-    throw new Error('Decryption failed. Data may be corrupted or tampered with.');
+    throw new Error('Decryption failed');
   }
 }
 
 /**
- * Encrypt an object with sensitive data
- * Only specified fields will be encrypted, the rest are left as is
+ * Helper to encrypt specified fields in an object
+ * This will encrypt the specified fields in-place
  * 
- * @param object The object containing fields to encrypt
+ * @param obj Object containing fields to encrypt
  * @param fields Array of field names to encrypt
  * @returns Object with encrypted fields
  */
-export function encryptObject<T extends Record<string, any>>(
-  object: T,
-  fields: (keyof T)[]
-): T & { _encrypted_fields?: (keyof T)[] } {
-  const result = { ...object };
-  const encryptedFields: (keyof T)[] = [];
+export function encryptFields<T extends Record<string, any>>(
+  obj: T, 
+  fields: string[]
+): T {
+  const result = { ...obj };
   
   for (const field of fields) {
-    if (object[field]) {
-      // Store field value as encrypted data
-      const encrypted = encryptData(object[field]);
-      
-      // Replace with encrypted version
-      result[field] = encrypted;
-      
-      // Keep track of which fields are encrypted
-      encryptedFields.push(field);
+    if (field in obj && typeof obj[field] === 'string' && obj[field]) {
+      result[field] = encrypt(obj[field]);
     }
   }
   
-  // Add metadata about which fields are encrypted if any
-  if (encryptedFields.length > 0) {
-    result._encrypted_fields = encryptedFields;
-  }
+  // Mark which fields are encrypted for easier decryption later
+  (result as any)._encrypted_fields = fields;
   
   return result;
 }
 
 /**
- * Decrypt an object with encrypted fields
+ * Helper to decrypt specified fields in an object
  * 
- * @param object The object with encrypted fields
+ * @param obj Object containing encrypted fields
+ * @param fields Array of field names to decrypt (optional, will use _encrypted_fields if not provided)
  * @returns Object with decrypted fields
  */
-export function decryptObject<T extends Record<string, any>>(object: T): T {
-  const result = { ...object };
+export function decryptFields<T extends Record<string, any>>(
+  obj: T, 
+  fields?: string[]
+): T {
+  const result = { ...obj };
+  const fieldsToDecrypt = fields || (obj as any)._encrypted_fields || [];
   
-  // Check if there are encrypted fields
-  const encryptedFields = object._encrypted_fields as (keyof T)[] | undefined;
-  
-  if (!encryptedFields || encryptedFields.length === 0) {
-    // No encrypted fields found
-    return result;
-  }
-  
-  // Decrypt each field
-  for (const field of encryptedFields) {
-    if (result[field]) {
-      const encrypted = result[field] as {
-        iv: string;
-        authTag: string;
-        encryptedData: string;
-      };
-      
-      // Decrypt the field
-      result[field] = decryptData(
-        encrypted.encryptedData,
-        encrypted.iv,
-        encrypted.authTag
-      );
+  for (const field of fieldsToDecrypt) {
+    if (field in obj && typeof obj[field] === 'object' && obj[field] !== null) {
+      try {
+        result[field] = decrypt(obj[field] as EncryptedData);
+      } catch (error) {
+        // If decryption fails, leave the field as is
+        Logger.logError(error as Error, 'encryption', {
+          details: { action: 'decryptFields', field }
+        });
+      }
     }
   }
   
-  // Remove metadata
-  delete result._encrypted_fields;
-  
   return result;
-}
-
-/**
- * Check if data is already encrypted
- */
-export function isEncrypted(data: any): boolean {
-  return (
-    data &&
-    typeof data === 'object' &&
-    'iv' in data &&
-    'authTag' in data &&
-    'encryptedData' in data
-  );
 }
