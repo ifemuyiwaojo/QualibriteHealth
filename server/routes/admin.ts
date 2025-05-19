@@ -28,17 +28,58 @@ router.get(
     try {
       // Check if user is superadmin or regular admin
       const isSuperadmin = req.user?.isSuperadmin;
+      const roleFilter = req.query.role as string | undefined;
       
       // Get all users
       const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
       
-      // If not superadmin, filter out other admins and superadmins
-      const filteredUsers = isSuperadmin 
-        ? allUsers
-        : allUsers.filter(user => !(user.role === "admin" && user.id !== req.user?.id) && !user.isSuperadmin);
+      // Apply role filtering first if specified
+      let filteredUsers = roleFilter 
+        ? allUsers.filter(user => user.role === roleFilter)
+        : allUsers;
       
-      // Remove sensitive data
-      const sanitizedUsers = filteredUsers.map(({ passwordHash, ...user }) => user);
+      // Then apply permission-based filtering
+      if (!isSuperadmin) {
+        filteredUsers = filteredUsers.filter(user => {
+          // Always exclude superadmins except self
+          if (user.isSuperadmin && user.id !== req.user?.id) return false;
+          
+          // Exclude other admins unless it's the current user
+          if (user.role === "admin" && user.id !== req.user?.id) return false;
+          
+          return true;
+        });
+      }
+      
+      // Remove sensitive data and format metadata
+      const sanitizedUsers = filteredUsers.map(({ passwordHash, metadata, ...user }) => {
+        // Parse metadata if it exists
+        let parsedMetadata = {};
+        let name = '';
+        let phone = '';
+        
+        try {
+          if (metadata) {
+            parsedMetadata = typeof metadata === 'string' 
+              ? JSON.parse(metadata) 
+              : metadata;
+              
+            if (parsedMetadata && typeof parsedMetadata === 'object') {
+              name = (parsedMetadata as any).name || '';
+              phone = (parsedMetadata as any).phone || '';
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing metadata for user', user.id);
+        }
+        
+        return {
+          ...user,
+          name,
+          phone,
+          metadata: parsedMetadata
+        };
+      });
       
       res.json(sanitizedUsers);
     } catch (error) {
@@ -452,6 +493,56 @@ router.post(
     } catch (error) {
       Logger.logError(error as Error, "system", { userId: req.user?.id });
       res.status(500).json({ message: "Failed to unlock user account" });
+    }
+  }
+);
+
+// Get providers only (admin route)
+router.get(
+  "/providers", 
+  authenticateToken,
+  authorizeRoles("admin"),
+  async (req: AuthRequest, res) => {
+    try {
+      // Get all provider users
+      const providerUsers = await db.select().from(users)
+        .where(eq(users.role, "provider"))
+        .orderBy(desc(users.createdAt));
+      
+      // Remove sensitive data and format metadata
+      const sanitizedProviders = providerUsers.map(({ passwordHash, metadata, ...user }) => {
+        // Parse metadata if it exists
+        let parsedMetadata = {};
+        let name = '';
+        let phone = '';
+        
+        try {
+          if (metadata) {
+            parsedMetadata = typeof metadata === 'string' 
+              ? JSON.parse(metadata) 
+              : metadata;
+              
+            if (parsedMetadata && typeof parsedMetadata === 'object') {
+              name = (parsedMetadata as any).name || '';
+              phone = (parsedMetadata as any).phone || '';
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing metadata for provider', user.id);
+        }
+        
+        return {
+          ...user,
+          name,
+          phone,
+          metadata: parsedMetadata
+        };
+      });
+      
+      res.json(sanitizedProviders);
+    } catch (error) {
+      Logger.logError(error as Error, "system", { userId: req.user?.id });
+      res.status(500).json({ message: "Failed to fetch providers" });
     }
   }
 );
