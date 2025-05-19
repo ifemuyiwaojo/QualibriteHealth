@@ -8,7 +8,7 @@ import express from "express";
 import { db } from "@db";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
-import { isAdmin } from "../middleware/role-check";
+import { authorizeRoles } from "../middleware/auth";
 import { generateSecurePassword } from "../lib/password-utils";
 import { hashPassword } from "../lib/auth-utils";
 import { logSecurityAudit, SecurityEventType } from "../lib/security-audit-logger";
@@ -21,7 +21,7 @@ const router = express.Router();
  * GET /api/admin/temp-password/patients
  * Returns a list of patient accounts (id, email, username)
  */
-router.get("/temp-password/patients", isAdmin, async (req, res) => {
+router.get("/temp-password/patients", authorizeRoles("admin"), async (req, res) => {
   try {
     // Get list of patients for dropdown selection
     const patientUsers = await db
@@ -49,7 +49,7 @@ router.get("/temp-password/patients", isAdmin, async (req, res) => {
  * Body: { userId: number }
  * Returns: { success: boolean, tempPassword?: string }
  */
-router.post("/temp-password/generate", isAdmin, async (req, res) => {
+router.post("/temp-password/generate", authorizeRoles("admin"), async (req, res) => {
   try {
     const { userId } = req.body;
     
