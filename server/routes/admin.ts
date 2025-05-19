@@ -315,16 +315,16 @@ router.patch(
           updateData.isActive = result.data.isActive;
         }
         
-        // Handle metadata updates (MFA settings, PHI data like name/phone)
-        // Create a proper metadata object that combines all values
-        const userMetadata = user.metadata || {};
-        
-        // Update MFA settings if provided
+        // Handle MFA settings - use the actual database field
         if (typeof result.data.enableMfa !== 'undefined') {
-          userMetadata.mfaRequired = result.data.enableMfa;
+          // Update the dedicated MFA field in the database
+          updateData.mfaEnabled = result.data.enableMfa;
         }
         
-        // Update name and phone fields (PHI data)
+        // Handle name and phone in metadata (PHI data)
+        const userMetadata = user.metadata || {};
+        
+        // Update name and phone fields if provided
         if (result.data.name) {
           userMetadata.name = result.data.name;
         }
@@ -333,8 +333,10 @@ router.patch(
           userMetadata.phone = result.data.phone;
         }
         
-        // Apply all metadata updates
-        updateData.metadata = userMetadata;
+        // Apply the metadata updates if changed
+        if (result.data.name || result.data.phone) {
+          updateData.metadata = userMetadata;
+        }
         
         // Handle account archiving
         if (result.data.archiveUser) {
