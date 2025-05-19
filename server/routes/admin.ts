@@ -92,17 +92,22 @@ router.post(
         return res.status(409).json({ message: "User with this email already exists" });
       }
       
-      // Create the user with proper metadata for name and phone
-      const userData = {
+      // Proper metadata handling - store name and phone as serialized JSON
+      let metadata = JSON.stringify({
+        name: name || '',
+        phone: phone || ''
+      });
+      
+      // Create the user with all necessary fields
+      const [newUser] = await db.insert(users).values({
         email: email.toLowerCase(),
         passwordHash: await hashPassword(password),
         role: role as any, // Cast to the enum type
         isSuperadmin: isSuperadmin || false,
         changePasswordRequired: requirePasswordChange === false ? false : true,
         emailVerified: true, // Set to true to allow immediate login
-      };
-      
-      const [newUser] = await db.insert(users).values(userData).returning();
+        metadata: metadata // Store user metadata
+      }).returning();
       
       // Log the creation
       await Logger.logSecurity(`User created by admin: ${newUser.email}`, {

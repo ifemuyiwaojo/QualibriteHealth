@@ -38,17 +38,29 @@ export async function createUser(userData: {
   const salt = await bcrypt.genSalt(12);
   const hashedPassword = await bcrypt.hash(userData.password, salt);
   
-  // Create user with consistent defaults
-  const [newUser] = await db.insert(users).values({
-    email: userData.email.toLowerCase(),
-    passwordHash: hashedPassword,
-    role: userData.role as any,
-    isSuperadmin: userData.isSuperadmin || false,
-    changePasswordRequired: userData.requirePasswordChange !== false,
-    emailVerified: true, // Enable immediate login
-  }).returning();
+  // Create metadata with user profile information
+  const metadata = {
+    name: userData.name || '',
+    phone: userData.phone || ''
+  };
   
-  return newUser;
+  // Create user with consistent defaults
+  try {
+    const [newUser] = await db.insert(users).values({
+      email: userData.email.toLowerCase(),
+      passwordHash: hashedPassword,
+      role: userData.role as any,
+      isSuperadmin: userData.isSuperadmin || false,
+      changePasswordRequired: userData.requirePasswordChange !== false,
+      emailVerified: true, // Enable immediate login
+      metadata // Add user profile information
+    }).returning();
+    
+    return newUser;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw new AppError("Failed to create user", 500, "USER_CREATION_FAILED");
+  }
 }
 
 /**
@@ -104,13 +116,39 @@ export async function getFilteredUsers(
  * Get users by role - specifically for provider management and similar components
  */
 export async function getUsersByRole(role: string) {
-  const roleUsers = await db.select()
-    .from(users)
-    .where(eq(users.role, role))
-    .orderBy(desc(users.createdAt));
+  try {
+    // Execute query with plain SQL conditions for better compatibility
+    const roleUsers = await db.select().from(users)
+      .where(eq(users.role, role as any))
+      .orderBy(desc(users.createdAt));
     
-  // Remove sensitive data
-  return roleUsers.map(({ passwordHash, ...user }) => user);
+    // Remove sensitive data and add metadata parsing
+    return roleUsers.map(({ passwordHash, metadata, ...user }) => {
+      let parsedMetadata = {};
+      
+      // Parse metadata if it exists
+      if (metadata) {
+        try {
+          parsedMetadata = typeof metadata === 'string' 
+            ? JSON.parse(metadata) 
+            : metadata;
+        } catch (e) {
+          console.error('Error parsing metadata for user', user.id);
+        }
+      }
+      
+      // Return user with parsed metadata
+      return {
+        ...user,
+        name: parsedMetadata?.name || '',
+        phone: parsedMetadata?.phone || '',
+        metadata: parsedMetadata
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching users by role:", error);
+    return [];
+  }
 }
 
 /**

@@ -28,6 +28,10 @@ export const users = pgTable("users", {
   mfaSecret: text("mfa_secret"),
   mfaBackupCodes: jsonb("mfa_backup_codes"),
   
+  // User profile and additional fields
+  metadata: jsonb("metadata").default({}).notNull(),
+  emailVerified: boolean("email_verified").default(false),
+  
   // Account security and lockout fields
   failedLoginAttempts: integer("failed_login_attempts").default(0),
   lastFailedLogin: timestamp("last_failed_login"),
