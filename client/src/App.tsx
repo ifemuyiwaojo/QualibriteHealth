@@ -1,5 +1,5 @@
 import { Switch, Route, Redirect } from "wouter";
-import { useAuth } from "@/lib/auth-provider";
+import { AuthContext, useAuthProvider } from "./lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -43,8 +43,7 @@ import ProviderProfilePage from "@/pages/provider/ProviderProfilePage";
 
 
 const DashboardRouter = memo(function DashboardRouter() {
-  // Use the useAuth hook from auth.tsx
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
     return <Loading fullScreen text="Loading your dashboard..." />;
@@ -102,7 +101,7 @@ const AdminRoute = memo(function AdminRoute({
 });
 
 export const Router = memo(function Router() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthProvider();
 
   if (isLoading) {
     return (
@@ -188,11 +187,13 @@ export const Router = memo(function Router() {
 });
 
 function App() {
+  const auth = useAuthProvider();
+
   return (
-    <>
+    <AuthContext.Provider value={auth}>
       <Router />
       <Toaster />
-    </>
+    </AuthContext.Provider>
   );
 }
 

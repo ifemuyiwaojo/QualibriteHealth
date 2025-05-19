@@ -23,16 +23,14 @@ declare module "express-session" {
   }
 }
 
-export interface AuthUser {
-  id: number;
-  email: string;
-  role: string;
-  isSuperadmin: boolean;
-  changePasswordRequired: boolean;
-}
-
 export interface AuthRequest extends Request {
-  user?: AuthUser;
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+    isSuperadmin: boolean;
+    changePasswordRequired: boolean;
+  };
 }
 
 export const authenticateToken = async (
@@ -244,43 +242,6 @@ export const authorizeRoles = (...roles: string[]) => {
 };
 
 // Add a superadmin check middleware with improved logging
-// Simple middleware to require authentication
-export const requireAuth = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  if (!req.user) {
-    console.warn(`[${new Date().toISOString()}] WARNING auth: Access denied: User not authenticated`, {
-      path: req.path,
-      method: req.method
-    });
-    return res.status(401).json({ message: "Authentication required" });
-  }
-  
-  // If password change is required, enforce it before allowing access to other areas
-  if (req.user.changePasswordRequired) {
-    // Allow access only to password change endpoints
-    if (
-      req.path === '/api/auth/change-password' || 
-      req.path === '/api/auth/logout'
-    ) {
-      return next();
-    } else {
-      await Logger.log("security", "auth", "Access denied: Password change required", {
-        userId: req.user.id,
-        request: req
-      });
-      return res.status(403).json({ 
-        message: "Password change required", 
-        passwordChangeRequired: true 
-      });
-    }
-  }
-  
-  next();
-};
-
 export const requireSuperadmin = async (
   req: AuthRequest,
   res: Response,

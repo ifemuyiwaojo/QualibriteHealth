@@ -37,9 +37,6 @@ export function useAuth() {
   return context;
 }
 
-// Since this is a .ts file, we can't use JSX here
-// We'll define the AuthProvider in auth.tsx instead
-
 export function useAuthProvider() {
   const queryClient = useQueryClient();
 
