@@ -30,26 +30,29 @@ router.get(
       const isSuperadmin = req.user?.isSuperadmin;
       const roleFilter = req.query.role as string | undefined;
       
-      // Get all users
-      const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      // Get all users with optional role filtering
+      let query = db.select().from(users);
       
-      // Apply role filtering first if specified
-      let filteredUsers = roleFilter 
-        ? allUsers.filter(user => user.role === roleFilter)
-        : allUsers;
-      
-      // Then apply permission-based filtering
-      if (!isSuperadmin) {
-        filteredUsers = filteredUsers.filter(user => {
-          // Always exclude superadmins except self
-          if (user.isSuperadmin && user.id !== req.user?.id) return false;
-          
-          // Exclude other admins unless it's the current user
-          if (user.role === "admin" && user.id !== req.user?.id) return false;
-          
-          return true;
-        });
+      // Apply database-level role filtering for better performance
+      if (roleFilter) {
+        query = query.where(eq(users.role, roleFilter as any));
       }
+      
+      // Execute query with ordering
+      const allUsers = await query.orderBy(desc(users.createdAt));
+      
+      // Apply permission-based filtering
+      let filteredUsers = isSuperadmin 
+        ? allUsers
+        : allUsers.filter(user => {
+            // Always exclude superadmins except self
+            if (user.isSuperadmin && user.id !== req.user?.id) return false;
+            
+            // Exclude other admins unless it's the current user
+            if (user.role === "admin" && user.id !== req.user?.id) return false;
+            
+            return true;
+          });
       
       // Remove sensitive data and format metadata
       const sanitizedUsers = filteredUsers.map(({ passwordHash, metadata, ...user }) => {
@@ -81,8 +84,12 @@ router.get(
         };
       });
       
+      // Log successful query
+      console.log(`Fetched ${sanitizedUsers.length} users ${roleFilter ? `with role: ${roleFilter}` : ''}`);
+      
       res.json(sanitizedUsers);
     } catch (error) {
+      console.error("Error fetching users:", error);
       Logger.logError(error as Error, "system", { userId: req.user?.id });
       res.status(500).json({ message: "Failed to fetch users" });
     }
