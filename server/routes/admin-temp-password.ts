@@ -134,8 +134,13 @@ router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin"
     
     const tempPassword = generatePassword();
     
-    // Use the imported hashPassword function that we already have
-    const hashedPassword = await hashPassword(tempPassword);
+    // We need to use bcrypt for hashing to match the login mechanism
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+    
+    console.log(`Generated temp password: ${tempPassword}`);
+    console.log(`Hashed with bcrypt (not the actual hash): [hash of length ${hashedPassword.length}]`);
 
     // Update the user's password and set changePasswordRequired flag
     await db
