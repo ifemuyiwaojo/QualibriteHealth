@@ -24,21 +24,32 @@ const router = express.Router();
 router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin", "superadmin"), async (req, res) => {
   try {
     // Get list of patients for dropdown selection
-    // Get all patients with a simpler query
+    // Get all patients from the database
     const patientUsers = await db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        metadata: users.metadata,
+        changePasswordRequired: users.changePasswordRequired
+      })
       .from(users)
       .where(eq(users.role, "patient"));
-      
+    
     // Process the results for the frontend
-    const processedPatients = patientUsers.map(patient => ({
-      id: patient.id,
-      email: patient.email,
-      username: patient.username || '',
-      firstName: patient.metadata?.firstName || '',
-      lastName: patient.metadata?.lastName || '',
-      changePasswordRequired: patient.changePasswordRequired
-    }));
+    const processedPatients = patientUsers.map(patient => {
+      // Handle potential undefined metadata
+      const metadata = patient.metadata || {};
+      
+      return {
+        id: patient.id,
+        email: patient.email,
+        username: patient.username || '',
+        firstName: metadata.firstName || '',
+        lastName: metadata.lastName || '',
+        changePasswordRequired: patient.changePasswordRequired
+      };
+    });
 
     return res.status(200).json(processedPatients);
   } catch (error) {
