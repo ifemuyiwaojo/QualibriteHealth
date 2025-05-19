@@ -834,6 +834,26 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={updateUserForm.control}
+                  name="requirePasswordChange"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          Require password change
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
               
               {/* Superadmin-only controls - separate section */}
