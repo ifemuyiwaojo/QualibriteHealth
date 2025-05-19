@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 
 // Import the main auth implementation from auth.ts
 import {
@@ -13,6 +13,17 @@ export type { AuthContextType };
 
 // Re-export the AuthContext 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
+// Create an AuthProvider component for wrapping the app
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const auth = actualUseAuthProvider();
+  
+  return (
+    <AuthContext.Provider value={auth}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
 // Export the provider hook for use in App.tsx
 export function useAuthProvider() {

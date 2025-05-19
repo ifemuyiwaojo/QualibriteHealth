@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext } from "react";
+import React, { ReactNode, createContext, useContext } from "react";
 import {
   useQuery,
   useMutation,
@@ -16,29 +16,29 @@ export interface User {
   mfaEnabled?: boolean;
 }
 
-type AuthContextType = {
+interface LoginData {
+  username: string;
+  password: string;
+}
+
+interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
+}
+
+interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<User, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<User, Error, RegisterData>;
-};
+}
 
-type LoginData = {
-  username: string;
-  password: string;
-};
+const AuthContext = createContext<AuthContextType | null>(null);
 
-type RegisterData = {
-  username: string;
-  email: string;
-  password: string;
-};
-
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const { toast } = useToast();
   
   const {
@@ -50,19 +50,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
+  const loginMutation = useMutation<User, Error, LoginData>({
+    mutationFn: async (credentials) => {
       const res = await apiRequest("POST", "/api/auth/login", credentials);
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: (user) => {
       queryClient.setQueryData(["/api/auth/me"], user);
       toast({
         title: "Login successful",
         description: "Welcome back to Qualibrite Health",
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Login failed",
         description: error.message,
@@ -71,19 +71,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: async (userData: RegisterData) => {
+  const registerMutation = useMutation<User, Error, RegisterData>({
+    mutationFn: async (userData) => {
       const res = await apiRequest("POST", "/api/auth/register", userData);
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: (user) => {
       queryClient.setQueryData(["/api/auth/me"], user);
       toast({
         title: "Registration successful",
         description: "Welcome to Qualibrite Health",
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Registration failed",
         description: error.message,
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const logoutMutation = useMutation({
+  const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
       await apiRequest("POST", "/api/auth/logout");
     },
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You have been logged out successfully",
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Logout failed",
         description: error.message,
@@ -126,9 +126,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");

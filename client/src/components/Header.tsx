@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useCallback, memo } from "react";
-import { useAuth } from "@/lib/auth";
+import { useAuthProvider } from "@/lib/auth";
 
 const navigation = [
   { name: "Home", href: "/" },
