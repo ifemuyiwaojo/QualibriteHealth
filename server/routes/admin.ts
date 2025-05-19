@@ -366,7 +366,7 @@ router.patch(
         
         // Handle password change requirement
         if (typeof result.data.requirePasswordChange !== 'undefined') {
-          updateData.requiresPasswordChange = result.data.requirePasswordChange;
+          updateData.changePasswordRequired = result.data.requirePasswordChange;
         }
       }
       
