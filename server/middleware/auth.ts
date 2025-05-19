@@ -92,6 +92,12 @@ export const authorizeRoles = (...roles: string[]) => {
       return next(new AppError('Authentication required', 401));
     }
 
+    // Allow superadmins access to all routes regardless of roles specified
+    if (req.user.isSuperadmin) {
+      return next();
+    }
+    
+    // Check if the user's role is included in the allowed roles
     if (!roles.includes(req.user.role)) {
       await logSecurityAudit(
         SecurityEventType.ACCESS_DENIED,
