@@ -36,6 +36,7 @@ import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
+import MedicalRecordsPage from "@/pages/patient/MedicalRecordsPage";
 import SchedulePage from "@/pages/provider/SchedulePage";
 import PatientListPage from "@/pages/provider/PatientListPage";
 import RecordsPage from "@/pages/provider/RecordsPage";
@@ -167,7 +168,7 @@ export const Router = memo(function Router() {
           {/* Patient Routes */}
           <Route path="/telehealth" component={() => <ProtectedRoute component={TelehealthPage} />} />
           <Route path="/patient/appointments" component={() => <ProtectedRoute component={AppointmentsPage} roles={["patient"]} />} />
-          <Route path="/patient/records" component={() => <ProtectedRoute component={() => <div>Medical Records Page</div>} roles={["patient"]} />} />
+          <Route path="/patient/records" component={() => <ProtectedRoute component={MedicalRecordsPage} roles={["patient"]} />} />
           <Route path="/patient/profile" component={() => <ProtectedRoute component={() => <div>Patient Profile Page</div>} roles={["patient"]} />} />
 
 
