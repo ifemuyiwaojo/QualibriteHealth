@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/use-auth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -14,8 +13,8 @@ export function EditUserDialog({
   onSubmit, 
   roleOptions 
 }) {
-  const { user: currentUser } = useAuth();
-  const isSuperadmin = currentUser?.isSuperadmin;
+  // Get isSuperadmin status from the parent component to avoid auth hook issues
+  const isSuperadmin = form.getValues("isSuperadmin") !== undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,9 +75,9 @@ export function EditUserDialog({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name (Optional)</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="John Doe" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -90,9 +89,9 @@ export function EditUserDialog({
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone (Optional)</FormLabel>
+                    <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="(555) 123-4567" {...field} />
+                      <Input placeholder="(555) 123-4567" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

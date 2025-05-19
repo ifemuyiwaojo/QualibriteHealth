@@ -103,8 +103,8 @@ export default function UserManagement() {
     email: z.string().email({ message: "Please enter a valid email address" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
     role: z.string({ required_error: "Please select a role" }),
-    name: z.string().optional(),
-    phone: z.string().optional(),
+    name: z.string({ required_error: "Name is required" }),
+    phone: z.string({ required_error: "Phone number is required" }),
     isSuperadmin: z.boolean().default(false),
     requirePasswordChange: z.boolean().default(true),
     skipEmailVerification: z.boolean().default(false),
@@ -114,8 +114,8 @@ export default function UserManagement() {
   const updateUserSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
     role: z.string({ required_error: "Please select a role" }),
-    name: z.string().optional(),
-    phone: z.string().optional(),
+    name: z.string({ required_error: "Name is required" }),
+    phone: z.string({ required_error: "Phone number is required" }),
     isActive: z.boolean().default(true),
     isSuperadmin: z.boolean().default(false),
     resetPassword: z.boolean().default(false),
@@ -123,6 +123,7 @@ export default function UserManagement() {
     enableMfa: z.boolean().default(false),
     archiveUser: z.boolean().default(false),
     lockAccount: z.boolean().default(false),
+    requirePasswordChange: z.boolean().default(false),
   });
 
   // Create user form
