@@ -1039,8 +1039,14 @@ router.post("/verify-password", authenticateToken, asyncHandler(async (req: Auth
     throw new AppError("User not found", 404);
   }
   
-  // Verify password against passwordHash field
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  // Verify password against password_hash field
+  console.log("User data for verification:", { 
+    userId: userId, 
+    hasPasswordHash: !!user.password_hash,
+    fields: Object.keys(user)
+  });
+  
+  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
   
   if (!isPasswordValid) {
     // Log failed verification attempt
