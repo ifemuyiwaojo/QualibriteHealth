@@ -83,6 +83,7 @@ export default function UserManagement() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Determine page title based on URL role parameter
   const getPageTitle = () => {
@@ -1045,7 +1046,8 @@ export default function UserManagement() {
               Cancel
             </Button>
             <Button 
-              variant="destructive" 
+              variant="destructive"
+              disabled={isDeleting}
               onClick={async () => {
                 if (!deletePassword) {
                   setPasswordError("Password is required");
@@ -1053,6 +1055,8 @@ export default function UserManagement() {
                 }
                 
                 try {
+                  setIsDeleting(true);
+                  
                   // Verify password with backend
                   const response = await fetch("/api/auth/verify-password", {
                     method: "POST",
@@ -1065,22 +1069,41 @@ export default function UserManagement() {
                   });
                   
                   if (response.ok) {
-                    // Password verified, proceed with deletion
-                    await handleDeleteUser(selectedUser.id);
-                    setShowDeleteConfirmation(false);
-                    setDeletePassword("");
-                    setPasswordError("");
-                    setIsEditDialogOpen(false);
-                    
-                    toast({
-                      title: "User deleted",
-                      description: "User account has been permanently deleted",
-                    });
+                    try {
+                      // Password verified, proceed with deletion
+                      const deleteResponse = await fetch(`/api/admin/users/${selectedUser.id}`, {
+                        method: 'DELETE',
+                      });
+                      
+                      if (deleteResponse.ok) {
+                        // Refresh user list
+                        await fetchUsers();
+                        
+                        setShowDeleteConfirmation(false);
+                        setDeletePassword("");
+                        setPasswordError("");
+                        setIsEditDialogOpen(false);
+                        
+                        toast({
+                          title: "User deleted",
+                          description: `User ${selectedUser.email} has been permanently deleted`,
+                          variant: "default",
+                        });
+                      } else {
+                        const errorData = await deleteResponse.json();
+                        throw new Error(errorData.message || "Failed to delete user");
+                      }
+                    } catch (deleteError) {
+                      setPasswordError(deleteError.message || "Failed to delete user");
+                    }
                   } else {
-                    setPasswordError("Incorrect password");
+                    const errorData = await response.json();
+                    setPasswordError(errorData.message || "Incorrect password");
                   }
                 } catch (error) {
                   setPasswordError(error.message || "An error occurred");
+                } finally {
+                  setIsDeleting(false);
                 }
               }}
             >

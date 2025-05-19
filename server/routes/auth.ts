@@ -1023,16 +1023,24 @@ router.post("/verify-password", authenticateToken, asyncHandler(async (req: Auth
   }
   
   // Get user with password for verification
-  const [user] = await db.select()
+  // Since userId is from the authenticated request, it should exist
+  if (!userId) {
+    throw new AppError("Authentication required", 401);
+  }
+  
+  const userResults = await db
+    .select()
     .from(users)
     .where(eq(users.id, userId));
+    
+  const user = userResults[0];
   
   if (!user) {
     throw new AppError("User not found", 404);
   }
   
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  // Verify password against passwordHash field
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
   
   if (!isPasswordValid) {
     // Log failed verification attempt
