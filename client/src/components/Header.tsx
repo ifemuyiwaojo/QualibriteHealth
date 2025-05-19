@@ -15,7 +15,7 @@ const navigation = [
 
 function HeaderComponent() {
   const [open, setOpen] = useState(false);
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuthProvider();
 
   const handleLogout = useCallback(async () => {
     try {
