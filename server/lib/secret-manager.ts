@@ -1,193 +1,169 @@
 /**
- * Secret Manager for Qualibrite Health
+ * Secret Manager Service
  * 
- * Handles JWT secret rotation and secure secret management
- * This implementation allows for secure rotation of secrets with a grace period
- * to ensure existing tokens remain valid during the rotation process.
+ * This module provides functionality for managing security secrets
+ * as part of Phase 2 security improvements for Qualibrite Health.
+ * 
+ * Features:
+ * - Secure JWT secret management with rotation capability
+ * - Supports graceful validation of tokens signed with previous secrets
+ * - Secret versioning for audit and tracking
  */
 
-import { randomBytes } from 'crypto';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
 import { Logger } from './logger';
 
-interface SecretVersion {
-  key: string;
-  createdAt: Date;
-  expiresAt: Date | null;
+interface Secret {
+  value: string;
+  version: number;
+  createdAt: string;
 }
 
+/**
+ * Secret Manager handles all security-sensitive secrets for the application
+ */
 export class SecretManager {
   private static instance: SecretManager;
-  private secrets: SecretVersion[] = [];
-  private readonly defaultExpiryDays: number = 30; // Default expiry period for old secrets
-
+  private jwtSecrets: Secret[] = [];
+  private currentJwtSecretIndex = 0;
+  
   private constructor() {
-    // Load initial secret from environment
-    const currentSecret = process.env.JWT_SECRET;
-    
-    if (!currentSecret) {
-      // Generate an initial secret if JWT_SECRET is not set (only for development)
-      const initialSecret = randomBytes(32).toString('hex');
-      
-      // Set it in memory for this instance
-      this.secrets.push({
-        key: initialSecret,
-        createdAt: new Date(),
-        expiresAt: null // Current secret doesn't expire until rotated
-      });
-      
-      Logger.log('security', 'system', 'Generated initial JWT secret (DEVELOPMENT ONLY)', {
-        details: { warning: 'JWT_SECRET environment variable should be set in production' }
-      });
-    } else {
-      // Add the current secret from environment
-      this.secrets.push({
-        key: currentSecret,
-        createdAt: new Date(),
-        expiresAt: null // Current secret doesn't expire until rotated
-      });
-      
-      Logger.log('info', 'system', 'Secret manager initialized with environment secret', {});
-    }
+    this.initializeSecrets();
   }
-
+  
   /**
-   * Get the singleton instance of the SecretManager
+   * Get singleton instance of SecretManager
    */
   public static getInstance(): SecretManager {
     if (!SecretManager.instance) {
       SecretManager.instance = new SecretManager();
     }
-    
     return SecretManager.instance;
   }
   
   /**
-   * Get the current active secret for signing new tokens
+   * Initialize secrets from environment or generate if needed
    */
-  public getCurrentSecret(): string {
-    // The current secret is always the latest one with no expiry date
-    const currentSecret = this.secrets.find(secret => secret.expiresAt === null);
-    
-    if (!currentSecret) {
-      throw new Error('No active secret found');
-    }
-    
-    return currentSecret.key;
-  }
-  
-  /**
-   * Get all valid secrets for validating tokens
-   * This includes both the current secret and any still-valid expired secrets
-   */
-  public getAllValidSecrets(): string[] {
-    const now = new Date();
-    return this.secrets
-      .filter(secret => secret.expiresAt === null || secret.expiresAt > now)
-      .map(secret => secret.key);
-  }
-  
-  /**
-   * Rotate the JWT secret
-   * This creates a new secret, marks the old one for expiration, and returns the new secret
-   * 
-   * @param expiryDays Number of days until the old secret expires (default: 30)
-   * @returns The new secret
-   */
-  public rotateSecret(expiryDays: number = this.defaultExpiryDays): string {
-    // Find and mark the current secret as expired
-    const currentSecret = this.secrets.find(secret => secret.expiresAt === null);
-    
-    if (currentSecret) {
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + expiryDays);
-      currentSecret.expiresAt = expiryDate;
+  private initializeSecrets(): void {
+    try {
+      // Get JWT secret from environment variable
+      const envSecret = process.env.JWT_SECRET;
       
-      Logger.log('security', 'system', `Secret scheduled for expiration on ${expiryDate.toISOString()}`, {
-        details: { 
-          secretCreatedAt: currentSecret.createdAt.toISOString() 
-        }
+      if (envSecret) {
+        // Create initial secret entry
+        this.jwtSecrets.push({
+          value: envSecret,
+          version: 1,
+          createdAt: new Date().toISOString()
+        });
+        
+        Logger.log('info', 'system', 'JWT secret loaded from environment');
+      } else {
+        // Generate a secure random secret
+        const generatedSecret = crypto.randomBytes(64).toString('hex');
+        
+        this.jwtSecrets.push({
+          value: generatedSecret,
+          version: 1,
+          createdAt: new Date().toISOString()
+        });
+        
+        Logger.log('warning', 'system', 'JWT secret not found in environment, generated a temporary one');
+        console.warn('WARNING: Using auto-generated JWT secret. Set JWT_SECRET environment variable for production.');
+      }
+    } catch (error) {
+      console.error('Error initializing secrets:', error);
+      
+      // Fallback to a temporary secret if initialization fails
+      const fallbackSecret = crypto.randomBytes(64).toString('hex');
+      
+      this.jwtSecrets.push({
+        value: fallbackSecret,
+        version: 0, // Mark as temporary
+        createdAt: new Date().toISOString()
+      });
+      
+      Logger.logError(error as Error, 'system', {
+        details: { message: 'Error initializing secrets, using temporary secret' }
       });
     }
-    
-    // Generate a new secret
-    const newSecret = randomBytes(32).toString('hex');
-    
-    // Add the new secret
-    this.secrets.push({
-      key: newSecret,
-      createdAt: new Date(),
-      expiresAt: null
-    });
-    
-    Logger.log('security', 'system', 'Secret rotation completed successfully', {});
-    
-    // Clean up expired secrets
-    this.cleanupExpiredSecrets();
-    
-    return newSecret;
   }
   
   /**
-   * Remove any secrets that have expired
+   * Get current JWT secret for signing tokens
    */
-  private cleanupExpiredSecrets(): void {
-    const now = new Date();
-    const initialCount = this.secrets.length;
+  public static getJwtSecret(): string {
+    const instance = SecretManager.getInstance();
+    return instance.jwtSecrets[instance.currentJwtSecretIndex].value;
+  }
+  
+  /**
+   * Get all active JWT secrets for token validation
+   * This allows validating tokens signed with previous secrets
+   * during the rotation grace period
+   */
+  public static getAllJwtSecrets(): string[] {
+    const instance = SecretManager.getInstance();
+    return instance.jwtSecrets.map(secret => secret.value);
+  }
+  
+  /**
+   * Alias for backward compatibility with existing code
+   */
+  public static getCurrentSecret(): string {
+    return SecretManager.getJwtSecret();
+  }
+  
+  /**
+   * Alias for backward compatibility with existing code
+   */
+  public static getAllValidSecrets(): string[] {
+    return SecretManager.getAllJwtSecrets();
+  }
+  
+  /**
+   * Rotate JWT secret
+   * Generates a new secret while keeping the old one valid
+   * for a grace period, allowing existing tokens to remain valid
+   */
+  public static rotateJwtSecret(): void {
+    const instance = SecretManager.getInstance();
     
-    this.secrets = this.secrets.filter(secret => 
-      secret.expiresAt === null || secret.expiresAt > now
-    );
+    // Generate new secret
+    const newSecret = crypto.randomBytes(64).toString('hex');
+    const newVersion = Math.max(...instance.jwtSecrets.map(s => s.version)) + 1;
     
-    const removedCount = initialCount - this.secrets.length;
-    if (removedCount > 0) {
-      Logger.log('security', 'system', `Removed ${removedCount} expired secrets`, {});
+    // Add new secret to beginning of array
+    instance.jwtSecrets.unshift({
+      value: newSecret,
+      version: newVersion,
+      createdAt: new Date().toISOString()
+    });
+    
+    // Update current index to point to new secret
+    instance.currentJwtSecretIndex = 0;
+    
+    // Keep only the last 2 secrets (current and previous)
+    if (instance.jwtSecrets.length > 2) {
+      instance.jwtSecrets = instance.jwtSecrets.slice(0, 2);
     }
+    
+    Logger.logSecurity('JWT secret rotated successfully', {
+      details: { version: newVersion }
+    });
   }
   
   /**
-   * Get status information about the current secrets
-   * This only returns metadata, never the actual secret values
+   * Get information about the current secret for auditing
    */
-  public getStatus(): any {
-    const now = new Date();
-    
-    // Clean up expired secrets first
-    this.cleanupExpiredSecrets();
-    
-    // Get the current active secret
-    const currentSecret = this.secrets.find(s => s.expiresAt === null);
-    
-    // Get previous secrets that are still valid
-    const previousSecrets = this.secrets.filter(s => s.expiresAt !== null)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    
-    // Current secret age in days
-    const currentSecretAge = currentSecret 
-      ? Math.floor((now.getTime() - currentSecret.createdAt.getTime()) / (1000 * 60 * 60 * 24)) 
-      : 0;
-    
-    // Process previous secrets to return age and expiry information
-    const previousSecretsInfo = previousSecrets.map(s => {
-      const ageInDays = Math.floor((now.getTime() - s.createdAt.getTime()) / (1000 * 60 * 60 * 24));
-      const daysUntilExpiry = s.expiresAt 
-        ? Math.floor((s.expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-        : 0;
-      
-      return {
-        ageInDays,
-        daysUntilExpiry,
-        isExpired: s.expiresAt ? s.expiresAt <= now : false
-      };
-    });
+  public static getCurrentSecretInfo(): { version: number; createdAt: string } {
+    const instance = SecretManager.getInstance();
+    const currentSecret = instance.jwtSecrets[instance.currentJwtSecretIndex];
     
     return {
-      currentSecret: currentSecret ? {
-        ageInDays: currentSecretAge,
-        createdAt: currentSecret.createdAt.toISOString()
-      } : null,
-      totalValidSecrets: this.secrets.length,
-      previousSecrets: previousSecretsInfo,
-      lastRotation: previousSecrets.length > 0 ? previousSecrets[0].createdAt.toISOString() : null
+      version: currentSecret.version,
+      createdAt: currentSecret.createdAt
     };
   }
 }

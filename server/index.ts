@@ -15,8 +15,7 @@ import { SecretManager } from "./lib/secret-manager";
 // This ensures proper validation of environment variables
 let SESSION_SECRET: string;
 try {
-  const secretManager = SecretManager.getInstance();
-  SESSION_SECRET = process.env.SESSION_SECRET || secretManager.getCurrentSecret();
+  SESSION_SECRET = process.env.SESSION_SECRET || SecretManager.getCurrentSecret();
   
   if (!SESSION_SECRET) {
     throw new Error("SESSION_SECRET must be set or JWT_SECRET must be available as fallback");

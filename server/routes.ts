@@ -6,6 +6,7 @@ import providerRoutes from "./routes/provider";
 import setupRoutes from "./routes/setup";
 import adminRoutes from "./routes/admin";
 import mfaRoutes from "./routes/mfa";
+import mobileAuthRoutes from "./routes/mobile-auth";
 import { csrfProtection, setCsrfToken } from "./middleware/csrf";
 import { limitAPI, limitAuth } from "./middleware/rate-limiter";
 
@@ -33,6 +34,9 @@ export function registerRoutes(app: Express): Server {
   
   // MFA routes for enhanced security - apply rate limiting for protection
   app.use("/api/mfa", limitAPI, mfaRoutes);
+  
+  // Mobile authentication routes - with rate limiting
+  app.use("/api/mobile", limitAPI, mobileAuthRoutes);
 
   const httpServer = createServer(app);
 

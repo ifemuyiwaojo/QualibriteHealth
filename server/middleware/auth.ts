@@ -100,15 +100,12 @@ export const authenticateToken = async (
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    // Get secret manager instance
-    const secretManager = SecretManager.getInstance();
-    
     // Try to verify with all valid secrets (supports secret rotation)
     let decoded: any = null;
     let isValid = false;
     
     // Get all valid secrets (current and not-yet-expired previous ones)
-    const validSecrets = secretManager.getAllValidSecrets();
+    const validSecrets = SecretManager.getAllValidSecrets();
     
     // Try each secret until one works or all fail
     for (const secret of validSecrets) {
