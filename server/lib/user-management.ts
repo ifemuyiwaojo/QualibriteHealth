@@ -117,6 +117,7 @@ export async function getFilteredUsers(
  */
 export async function getUsersByRole(role: string) {
   try {
+    console.log("Fetching users for role:", role);
     // Execute query with plain SQL conditions for better compatibility
     const roleUsers = await db.select().from(users)
       .where(eq(users.role, role as any))
