@@ -225,7 +225,7 @@ router.patch(
         return res.status(400).json({ message: "Invalid user ID" });
       }
       
-      // Validate request body
+      // Validate request body with enhanced superadmin controls
       const schema = z.object({
         email: z.string().email().optional(),
         role: z.string().optional(),
@@ -234,6 +234,11 @@ router.patch(
         isActive: z.boolean().optional(),
         isSuperadmin: z.boolean().optional(),
         resetPassword: z.boolean().optional(),
+        // Enhanced superadmin privileges
+        enableMfa: z.boolean().optional(),
+        archiveUser: z.boolean().optional(),
+        lockAccount: z.boolean().optional(),
+        requirePasswordChange: z.boolean().optional(),
       });
       
       const result = schema.safeParse(req.body);
@@ -300,7 +305,56 @@ router.patch(
         // Generate a random password
         tempPassword = randomBytes(10).toString('hex');
         updateData.passwordHash = await hashPassword(tempPassword);
-        updateData.changePasswordRequired = true;
+        updateData.requiresPasswordChange = true;
+      }
+      
+      // Handle superadmin-specific actions
+      if (req.user?.isSuperadmin) {
+        // Set active status
+        if (typeof result.data.isActive !== 'undefined') {
+          updateData.isActive = result.data.isActive;
+        }
+        
+        // Set MFA requirements
+        if (typeof result.data.enableMfa !== 'undefined') {
+          // Update user metadata to include MFA settings
+          const userMetadata = user.metadata || {};
+          userMetadata.mfaRequired = result.data.enableMfa;
+          updateData.metadata = userMetadata;
+        }
+        
+        // Handle account archiving
+        if (result.data.archiveUser) {
+          updateData.isActive = false;
+          updateData.isArchived = true;
+          
+          // Log this critical security action
+          await Logger.logSecurity(`User archived by superadmin: ${user.email}`, {
+            userId: req.user?.id,
+            resourceId: user.id,
+            resourceType: 'user'
+          });
+        }
+        
+        // Handle account lockout
+        if (typeof result.data.lockAccount !== 'undefined') {
+          updateData.accountLocked = result.data.lockAccount;
+          if (!result.data.lockAccount) {
+            // Reset failed login attempts when manually unlocking
+            updateData.failedLoginAttempts = 0;
+            updateData.lockExpiresAt = null;
+          } else {
+            // Set lock expiry when manually locking
+            const lockExpiry = new Date();
+            lockExpiry.setDate(lockExpiry.getDate() + 1); // 24 hour lock
+            updateData.lockExpiresAt = lockExpiry;
+          }
+        }
+        
+        // Handle password change requirement
+        if (typeof result.data.requirePasswordChange !== 'undefined') {
+          updateData.requiresPasswordChange = result.data.requirePasswordChange;
+        }
       }
       
       // Update the user
