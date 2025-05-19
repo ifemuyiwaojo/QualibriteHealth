@@ -16,6 +16,7 @@ import Register from "@/pages/auth/Register";
 import ChangePassword from "@/pages/auth/ChangePassword";
 import ProfilePage from "@/pages/auth/ProfilePage";
 import MfaSetupPage from "@/pages/auth/MfaSetupPage";
+import MfaEnforcePage from "@/pages/auth/MfaEnforcePage";
 import SecuritySettings from "@/pages/profile/SecuritySettings";
 import PatientDashboard from "@/pages/dashboard/PatientDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
@@ -144,6 +145,9 @@ export const Router = memo(function Router() {
           </Route>
           <Route path="/auth/mfa-setup">
             {!user ? <Redirect to="/auth/login" /> : <MfaSetupPage />}
+          </Route>
+          <Route path="/auth/mfa-enforce">
+            {!user ? <Redirect to="/auth/login" /> : <MfaEnforcePage />}
           </Route>
           <Route path="/profile/security">
             {!user ? <Redirect to="/auth/login" /> : <SecuritySettings />}

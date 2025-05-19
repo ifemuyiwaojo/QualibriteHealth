@@ -30,6 +30,14 @@ export function ProtectedRoute({ component: Component, roles }: ProtectedRoutePr
   if (user.changePasswordRequired) {
     return <Redirect to="/auth/change-password" />;
   }
+  
+  // Force MFA setup if required but not enabled
+  const mfaRequired = user.metadata?.mfaRequired === true;
+  const mfaEnabled = user.mfaEnabled === true;
+  
+  if (mfaRequired && !mfaEnabled) {
+    return <Redirect to="/auth/mfa-enforce" />;
+  }
 
   // Check role-based access if roles are specified
   if (roles && roles.length > 0 && !roles.includes(user.role)) {

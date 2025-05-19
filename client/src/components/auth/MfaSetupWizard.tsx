@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, QrCode, ShieldCheck, Copy, Key } from "lucide-react";
+import { Loader2, ShieldCheck, Copy, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";

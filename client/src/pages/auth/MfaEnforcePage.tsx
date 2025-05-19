@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useAuthProvider } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, AlertTriangle } from "lucide-react";
-import MfaSetupWizard from "@/components/auth/MfaSetupWizard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import MfaSetupWizard from "../../components/auth/MfaSetupWizard";
 
 /**
  * MFA Enforcement Page
@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
  */
 export default function MfaEnforcePage() {
   const [, navigate] = useLocation();
-  const { user, refreshUser, isLoading } = useAuthProvider();
+  const { user, refreshUser, isLoading, checkMfaRequired } = useAuth();
   const [isSettingUp, setIsSettingUp] = useState(false);
   const { toast } = useToast();
 
@@ -34,8 +34,13 @@ export default function MfaEnforcePage() {
         navigate("/dashboard");
         return;
       }
+      
+      // If MFA is not required, redirect to dashboard
+      if (!checkMfaRequired()) {
+        navigate("/dashboard");
+      }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, checkMfaRequired]);
 
   const handleSetupComplete = async () => {
     try {
@@ -45,7 +50,6 @@ export default function MfaEnforcePage() {
       toast({
         title: "MFA Setup Complete",
         description: "Your account is now protected with Multi-Factor Authentication.",
-        variant: "success",
       });
       
       // Redirect to dashboard
@@ -68,7 +72,6 @@ export default function MfaEnforcePage() {
       toast({
         title: "MFA Setup Delayed",
         description: "You'll be reminded to set up MFA on your next login.",
-        variant: "warning",
       });
       
       navigate("/dashboard");
