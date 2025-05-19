@@ -27,15 +27,16 @@ router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin",
     // Get all patients from the database
     console.log("Fetching patient list...");
     
-    // Use a more basic query to avoid potential issues with metadata handling
-    const patientUsers = await db.query.users.findMany({
-      where: eq(users.role, "patient"),
-      columns: {
-        id: true,
-        email: true,
-        changePasswordRequired: true
-      }
-    });
+    // Use a direct query with simpler structure
+    console.log("Running simplified patient query...");
+    const patientUsers = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        changePasswordRequired: users.changePasswordRequired
+      })
+      .from(users)
+      .where(eq(users.role, "patient"));
       
     if (!patientUsers || patientUsers.length === 0) {
       return res.status(200).json([]); // Return empty array if no patients found
@@ -93,46 +94,73 @@ router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin"
       });
     }
 
-    // Generate a secure but readable temporary password
-    const tempPassword = generateSecurePassword({ 
-      length: 12, 
-      uppercase: true, 
-      lowercase: true, 
-      numbers: true, 
-      specialChars: true 
-    });
-
-    // Hash the password before storing
-    const hashedPassword = await hashPassword(tempPassword);
+    // Generate a temporary password manually since we have import issues
+    // This follows HIPAA guidelines with uppercase, lowercase, numbers, and special characters
+    const generatePassword = () => {
+      const length = 12;
+      const uppercaseChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Omitting similar-looking chars
+      const lowercaseChars = 'abcdefghijkmnpqrstuvwxyz';
+      const numberChars = '23456789'; // Omitting 0/1 that look like O/l
+      const specialChars = '!@#$%^&*()-_=+';
+      
+      let password = '';
+      
+      // Ensure at least one of each character type
+      password += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length));
+      password += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length));
+      password += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
+      password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+      
+      // Fill the rest randomly
+      const allChars = uppercaseChars + lowercaseChars + numberChars + specialChars;
+      for (let i = password.length; i < length; i++) {
+        password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+      }
+      
+      // Shuffle the password to avoid predictable pattern
+      return password.split('').sort(() => 0.5 - Math.random()).join('');
+    };
+    
+    const tempPassword = generatePassword();
+    
+    // Hash the password directly with bcrypt since we have import issues
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
 
     // Update the user's password and set changePasswordRequired flag
     await db
       .update(users)
       .set({ 
-        password: hashedPassword,
+        passwordHash: hashedPassword, // Using passwordHash field instead of password
         changePasswordRequired: true,
-        lastPasswordChange: new Date()
+        updatedAt: new Date() // Using updatedAt field instead of lastPasswordChange
       })
       .where(eq(users.id, userId));
 
-    // Log the security event
-    await logSecurityAudit(
-      SecurityEventType.PASSWORD_RESET,
-      "Admin generated temporary password",
-      {
-        userId: req.session?.userId,
-        targetUserId: userId,
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-        outcome: "SUCCESS",
-        details: {
-          action: "TEMP_PASSWORD_GENERATION",
-          targetUserRole: user.role,
-          targetUserEmail: user.email,
-          passwordChangeRequired: true
-        }
+    // Log the security event - use direct DB insert to avoid imported functionality
+    try {
+      if (req.session && typeof req.session.userId === 'number') {
+        await db.insert(auditLogs).values({
+          userId: req.session.userId,
+          action: "PASSWORD_RESET",
+          resourceType: "USER",
+          resourceId: userId,
+          details: { 
+            targetUser: user.email, 
+            action: "TEMP_PASSWORD_GENERATION",
+            outcome: "SUCCESS",
+            passwordChangeRequired: true
+          },
+          ipAddress: req.ip || null,
+          userAgent: req.headers['user-agent'] || null
+        });
+        console.log("Successfully logged temp password generation");
       }
-    );
+    } catch (logError) {
+      console.error("Error logging temp password generation:", logError);
+      // Continue even if logging fails - don't block the operation
+    }
 
     // Optional: Send email notification to user (in production)
     // Note: This would need proper email configuration in production

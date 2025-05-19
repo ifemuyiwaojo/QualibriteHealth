@@ -10,7 +10,17 @@ import {
   UserPlus, 
   UserCog, 
   Users, 
-  Shield 
+  Shield,
+  PlusCircle, 
+  Settings, 
+  User, 
+  LockIcon, 
+  UnlockIcon, 
+  Trash2, 
+  Edit, 
+  Check, 
+  X,
+  AlertCircle
 } from "lucide-react";
 import { 
   Dialog, 
@@ -57,22 +67,6 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
-import { 
-  PlusCircle, 
-  UserPlus, 
-  Settings, 
-  User, 
-  Shield, 
-  LockIcon, 
-  UnlockIcon, 
-  Trash2, 
-  Edit, 
-  Check, 
-  X,
-  AlertCircle,
-  ArrowLeft
-} from "lucide-react";
-import { Link } from "wouter";
 import {
   AlertDialog,
   AlertDialogAction,
