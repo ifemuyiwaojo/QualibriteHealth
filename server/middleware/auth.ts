@@ -94,7 +94,15 @@ export const authorizeRoles = (...roles: string[]) => {
     }
 
     // Allow superadmins access to all routes regardless of roles specified
+    console.log("Authorization check - User:", { 
+      id: req.user.id, 
+      role: req.user.role, 
+      isSuperadmin: req.user.isSuperadmin,
+      path: req.path
+    });
+    
     if (req.user.isSuperadmin) {
+      console.log("Superadmin access granted for path:", req.path);
       return next();
     }
     
