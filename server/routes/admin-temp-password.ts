@@ -13,6 +13,7 @@ import { generateSecurePassword } from "../lib/password-utils";
 import { hashPassword } from "../lib/auth-utils";
 import { logSecurityAudit, SecurityEventType } from "../lib/security-audit-logger";
 import { sendEmail } from "../lib/email";
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -135,7 +136,6 @@ router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin"
     const tempPassword = generatePassword();
     
     // We need to use bcrypt for hashing to match the login mechanism
-    const bcrypt = require('bcryptjs');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
     
