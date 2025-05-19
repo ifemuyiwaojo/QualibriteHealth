@@ -79,6 +79,23 @@ export default function UserManagement() {
   const [isNewUserDialogOpen, setIsNewUserDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  
+  // Determine page title based on URL role parameter
+  const getPageTitle = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role');
+    
+    switch(role) {
+      case 'admin':
+        return 'Admin Management';
+      case 'provider':
+        return 'Provider Management';
+      case 'patient':
+        return 'Patient Management';
+      default:
+        return 'User Management';
+    }
+  };
 
   // Schema for user creation
   const createUserSchema = z.object({
@@ -132,17 +149,27 @@ export default function UserManagement() {
     },
   });
 
-  // Fetch users
+  // Fetch users - use URL parameters for role filtering
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [window.location.search]); // Depend on URL search params
 
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await apiRequest("GET", "/api/admin/users");
+      // Get role filter from URL if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const roleFilter = urlParams.get('role');
+      
+      // Construct API URL with optional role filter
+      const url = roleFilter 
+        ? `/api/admin/users?role=${roleFilter}`
+        : "/api/admin/users";
+      
+      console.log("Fetching users with URL:", url);
+      const response = await apiRequest("GET", url);
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -339,7 +366,7 @@ export default function UserManagement() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">User Management</h1>
+        <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
         <Button onClick={() => setIsNewUserDialogOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           Add New User

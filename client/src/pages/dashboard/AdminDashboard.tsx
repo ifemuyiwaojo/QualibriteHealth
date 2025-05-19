@@ -49,10 +49,10 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Create and manage admin accounts
+                Create and manage administrator accounts
               </p>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/admin/users">Manage Admins</Link>
+                <Link href="/admin/users?role=admin">Manage Admins</Link>
               </Button>
             </CardContent>
           </Card>
@@ -65,10 +65,10 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Manage user accounts, roles, and permissions
+              Manage patients and staff accounts
             </p>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/admin/users">Manage Users</Link>
+              <Link href="/admin/users?role=patient">Manage Patients</Link>
             </Button>
           </CardContent>
         </Card>
