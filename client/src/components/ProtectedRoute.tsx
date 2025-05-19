@@ -1,5 +1,5 @@
 import { Redirect, useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
 type ProtectedRouteProps = {
@@ -32,11 +32,10 @@ export function ProtectedRoute({ component: Component, roles }: ProtectedRoutePr
   }
   
   // Force MFA setup if required but not enabled
-  const mfaRequired = user.metadata?.mfaRequired === true;
   const mfaEnabled = user.mfaEnabled === true;
   
-  if (mfaRequired && !mfaEnabled) {
-    return <Redirect to="/auth/mfa-enforce" />;
+  if (user.mfaEnabled === false) {
+    return <Redirect to="/auth/mfa-setup" />;
   }
 
   // Check role-based access if roles are specified
