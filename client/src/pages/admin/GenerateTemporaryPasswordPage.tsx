@@ -107,6 +107,19 @@ export default function GenerateTemporaryPasswordPage() {
     setSelectedPatient(patient);
     generatePasswordMutation.mutate({ userId });
   };
+  
+  const handleRegenerate = () => {
+    if (!selectedPatient) return;
+    
+    // Reset previously generated password
+    setGeneratedPassword(null);
+    
+    // Force regenerate a new password
+    generatePasswordMutation.mutate({ 
+      userId: selectedPatient.id, 
+      forceRegenerate: true 
+    });
+  };
 
   const copyToClipboard = () => {
     if (generatedPassword) {
@@ -212,6 +225,35 @@ export default function GenerateTemporaryPasswordPage() {
                 Could not load patients. Please try again later.
               </AlertDescription>
             </Alert>
+          )}
+
+          {selectedPatient && selectedPatient.hasExistingTemporaryPassword && !generatedPassword && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="mr-2 h-5 w-5 text-orange-500" />
+                  Existing Temporary Password
+                </CardTitle>
+                <CardDescription>
+                  {formatUserName(selectedPatient)} already has a temporary password that hasn't been changed yet
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Alert>
+                  <AlertTitle>Password Change Required</AlertTitle>
+                  <AlertDescription>
+                    This patient already has a temporary password and will be required to change it on their next login.
+                    You can generate a new temporary password if necessary.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleRegenerate} className="w-full gap-2">
+                  <Key className="h-4 w-4" />
+                  Generate New Password
+                </Button>
+              </CardFooter>
+            </Card>
           )}
 
           {generatedPassword && (
