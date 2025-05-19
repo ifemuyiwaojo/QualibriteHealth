@@ -35,18 +35,29 @@ router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin",
       })
       .from(users)
       .where(eq(users.role, "patient"));
+      
+    if (!patientUsers || patientUsers.length === 0) {
+      return res.status(200).json([]); // Return empty array if no patients found
+    }
     
     // Process the results for the frontend
     const processedPatients = patientUsers.map(patient => {
-      // Handle potential undefined metadata
+      // Handle potential undefined metadata more safely
       const metadata = patient.metadata || {};
+      
+      // Ensure we're safely accessing potentially missing properties
+      // Convert metadata to string for debugging purposes
+      console.log('Processing patient metadata:', 
+                  typeof metadata === 'object' ? JSON.stringify(metadata) : 'non-object metadata');
       
       return {
         id: patient.id,
         email: patient.email,
         username: patient.username || '',
-        firstName: metadata.firstName || '',
-        lastName: metadata.lastName || '',
+        firstName: metadata && typeof metadata === 'object' ? 
+                  (metadata.firstName || metadata.name || '') : '',
+        lastName: metadata && typeof metadata === 'object' ? 
+                  (metadata.lastName || '') : '',
         changePasswordRequired: patient.changePasswordRequired
       };
     });
