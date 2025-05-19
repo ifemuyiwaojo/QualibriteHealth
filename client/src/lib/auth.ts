@@ -8,6 +8,12 @@ export interface User {
   changePasswordRequired?: boolean;
   isSuperadmin?: boolean;
   mfaEnabled?: boolean;
+  metadata?: {
+    mfaRequired?: boolean;
+    name?: string;
+    phone?: string;
+    [key: string]: any;
+  };
 }
 
 export interface AuthContextType {
@@ -17,6 +23,8 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   register: (email: string, password: string, role: string) => Promise<void>;
   verifyMfa: (code: string) => Promise<any>;
+  refreshUser: () => Promise<User | null>;
+  checkMfaRequired: () => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -141,6 +149,21 @@ export function useAuthProvider() {
     return data;
   }, [queryClient]);
 
+  // Add a function to refresh user data
+  const refreshUser = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    await queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
+    return user;
+  }, [queryClient, user]);
+
+  // Check if MFA is required but not set up
+  const checkMfaRequired = useCallback(() => {
+    if (!user) return false;
+    
+    // Check if MFA is required via metadata but not enabled
+    return user.metadata?.mfaRequired === true && user.mfaEnabled !== true;
+  }, [user]);
+
   return {
     user,
     isLoading,
@@ -148,5 +171,7 @@ export function useAuthProvider() {
     logout,
     register,
     verifyMfa,
+    refreshUser,
+    checkMfaRequired,
   };
 }
