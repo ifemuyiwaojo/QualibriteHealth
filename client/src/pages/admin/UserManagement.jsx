@@ -121,8 +121,7 @@ export default function UserManagement() {
   const updateUserSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
     role: z.string({ required_error: "Please select a role" }),
-    name: z.string({ required_error: "Name is required" }),
-    phone: z.string({ required_error: "Phone number is required" }),
+    // Removed name/phone fields that were causing issues
     isActive: z.boolean().default(true),
     isSuperadmin: z.boolean().default(false),
     resetPassword: z.boolean().default(false),
@@ -313,10 +312,9 @@ export default function UserManagement() {
     updateUserForm.reset({
       email: user.email,
       role: user.role,
-      name: metadata?.name || "",
-      phone: metadata?.phone || "",
       isActive: user.isActive !== false, // Default to true if not specified
       isSuperadmin: user.isSuperadmin || false,
+      isAdmin: user.role === 'admin',
       resetPassword: false,
       // Enhanced superadmin controls
       enableMfa: mfaRequired,
@@ -766,35 +764,7 @@ export default function UserManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={updateUserForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={updateUserForm.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input placeholder="(555) 123-4567" {...field} required />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {/* Name and phone fields temporarily removed to fix issues */}
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
