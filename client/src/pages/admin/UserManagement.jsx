@@ -284,7 +284,7 @@ export default function UserManagement() {
   const handleEditUser = (user) => {
     setSelectedUser(user);
     
-    // Parse metadata to get name and phone
+    // Parse metadata to get name, phone, and MFA settings
     let metadata = {};
     try {
       if (user.metadata && typeof user.metadata === 'string') {
@@ -296,6 +296,9 @@ export default function UserManagement() {
       console.error("Error parsing user metadata", e);
     }
 
+    // Check if MFA is required
+    const mfaRequired = metadata?.mfaRequired || false;
+
     updateUserForm.reset({
       email: user.email,
       role: user.role,
@@ -304,6 +307,11 @@ export default function UserManagement() {
       isActive: user.isActive !== false, // Default to true if not specified
       isSuperadmin: user.isSuperadmin || false,
       resetPassword: false,
+      // Enhanced superadmin controls
+      enableMfa: mfaRequired,
+      archiveUser: false,
+      lockAccount: user.accountLocked || false,
+      requirePasswordChange: user.requiresPasswordChange || false,
     });
     
     setIsEditDialogOpen(true);
@@ -809,6 +817,51 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
+                
+                {/* Superadmin-only controls */}
+                {user?.isSuperadmin && (
+                  <>
+                    <FormField
+                      control={updateUserForm.control}
+                      name="enableMfa"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Enable MFA
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  
+                    <FormField
+                      control={updateUserForm.control}
+                      name="archiveUser"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-destructive">
+                              Archive user
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 {/* Enhanced Superadmin Privileges */}
                 {user?.isSuperadmin && (
