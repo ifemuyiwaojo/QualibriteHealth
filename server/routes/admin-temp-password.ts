@@ -25,39 +25,33 @@ router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin",
   try {
     // Get list of patients for dropdown selection
     // Get all patients from the database
-    const patientUsers = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        username: users.username,
-        metadata: users.metadata,
-        changePasswordRequired: users.changePasswordRequired
-      })
-      .from(users)
-      .where(eq(users.role, "patient"));
+    console.log("Fetching patient list...");
+    
+    // Use a more basic query to avoid potential issues with metadata handling
+    const patientUsers = await db.query.users.findMany({
+      where: eq(users.role, "patient"),
+      columns: {
+        id: true,
+        email: true,
+        changePasswordRequired: true
+      }
+    });
       
     if (!patientUsers || patientUsers.length === 0) {
       return res.status(200).json([]); // Return empty array if no patients found
     }
     
-    // Process the results for the frontend
+    // Process the results for the frontend - using a simpler approach with basic data
     const processedPatients = patientUsers.map(patient => {
-      // Handle potential undefined metadata more safely
-      const metadata = patient.metadata || {};
-      
-      // Ensure we're safely accessing potentially missing properties
-      // Convert metadata to string for debugging purposes
-      console.log('Processing patient metadata:', 
-                  typeof metadata === 'object' ? JSON.stringify(metadata) : 'non-object metadata');
+      console.log('Processing patient:', patient.id, patient.email);
       
       return {
         id: patient.id,
         email: patient.email,
-        username: patient.username || '',
-        firstName: metadata && typeof metadata === 'object' ? 
-                  (metadata.firstName || metadata.name || '') : '',
-        lastName: metadata && typeof metadata === 'object' ? 
-                  (metadata.lastName || '') : '',
+        // Simple display name derived from email for display
+        username: patient.email.split('@')[0],
+        firstName: '',
+        lastName: '',
         changePasswordRequired: patient.changePasswordRequired
       };
     });
