@@ -24,25 +24,23 @@ const router = express.Router();
 router.get("/temp-password/patients", authenticateToken, authorizeRoles("admin", "superadmin"), async (req, res) => {
   try {
     // Get list of patients for dropdown selection
+    // Get all patients with a simpler query
     const patientUsers = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        username: users.username,
-        metadata: users.metadata,
-        changePasswordRequired: users.changePasswordRequired
-      })
+      .select()
       .from(users)
       .where(eq(users.role, "patient"));
       
-    // Process the metadata field to extract firstName and lastName
+    // Process the results for the frontend
     const processedPatients = patientUsers.map(patient => ({
-      ...patient,
+      id: patient.id,
+      email: patient.email,
+      username: patient.username || '',
       firstName: patient.metadata?.firstName || '',
-      lastName: patient.metadata?.lastName || ''
+      lastName: patient.metadata?.lastName || '',
+      changePasswordRequired: patient.changePasswordRequired
     }));
 
-    return res.status(200).json(patientUsers);
+    return res.status(200).json(processedPatients);
   } catch (error) {
     console.error("Error getting patient list:", error);
     return res.status(500).json({ message: "Failed to retrieve patient list" });

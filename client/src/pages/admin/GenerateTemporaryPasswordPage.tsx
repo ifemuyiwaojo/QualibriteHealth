@@ -116,7 +116,7 @@ export default function GenerateTemporaryPasswordPage() {
     <div className="container py-10">
       <div className="flex items-center mb-8">
         <Button variant="ghost" size="sm" asChild className="mr-4">
-          <Link href="/admin">
+          <Link href="/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Link>
