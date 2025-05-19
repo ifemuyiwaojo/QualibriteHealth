@@ -817,98 +817,53 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
-                
-                {/* Superadmin-only controls */}
-                {user?.isSuperadmin && (
-                  <>
-                    <FormField
-                      control={updateUserForm.control}
-                      name="enableMfa"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Enable MFA
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
+              </div>
+              
+              {/* Superadmin-only controls - separate section */}
+              {user?.isSuperadmin && (
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t mt-4">
+                  <h4 className="text-sm font-medium col-span-2 mb-2">Superadmin Controls</h4>
                   
-                    <FormField
-                      control={updateUserForm.control}
-                      name="archiveUser"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-destructive">
-                              Archive user
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-
-                {/* Enhanced Superadmin Privileges */}
-                {user?.isSuperadmin && (
-                  <>
-                    <FormField
-                      control={updateUserForm.control}
-                      name="enableMfa"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Enable MFA
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={updateUserForm.control}
-                      name="archiveUser"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Archive user
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-
-                {user?.isSuperadmin && (
+                  <FormField
+                    control={updateUserForm.control}
+                    name="enableMfa"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Enable MFA
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                
+                  <FormField
+                    control={updateUserForm.control}
+                    name="archiveUser"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-destructive">
+                            Archive user
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
                   <FormField
                     control={updateUserForm.control}
                     name="isSuperadmin"
@@ -928,8 +883,28 @@ export default function UserManagement() {
                       </FormItem>
                     )}
                   />
-                )}
-              </div>
+                  
+                  <FormField
+                    control={updateUserForm.control}
+                    name="lockAccount"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-destructive">
+                            Lock account
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               <DialogFooter>
                 <Button 
