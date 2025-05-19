@@ -1022,31 +1022,35 @@ router.post("/verify-password", authenticateToken, asyncHandler(async (req: Auth
     throw new AppError("Password is required", 400);
   }
   
-  // Get user with password for verification
   // Since userId is from the authenticated request, it should exist
   if (!userId) {
     throw new AppError("Authentication required", 401);
   }
   
-  const userResults = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId));
-    
-  const user = userResults[0];
+  // Get user directly from the database with the raw SQL query to get the password_hash field
+  const { rows } = await db.execute(
+    sql`SELECT id, email, password_hash FROM users WHERE id = ${userId}`
+  );
   
-  if (!user) {
+  if (!rows || rows.length === 0) {
     throw new AppError("User not found", 404);
   }
   
-  // Verify password against password_hash field
-  console.log("User data for verification:", { 
+  const user = rows[0];
+  
+  // Verify password against password_hash field from the raw query
+  console.log("Password verification attempt:", { 
     userId: userId, 
-    hasPasswordHash: !!user.password_hash,
-    fields: Object.keys(user)
+    hasPassword: !!user.password_hash
   });
   
-  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+  if (!user.password_hash) {
+    throw new AppError("Password hash not found", 404);
+  }
+  
+  // Convert to string to ensure bcrypt comparison works correctly
+  const passwordHash = String(user.password_hash);
+  const isPasswordValid = await bcrypt.compare(password, passwordHash);
   
   if (!isPasswordValid) {
     // Log failed verification attempt

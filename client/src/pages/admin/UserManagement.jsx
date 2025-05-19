@@ -48,6 +48,8 @@ import {
   User, 
   Shield, 
   AlertTriangle,
+  Eye,
+  EyeOff,
   LockIcon, 
   UnlockIcon, 
   Trash2, 
@@ -84,6 +86,7 @@ export default function UserManagement() {
   const [deletePassword, setDeletePassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   // Determine page title based on URL role parameter
   const getPageTitle = () => {
@@ -1012,14 +1015,23 @@ export default function UserManagement() {
             
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Your Password</Label>
-              <Input 
-                id="confirmPassword"
-                type="password"
-                placeholder="Enter your password"
-                value={deletePassword}
-                onChange={(e) => setDeletePassword(e.target.value)}
-                className={passwordError ? "border-red-500" : ""}
-              />
+              <div className="relative">
+                <Input 
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className={passwordError ? "border-red-500 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                >
+                  <span className="text-xs">{showPassword ? "Hide" : "Show"}</span>
+                </button>
+              </div>
               {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             </div>
             
