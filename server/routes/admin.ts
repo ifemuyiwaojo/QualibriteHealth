@@ -299,13 +299,43 @@ router.patch(
         updateData.isSuperadmin = result.data.isSuperadmin;
       }
       
-      // Handle password reset
+      // Handle password reset and require password change
       let tempPassword;
       if (result.data.resetPassword) {
-        // Generate a random password
-        tempPassword = randomBytes(10).toString('hex');
+        // Generate a HIPAA-compliant random password
+        // Pattern: 1 uppercase, 1 lowercase, 1 number, 1 special char, min 10 chars
+        const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
+        const numberChars = '0123456789';
+        const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        
+        const getRandomChar = (charSet) => charSet[Math.floor(Math.random() * charSet.length)];
+        
+        // Start with one of each required character type
+        tempPassword = getRandomChar(uppercaseChars) +
+                       getRandomChar(lowercaseChars) +
+                       getRandomChar(numberChars) +
+                       getRandomChar(specialChars);
+        
+        // Add 6 more random chars for length
+        const allChars = uppercaseChars + lowercaseChars + numberChars + specialChars;
+        for (let i = 0; i < 6; i++) {
+          tempPassword += getRandomChar(allChars);
+        }
+        
+        // Shuffle the password characters
+        tempPassword = tempPassword
+          .split('')
+          .sort(() => 0.5 - Math.random())
+          .join('');
+        
         updateData.passwordHash = await hashPassword(tempPassword);
-        updateData.requiresPasswordChange = true;
+        updateData.changePasswordRequired = true; // Field name in schema is changePasswordRequired
+      }
+      
+      // Handle require password change flag separately
+      if (typeof result.data.requirePasswordChange !== 'undefined') {
+        updateData.changePasswordRequired = result.data.requirePasswordChange;
       }
       
       // Handle superadmin-specific actions
@@ -322,21 +352,21 @@ router.patch(
         }
         
         // Handle name and phone in metadata (PHI data)
-        const userMetadata = user.metadata || {};
+        // First ensure we're working with an object for metadata
+        const userMetadata = typeof user.metadata === 'object' ? 
+          { ...user.metadata } : {};
         
-        // Update name and phone fields if provided
-        if (result.data.name) {
+        // Update name and phone fields if provided (even empty strings)
+        if (result.data.name !== undefined) {
           userMetadata.name = result.data.name;
         }
         
-        if (result.data.phone) {
+        if (result.data.phone !== undefined) {
           userMetadata.phone = result.data.phone;
         }
         
-        // Apply the metadata updates if changed
-        if (result.data.name || result.data.phone) {
-          updateData.metadata = userMetadata;
-        }
+        // Always apply metadata updates to ensure consistency
+        updateData.metadata = userMetadata;
         
         // Handle account archiving
         if (result.data.archiveUser) {
