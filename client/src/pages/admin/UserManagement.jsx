@@ -120,8 +120,10 @@ export default function UserManagement() {
     resetPassword: z.boolean().default(false),
     // Enhanced superadmin privileges
     enableMfa: z.boolean().default(false),
+    isAdmin: z.boolean().default(false),
     archiveUser: z.boolean().default(false),
     lockAccount: z.boolean().default(false),
+    deleteUser: z.boolean().default(false),
     requirePasswordChange: z.boolean().default(false),
   });
 
@@ -425,7 +427,9 @@ export default function UserManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Email</TableHead>
+                  <TableHead className="w-[200px]">Email</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
@@ -440,6 +444,12 @@ export default function UserManagement() {
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
                         {user.email}
+                      </TableCell>
+                      <TableCell>
+                        {user.metadata?.name || 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {user.metadata?.phone || 'N/A'}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
@@ -844,10 +854,10 @@ export default function UserManagement() {
                       </FormItem>
                     )}
                   />
-                
+                  
                   <FormField
                     control={updateUserForm.control}
-                    name="archiveUser"
+                    name="isAdmin"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                         <FormControl>
@@ -857,14 +867,14 @@ export default function UserManagement() {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel className="text-destructive">
-                            Archive user
+                          <FormLabel>
+                            Admin privileges
                           </FormLabel>
                         </div>
                       </FormItem>
                     )}
                   />
-                  
+                
                   <FormField
                     control={updateUserForm.control}
                     name="isSuperadmin"
@@ -899,6 +909,46 @@ export default function UserManagement() {
                         <div className="space-y-1 leading-none">
                           <FormLabel className="text-destructive">
                             Lock account
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={updateUserForm.control}
+                    name="archiveUser"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-destructive">
+                            Archive user
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={updateUserForm.control}
+                    name="deleteUser"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-destructive font-bold">
+                            Delete account
                           </FormLabel>
                         </div>
                       </FormItem>
