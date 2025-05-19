@@ -27,12 +27,15 @@ const SENSITIVE_FIELDS = ['diagnosis', 'prescription', 'treatment'];
  */
 export async function createMedicalRecord(
   data: InsertMedicalRecord,
-  userId: number
+  user: AuthUser
 ): Promise<SelectMedicalRecord> {
   // Encrypt sensitive fields in the content
   const encryptedContent = encryptSensitiveFields(data.content as MedicalRecordContent);
 
   // Create record with encrypted content
+  // Check if user has permission to create a record for this patient
+  await checkPatientAccessPermission(data.patientProfileId, user);
+
   const [record] = await db.insert(medicalRecords)
     .values({
       ...data,
@@ -181,7 +184,7 @@ export async function deleteMedicalRecord(
  */
 async function checkAccessPermission(
   record: SelectMedicalRecord, 
-  user: SelectUser
+  user: AuthUser
 ): Promise<void> {
   // Superadmins and admins have access to all records
   if (user.role === 'superadmin' || user.role === 'admin') {
@@ -223,7 +226,7 @@ async function checkAccessPermission(
  */
 async function checkPatientAccessPermission(
   patientProfileId: number,
-  user: SelectUser
+  user: AuthUser
 ): Promise<void> {
   // Superadmins and admins have access to all records
   if (user.role === 'superadmin' || user.role === 'admin') {
@@ -279,7 +282,7 @@ async function checkPatientAccessPermission(
  */
 async function checkDeletePermission(
   record: SelectMedicalRecord, 
-  user: SelectUser
+  user: AuthUser
 ): Promise<void> {
   // Only superadmins, admins, and the provider who created the record can delete
   if (user.role === 'superadmin' || user.role === 'admin') {

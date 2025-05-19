@@ -66,9 +66,15 @@ router.post('/', async (req: AuthRequest, res, next) => {
       throw new AppError('Invalid medical record data', 400, 'VALIDATION_ERROR', parsedData.error.format());
     }
 
+    // Convert visitDate string to Date object
+    const recordData = {
+      ...parsedData.data,
+      visitDate: new Date(parsedData.data.visitDate)
+    };
+    
     const record = await createMedicalRecord(
-      parsedData.data,
-      req.user!.id
+      recordData,
+      req.user!
     );
 
     // Log this security-sensitive operation
