@@ -35,6 +35,7 @@ import CompliancePage from "@/pages/admin/CompliancePage";
 import SettingsPage from "@/pages/admin/SettingsPage";
 import ProvidersPage from "@/pages/admin/ProvidersPage";
 import GenerateTemporaryPasswordPage from "@/pages/admin/GenerateTemporaryPasswordPage";
+import AccountUnlockPage from "@/pages/admin/AccountUnlockPage";
 import TelehealthPage from "@/pages/telehealth/TelehealthPage";
 import AppointmentsPage from "@/pages/patient/AppointmentsPage";
 import MedicalRecordsPage from "@/pages/patient/MedicalRecordsPage";
@@ -166,6 +167,7 @@ export const Router = memo(function Router() {
           <Route path="/admin/compliance" component={() => <ProtectedRoute component={CompliancePage} roles={["admin"]} />} />
           <Route path="/admin/security" component={() => <ProtectedRoute component={SecurityCenterPage} roles={["admin"]} />} />
           <Route path="/admin/generate-temp-password" component={() => <ProtectedRoute component={GenerateTemporaryPasswordPage} roles={["admin"]} />} />
+          <Route path="/admin/account-unlock" component={() => <ProtectedRoute component={AccountUnlockPage} roles={["admin", "it_support"]} />} />
 
           {/* Patient Routes */}
           <Route path="/telehealth" component={() => <ProtectedRoute component={TelehealthPage} />} />

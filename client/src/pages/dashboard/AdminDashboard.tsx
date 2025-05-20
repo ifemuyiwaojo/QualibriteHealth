@@ -10,7 +10,8 @@ import {
   FileText,
   AlertTriangle,
   UserPlus,
-  Key
+  Key,
+  Unlock
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -148,8 +149,11 @@ export default function AdminDashboard() {
             <p className="text-sm text-muted-foreground mb-4">
               Generate temporary passwords for new patient accounts
             </p>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full mb-2">
               <Link href="/admin/generate-temp-password">Generate Passwords</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/admin/account-unlock">Unlock Accounts</Link>
             </Button>
           </CardContent>
         </Card>
