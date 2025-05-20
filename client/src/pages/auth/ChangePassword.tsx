@@ -94,8 +94,16 @@ export default function ChangePassword() {
         // Update auth state with the new user data
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
         
-        // Redirect to dashboard
-        setLocation("/dashboard");
+        // Get latest user data to check role
+        const userResponse = await fetch("/api/auth/me");
+        const userData = await userResponse.json();
+        
+        // Redirect based on user role
+        if (userData?.user?.role === "patient") {
+          setLocation("/patient/dashboard");
+        } else {
+          setLocation("/dashboard");
+        }
       }
     } catch (error: any) {
       toast({
