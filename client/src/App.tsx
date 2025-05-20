@@ -65,7 +65,7 @@ const DashboardRouter = memo(function DashboardRouter() {
 
   switch (user.role) {
     case "patient":
-      return <PatientDashboard />;
+      return <Redirect to="/patient/dashboard" />;
     case "provider":
       return <ProviderDashboard />;
     case "admin":
@@ -173,6 +173,7 @@ export const Router = memo(function Router() {
           <Route path="/admin/user-security/:userId" component={() => <ProtectedRoute component={UserSecurityPage} roles={["admin", "it_support"]} />} />
 
           {/* Patient Routes */}
+          <Route path="/patient/dashboard" component={() => <ProtectedRoute component={PatientDashboard} roles={["patient"]} />} />
           <Route path="/telehealth" component={() => <ProtectedRoute component={TelehealthPage} />} />
           <Route path="/patient/appointments" component={() => <ProtectedRoute component={AppointmentsPage} roles={["patient"]} />} />
           <Route path="/patient/records" component={() => <ProtectedRoute component={MedicalRecordsPage} roles={["patient"]} />} />

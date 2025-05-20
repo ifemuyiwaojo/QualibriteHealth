@@ -99,7 +99,11 @@ export default function Login() {
         } else {
           // Normal login successful
           console.log("Login successful, redirecting to dashboard");
-          setLocation("/dashboard");
+          if (response.user.role === "patient") {
+            setLocation("/patient/dashboard");
+          } else {
+            setLocation("/dashboard");
+          }
           toast({
             title: "Login Successful",
             description: "Welcome back!",
