@@ -548,11 +548,25 @@ router.post("/change-password", authenticateToken, asyncHandler(async (req: any,
     throw new AppError("New password must be different from current password", 400, "PASSWORD_REUSE");
   }
 
-  // Enhanced password complexity validation
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  if (!passwordRegex.test(newPassword)) {
+  // Enhanced password complexity validation with more allowed special characters
+  // Use manual checks instead of complex regex to be more flexible with special characters
+  const hasLowercase = /[a-z]/.test(newPassword);
+  const hasUppercase = /[A-Z]/.test(newPassword);
+  const hasNumber = /\d/.test(newPassword);
+  // Check for ANY special character (more permissive)
+  const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+  const isLongEnough = newPassword.length >= 8;
+  
+  const errors = [];
+  if (!hasLowercase) errors.push("lowercase letter");
+  if (!hasUppercase) errors.push("uppercase letter");
+  if (!hasNumber) errors.push("number");
+  if (!hasSpecial) errors.push("special character");
+  if (!isLongEnough) errors.push("at least 8 characters");
+  
+  if (errors.length > 0) {
     throw new AppError(
-      "New password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters", 
+      `New password must contain ${errors.join(", ")}`, 
       400, 
       "PASSWORD_COMPLEXITY"
     );
