@@ -7,7 +7,7 @@
 import express from "express";
 import { db } from "@db";
 import { users } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { eq, SQL } from "drizzle-orm";
 import { authenticateToken, authorizeRoles, AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
@@ -106,6 +106,7 @@ router.get("/security-summary", authenticateToken, authorizeRoles("admin", "supe
     }
 
     // Query to get security data for all users of a specific role
+    // Use SQL template literal for role filtering
     const userSummaries = await db
       .select({
         id: users.id,
@@ -119,7 +120,7 @@ router.get("/security-summary", authenticateToken, authorizeRoles("admin", "supe
         metadata: users.metadata
       })
       .from(users)
-      .where(eq(users.role, role));
+      .where(eq(users.role, role as any));
 
     // Format the response into a more usable structure
     const securitySummary = userSummaries.map(user => ({

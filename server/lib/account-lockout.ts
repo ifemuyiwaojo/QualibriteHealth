@@ -32,7 +32,8 @@ export async function recordFailedLoginAttempt(userId: number, ipAddress?: strin
     const [userData] = await db.select({
       failedLoginAttempts: users.failedLoginAttempts,
       accountLocked: users.accountLocked,
-      lockExpiresAt: users.lockExpiresAt
+      lockExpiresAt: users.lockExpiresAt,
+      lastFailedLogin: users.lastFailedLogin
     })
     .from(users)
     .where(eq(users.id, userId));

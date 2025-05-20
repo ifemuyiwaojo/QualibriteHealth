@@ -590,7 +590,13 @@ router.post("/change-password", authenticateToken, asyncHandler(async (req: any,
 
   // Check if user should be required to set up MFA next
   const metadata = updatedUser.metadata || {};
-  const mfaRequired = metadata.mfaRequired === true && !updatedUser.mfaEnabled;
+  const mfaRequired = (metadata?.mfaRequired === true) && !updatedUser.mfaEnabled;
+  
+  // Handle MFA setup flow
+  if (mfaRequired) {
+    req.session.mfaSetupRequired = true;
+    await auditLog(req.user.id, 'mfa_setup_required', 'users', req.user.id, req);
+  }
 
   // Optionally invalidate other sessions for security
   // This step forces re-login on other devices after password change
