@@ -31,7 +31,7 @@ export default function RouterHandler() {
     // Check if user needs to change password
     if (user.requiresPasswordChange) {
       console.log('User requires password change, redirecting to change password page');
-      setLocation('/change-password');
+      setLocation('/auth/change-password');
       return;
     }
 
