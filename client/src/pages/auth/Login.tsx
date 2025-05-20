@@ -114,10 +114,14 @@ export default function Login() {
       // Set appropriate error message based on error type/message
       let errorMessage = "Please check your credentials and try again.";
       
-      if (error.message && error.message.includes("credentials")) {
+      if (error.message && error.message.includes("ACCOUNT_LOCKED")) {
+        errorMessage = "Your account is temporarily locked due to multiple failed login attempts. Please try again later or contact support.";
+      } else if (error.message && error.message.includes("credentials")) {
         errorMessage = "Incorrect email or password. Please try again.";
       } else if (error.message && error.message.includes("Too many")) {
         errorMessage = "Too many login attempts. Please try again later.";
+      } else if (error.message && error.message.includes("locked")) {
+        errorMessage = "Your account is locked. Please contact an administrator to unlock it.";
       } else if (error.message) {
         errorMessage = error.message;
       }

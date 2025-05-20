@@ -152,6 +152,18 @@ export default function AdminDashboard() {
             <Button asChild variant="outline" className="w-full mb-2">
               <Link href="/admin/generate-temp-password">Generate Passwords</Link>
             </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Account Unlocking</CardTitle>
+            <Unlock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Unlock accounts that have been locked due to failed login attempts
+            </p>
             <Button asChild variant="outline" className="w-full">
               <Link href="/admin/account-unlock">Unlock Accounts</Link>
             </Button>
