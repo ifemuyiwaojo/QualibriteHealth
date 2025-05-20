@@ -6,13 +6,14 @@
  */
 
 import { db } from '@db';
-import { users } from '@db/schema';
+import { users, auditLogs } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { Logger } from './logger';
 
 // Configuration
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MINUTES = 15;
+const LOCKOUT_DURATION_MINUTES = 30;
+const RESET_WINDOW_HOURS = 24;  // Reset failed attempts after 24 hours of no failures
 
 /**
  * Record a failed login attempt for a user
@@ -55,6 +56,23 @@ export async function recordFailedLoginAttempt(userId: number, ipAddress?: strin
           })
           .where(eq(users.id, userId));
           
+        // Add audit log for auto-unlocking
+        try {
+          await db.insert(auditLogs).values({
+            userId: userId,
+            action: "ACCOUNT_AUTO_UNLOCKED",
+            resourceType: "USER",
+            resourceId: userId,
+            details: {
+              reason: "Lock duration expired",
+              previousLockTime: userData.lockExpiresAt
+            },
+            ipAddress: ipAddress || null
+          });
+        } catch (error) {
+          console.error("Error logging auto-unlock:", error);
+        }
+          
         await Logger.logSecurity("Account lock expired and reset", {
           userId,
           ipAddress,
@@ -72,8 +90,19 @@ export async function recordFailedLoginAttempt(userId: number, ipAddress?: strin
       };
     }
     
-    // Increment failed login counter
-    const newAttemptCount = (userData.failedLoginAttempts ?? 0) + 1;
+    // Check if we should reset failed attempts due to time passing
+    const now = new Date();
+    const lastFailedTime = userData.lastFailedLogin;
+    
+    let newAttemptCount = 0;
+    
+    // If it's been more than RESET_WINDOW_HOURS since last failure, reset counter
+    if (lastFailedTime && ((now.getTime() - lastFailedTime.getTime()) > (RESET_WINDOW_HOURS * 60 * 60 * 1000))) {
+      newAttemptCount = 1; // Reset to 1 for this new attempt
+    } else {
+      // Increment failed login counter
+      newAttemptCount = (userData.failedLoginAttempts ?? 0) + 1;
+    }
     
     // Check if account should be locked
     if (newAttemptCount >= MAX_FAILED_ATTEMPTS) {
