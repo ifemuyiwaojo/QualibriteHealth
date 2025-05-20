@@ -6,6 +6,7 @@ import providerRoutes from "./routes/provider";
 import setupRoutes from "./routes/setup";
 import adminRoutes from "./routes/admin";
 import adminTempPasswordRoutes from "./routes/admin-temp-password";
+import adminAccountUnlockRoutes from "./routes/admin-account-unlock";
 import mfaRoutes from "./routes/mfa";
 import mobileAuthRoutes from "./routes/mobile-auth";
 import medicalRecordsRoutes from "./routes/medical-records";
@@ -46,6 +47,9 @@ export function registerRoutes(app: Express): Server {
   
   // Admin temporary password generation routes
   app.use("/api/admin", limitAPI, adminTempPasswordRoutes);
+  
+  // Admin account unlock routes
+  app.use("/api/admin", limitAPI, adminAccountUnlockRoutes);
   
   // MFA routes for enhanced security - apply rate limiting for protection
   app.use("/api/mfa", limitAPI, mfaRoutes);
