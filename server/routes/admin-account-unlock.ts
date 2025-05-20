@@ -78,11 +78,19 @@ router.post("/accounts/unlock", authenticateToken, authorizeRoles("admin", "supe
       });
     }
     
-    // Special handling for superadmin accounts
-    if (user.isSuperadmin && req.user?.role !== "superadmin") {
+    // Permission handling based on role hierarchies
+    if (user.role === "admin" && req.user?.role !== "superadmin") {
       return res.status(403).json({ 
         success: false,
-        message: "Only superadmins can unlock superadmin accounts" 
+        message: "Only superadmins can unlock admin accounts" 
+      });
+    }
+    
+    // Special handling for superadmin accounts - need special procedure
+    if (user.isSuperadmin) {
+      return res.status(403).json({ 
+        success: false,
+        message: "Superadmin accounts require a special unlock procedure. Please contact system support." 
       });
     }
     

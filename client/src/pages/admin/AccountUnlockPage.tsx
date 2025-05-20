@@ -36,22 +36,34 @@ export function AccountUnlockPage() {
   // Mutation to unlock an account
   const unlockMutation = useMutation({
     mutationFn: async (userId: number) => {
+      console.log("Attempting to unlock account:", userId);
       const res = await apiRequest("POST", "/api/admin/accounts/unlock", { userId });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Unlock response:", data);
       toast({
         title: "Account Unlocked",
-        description: "User account has been successfully unlocked",
+        description: data.message || "User account has been successfully unlocked",
         variant: "default",
       });
       refetch(); // Refresh the list after unlocking
       setSelectedUser(null);
     },
     onError: (error: any) => {
+      console.error("Unlock error:", error);
+      let errorMessage = "An error occurred while trying to unlock the account";
+      
+      // Try to extract error message from the response
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.data && error.data.message) {
+        errorMessage = error.data.message;
+      }
+      
       toast({
         title: "Failed to unlock account",
-        description: error.message || "An error occurred while trying to unlock the account",
+        description: errorMessage,
         variant: "destructive",
       });
     },

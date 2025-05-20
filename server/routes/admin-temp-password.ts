@@ -149,13 +149,31 @@ router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin"
     console.log(`Generated temp password: ${tempPassword}`);
     console.log(`Hashed with bcrypt (not the actual hash): [hash of length ${hashedPassword.length}]`);
 
-    // Update the user's password and set changePasswordRequired flag
+    // Check if user already has a permanent password (not marked as requiring change)
+    const userPasswordStatus = await db.select({
+      changeRequired: users.changePasswordRequired
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+    
+    // If the user already has set their permanent password, we need to track that
+    const hadPermanentPassword = userPasswordStatus[0] && !userPasswordStatus[0].changeRequired;
+    
+    // Update the user's password and set changePasswordRequired flag regardless of previous state
     await db
       .update(users)
       .set({ 
         passwordHash: hashedPassword, // Using passwordHash field instead of password
         changePasswordRequired: true,
-        updatedAt: new Date() // Using updatedAt field instead of lastPasswordChange
+        updatedAt: new Date(), // Using updatedAt field instead of lastPasswordChange
+        // If they had a permanent password, we're forcing them back to temporary
+        // This is important for tracking security purposes
+        metadata: JSON.stringify({
+          ...user.metadata,
+          previousPasswordWasPermanent: hadPermanentPassword,
+          temporaryPasswordGenerated: new Date().toISOString()
+        })
       })
       .where(eq(users.id, userId));
 
