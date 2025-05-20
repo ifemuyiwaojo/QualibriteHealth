@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ConvaiWidget } from "@/components/ConvaiWidget";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import RouterHandler from "@/pages/auth/RouterHandler";
 import { Loading } from "@/components/ui/loading";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
@@ -198,6 +199,7 @@ function App() {
 
   return (
     <AuthContext.Provider value={auth}>
+      <RouterHandler />
       <Router />
       <Toaster />
     </AuthContext.Provider>

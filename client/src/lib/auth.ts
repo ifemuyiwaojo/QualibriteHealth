@@ -8,6 +8,7 @@ export interface User {
   changePasswordRequired?: boolean;
   isSuperadmin?: boolean;
   mfaEnabled?: boolean;
+  mfaSetupRequired?: boolean;
   metadata?: {
     mfaRequired?: boolean;
     name?: string;
