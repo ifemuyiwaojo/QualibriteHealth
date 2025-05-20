@@ -1,35 +1,55 @@
 import { useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { useAuth } from '@/lib/auth';
+import { Loader2 } from 'lucide-react';
 
 /**
- * This component handles routing logic based on authentication state
- * Including special cases for password change and MFA setup requirements
+ * RouterHandler Component
+ * 
+ * This component handles special routing requirements based on user state:
+ * - Redirects to password change page if user needs to change password
+ * - Redirects to MFA setup page if MFA is required but not set up
+ * - Allows normal routing for other cases
  */
 export default function RouterHandler() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [isAuthPage] = useRoute('/auth');
+  const [isSetupMFAPage] = useRoute('/setup-mfa');
+  const [isChangePasswordPage] = useRoute('/change-password');
 
   useEffect(() => {
-    if (!user) {
-      // Not logged in - no special handling needed
+    // Don't redirect while authentication is loading
+    if (isLoading) return;
+
+    // Don't redirect if user is not authenticated
+    if (!user) return;
+    
+    // Skip redirects if already on the special pages
+    if (isAuthPage || isSetupMFAPage || isChangePasswordPage) return;
+
+    // Check if user needs to change password
+    if (user.requiresPasswordChange) {
+      console.log('User requires password change, redirecting to change password page');
+      setLocation('/change-password');
       return;
     }
 
-    // Check for required password change first
-    if (user.changePasswordRequired) {
-      setLocation('/auth/change-password');
+    // Check if user needs to set up MFA
+    if (user.mfaRequired && !user.mfaEnabled) {
+      console.log('User requires MFA setup, redirecting to setup MFA page');
+      setLocation('/setup-mfa');
       return;
     }
+  }, [
+    user, 
+    isLoading, 
+    setLocation, 
+    isAuthPage, 
+    isSetupMFAPage, 
+    isChangePasswordPage
+  ]);
 
-    // Check for required MFA setup next (only if password is already set)
-    if (user.mfaSetupRequired) {
-      setLocation('/auth/mfa-setup');
-      return;
-    }
-
-    // Otherwise normal authenticated session continues
-  }, [user, setLocation]);
-
+  // This component doesn't render anything visible
   return null;
 }
