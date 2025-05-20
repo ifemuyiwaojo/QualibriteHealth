@@ -97,12 +97,19 @@ router.post("/temp-password/generate", authenticateToken, authorizeRoles("admin"
     
     // Check if user already has a temporary password that hasn't been changed yet
     if (user.changePasswordRequired && forceRegenerate !== true) {
+      // For security reasons we don't store the actual temporary password,
+      // but we can indicate to the admin that the password change is required
       return res.status(200).json({ 
         success: true, 
-        message: "User already has a temporary password that hasn't been changed. Use forceRegenerate to create a new one.",
+        message: "User already has a temporary password that hasn't been changed. You can regenerate if needed.",
         hasExistingTemporaryPassword: true,
         userId: user.id,
-        email: user.email
+        email: user.email,
+        // Provide metadata about the password - when it was created
+        passwordMetadata: {
+          createdAt: user.updatedAt,
+          changeRequired: user.changePasswordRequired
+        }
       });
     }
 

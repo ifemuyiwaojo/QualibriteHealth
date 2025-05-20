@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Clipboard, Key, ShieldAlert, CheckCircle } from "lucide-react";
+import { ArrowLeft, Clipboard, Key, ShieldAlert, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -231,25 +232,49 @@ export default function GenerateTemporaryPasswordPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <CheckCircle className="mr-2 h-5 w-5 text-orange-500" />
-                  Existing Temporary Password
+                  <AlertCircle className="mr-2 h-5 w-5 text-orange-500" />
+                  Temporary Password Active
                 </CardTitle>
                 <CardDescription>
-                  {formatUserName(selectedPatient)} already has a temporary password that hasn't been changed yet
+                  {formatUserName(selectedPatient)} already has an active temporary password
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                      Password Change Required
+                    </Badge>
+                  </div>
+                  {selectedPatient.passwordMetadata?.createdAt && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Created:</span>
+                      <span className="text-sm">
+                        {new Date(selectedPatient.passwordMetadata.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
                 <Alert>
-                  <AlertTitle>Password Change Required</AlertTitle>
+                  <AlertTitle>Password Security Notice</AlertTitle>
                   <AlertDescription>
-                    This patient already has a temporary password and will be required to change it on their next login.
-                    You can generate a new temporary password if necessary.
+                    For security reasons, we don't store temporary passwords in plaintext. If the patient has forgotten 
+                    their temporary password, you can generate a new one.
                   </AlertDescription>
                 </Alert>
               </CardContent>
-              <CardFooter>
-                <Button onClick={handleRegenerate} className="w-full gap-2">
-                  <Key className="h-4 w-4" />
+              <CardFooter className="flex flex-col space-y-2">
+                <div className="text-sm text-muted-foreground mb-2">
+                  Regenerating will invalidate the current temporary password.
+                </div>
+                <Button 
+                  onClick={handleRegenerate} 
+                  className="w-full gap-2"
+                  variant="default"
+                >
+                  <RefreshCw className="h-4 w-4" />
                   Generate New Password
                 </Button>
               </CardFooter>
