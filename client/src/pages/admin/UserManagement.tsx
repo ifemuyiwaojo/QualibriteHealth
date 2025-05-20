@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import UserSecurityActions from "@/components/admin/UserSecurityActions";
 import { 
   ArrowLeft, 
   UserPlus, 
