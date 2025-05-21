@@ -22,10 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TelehealthSession } from "@/components/TelehealthSession";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import { ApiService } from "@/services/api/ApiService";
+import { initializeApi } from "@/services/api/initializeApi";
+import { useEffect, useState } from "react";
+import { Appointment } from "@/services/adapters/ApiAdapter";
 
 const scheduleFormSchema = z.object({
   scheduledTime: z.date({
@@ -38,6 +42,53 @@ const scheduleFormSchema = z.object({
 export default function AppointmentsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [apiService, setApiService] = useState<ApiService | null>(null);
+  const [apiInitialized, setApiInitialized] = useState(false);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  // Initialize the API service
+  useEffect(() => {
+    const initApi = async () => {
+      try {
+        // Currently using 'mock' adapter while waiting for TherapyNotes API credentials
+        const service = await initializeApi('mock');
+        setApiService(service);
+        setApiInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize API service:', error);
+        toast({
+          title: 'API Connection Error',
+          description: 'Failed to connect to appointment scheduling service. Please try again later.',
+          variant: 'destructive'
+        });
+      }
+    };
+
+    initApi();
+  }, [toast]);
+
+  // Fetch existing appointments when API is ready
+  const { isLoading: isLoadingAppointments } = useQuery({
+    queryKey: ['appointments', user?.id],
+    queryFn: async () => {
+      if (!apiInitialized || !apiService || !user) return [];
+      
+      try {
+        const appointments = await apiService.getAppointments(user.id.toString());
+        setAppointments(appointments);
+        return appointments;
+      } catch (error) {
+        console.error('Failed to fetch appointments:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load your appointments. Please try again.',
+          variant: 'destructive'
+        });
+        return [];
+      }
+    },
+    enabled: apiInitialized && !!user
+  });
 
   const form = useForm<z.infer<typeof scheduleFormSchema>>({
     resolver: zodResolver(scheduleFormSchema),
