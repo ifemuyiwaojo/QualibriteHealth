@@ -7,13 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { 
   Calendar, FileText, Video, User, Clock, Bell, PieChart, Pill, Activity,
-  Heart, Tablet, CalendarClock, ChevronRight, Clipboard, Award, CheckCircle2
+  Heart, Tablet, CalendarClock, ChevronRight, Clipboard, Award, CheckCircle2,
+  MessageSquare, Bell as BellIcon, X, ExternalLink
 } from "lucide-react";
 import { Link } from "wouter";
 import { TelehealthSession } from "@/components/TelehealthSession";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // This will eventually be replaced with real EHR API integration
 const useMockPatientData = (userId: number) => {
@@ -135,6 +141,51 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// Mock notifications data - this will be replaced with real API calls
+const useMockNotifications = (userId: number) => {
+  return useQuery({
+    queryKey: [`/api/patient/${userId}/notifications`],
+    queryFn: async () => {
+      // This will be replaced with an actual API call to fetch patient notifications
+      return [
+        {
+          id: 1,
+          type: 'appointment',
+          title: 'Upcoming Appointment',
+          message: 'Reminder: You have an appointment with Dr. Sarah Wilson tomorrow at 1:00 PM.',
+          date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'medication',
+          title: 'Medication Reminder',
+          message: 'Time to take your Escitalopram (10mg). Mark as taken when complete.',
+          date: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+          read: false
+        },
+        {
+          id: 3,
+          type: 'message',
+          title: 'New Message from Dr. Wilson',
+          message: "I've reviewed your latest mood tracking data. Let's discuss it at your next appointment.",
+          date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+          read: true
+        },
+        {
+          id: 4, 
+          type: 'system',
+          title: 'Lab Results Available',
+          message: 'Your recent lab results have been uploaded to your medical records.',
+          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          read: true
+        }
+      ];
+    },
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
+};
+
 export default function PatientDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -144,8 +195,11 @@ export default function PatientDashboard() {
     return null;
   }
 
-  // This will be replaced with actual API calls when integrating with EHR
+  // These will be replaced with actual API calls when integrating with the EHR system
   const { data: patientData, isLoading } = useMockPatientData(user.id);
+  const { data: notifications = [] } = useMockNotifications(user.id);
+  
+  const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
 
   const handleMedicationAction = (medicationId: number, action: string) => {
     // This will be replaced with actual API calls when integrating with EHR
@@ -168,7 +222,7 @@ export default function PatientDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Patient Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, {user.name || user.email}</p>
+          <p className="text-muted-foreground mt-1">Welcome back, {user.email}</p>
         </div>
         <div className="flex gap-3">
           <Button asChild variant="outline" size="sm" className="hidden md:flex">
@@ -613,9 +667,10 @@ export default function PatientDashboard() {
                           </div>
                           <Progress 
                             value={medication.adherenceRate} 
-                            className="h-2" 
-                            indicatorClassName={medication.adherenceRate < 70 ? "bg-destructive" : 
-                              medication.adherenceRate < 90 ? "bg-amber-500" : "bg-green-500"}
+                            className={`h-2 ${
+                              medication.adherenceRate < 70 ? "bg-destructive/20" : 
+                              medication.adherenceRate < 90 ? "bg-amber-500/20" : "bg-green-500/20"
+                            }`}
                           />
                         </div>
                         
@@ -922,17 +977,336 @@ export default function PatientDashboard() {
         </TabsContent>
 
         <TabsContent value="health" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Health Tracking</CardTitle>
-              <CardDescription>Monitor your health metrics over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-20 text-muted-foreground">
-                Health tracking features will be available when integrated with the external EHR system.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Health Metrics */}
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Health Metrics</CardTitle>
+                    <CardDescription>Track your progress over time</CardDescription>
+                  </div>
+                  <select className="rounded-md border border-input bg-background px-2 py-1 text-sm">
+                    <option value="30days">Last 30 Days</option>
+                    <option value="90days">Last 90 Days</option>
+                    <option value="6months">Last 6 Months</option>
+                    <option value="1year">Last Year</option>
+                  </select>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Mood Tracker */}
+                  <div>
+                    <h4 className="font-medium mb-3">Mood Tracking</h4>
+                    <div className="h-[200px] w-full border rounded-md p-4 flex items-center justify-center">
+                      <div className="w-full h-full relative">
+                        {/* Mood graph simulation */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-border"></div>
+                        <div className="absolute bottom-0 left-0 h-full w-[1px] bg-border"></div>
+                        
+                        {/* Simulate a line chart for mood */}
+                        <div className="absolute bottom-0 left-0 right-0 h-full flex items-end">
+                          <div style={{ height: '60%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '70%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '55%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '40%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '65%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '80%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '75%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '85%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '70%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '60%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '50%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '65%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '75%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                          <div style={{ height: '85%' }} className="w-[7.14%] px-0.5">
+                            <div className="bg-primary/80 w-full h-full rounded-t-sm"></div>
+                          </div>
+                        </div>
+                        
+                        {/* Labels for the y-axis */}
+                        <div className="absolute top-0 left-[-30px] bottom-0 flex flex-col justify-between text-xs text-muted-foreground">
+                          <span>Great</span>
+                          <span>Good</span>
+                          <span>Neutral</span>
+                          <span>Poor</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>May 7</span>
+                      <span>May 14</span>
+                      <span>May 21</span>
+                    </div>
+                  </div>
+                  
+                  {/* Anxiety Level Tracker */}
+                  <div>
+                    <h4 className="font-medium mb-3">Anxiety Levels</h4>
+                    <div className="h-[200px] w-full border rounded-md p-4 flex items-center justify-center">
+                      <div className="w-full h-full relative">
+                        {/* Anxiety graph simulation with a line chart */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-border"></div>
+                        <div className="absolute bottom-0 left-0 h-full w-[1px] bg-border"></div>
+                        
+                        {/* Simulated line path for anxiety levels */}
+                        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                          <path 
+                            d="M0,160 L40,140 L80,120 L120,130 L160,100 L200,70 L240,90 L280,50 L320,80 L360,60 L400,40 L440,60 L480,30" 
+                            stroke="hsl(var(--primary))" 
+                            strokeWidth="2" 
+                            fill="none" 
+                          />
+                          <path 
+                            d="M0,160 L40,140 L80,120 L120,130 L160,100 L200,70 L240,90 L280,50 L320,80 L360,60 L400,40 L440,60 L480,30 L480,190 L0,190 Z" 
+                            fill="hsl(var(--primary)/0.1)" 
+                          />
+                        </svg>
+                        
+                        {/* Labels for the y-axis */}
+                        <div className="absolute top-0 left-[-30px] bottom-0 flex flex-col justify-between text-xs text-muted-foreground">
+                          <span>Severe</span>
+                          <span>Moderate</span>
+                          <span>Mild</span>
+                          <span>Minimal</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>March</span>
+                      <span>April</span>
+                      <span>May</span>
+                    </div>
+                  </div>
+                  
+                  {/* Sleep Quality Tracker */}
+                  <div>
+                    <h4 className="font-medium mb-3">Sleep Quality</h4>
+                    <div className="h-[200px] w-full border rounded-md p-4 flex items-center justify-center">
+                      <div className="w-full h-full relative">
+                        {/* Sleep quality graph simulation */}
+                        <div className="absolute inset-0 grid grid-cols-7 gap-2">
+                          {[
+                            { day: 'Mon', hours: 6.5, quality: 'medium' },
+                            { day: 'Tue', hours: 7, quality: 'good' },
+                            { day: 'Wed', hours: 7.5, quality: 'good' },
+                            { day: 'Thu', hours: 6, quality: 'medium' },
+                            { day: 'Fri', hours: 8, quality: 'excellent' },
+                            { day: 'Sat', hours: 8.5, quality: 'excellent' },
+                            { day: 'Sun', hours: 7, quality: 'good' }
+                          ].map((day, index) => (
+                            <div key={index} className="flex flex-col items-center justify-end h-full">
+                              <div className="text-xs text-muted-foreground mb-1">{day.hours}h</div>
+                              <div 
+                                className={`w-full rounded-t-sm ${
+                                  day.quality === 'excellent' ? 'bg-green-500' : 
+                                  day.quality === 'good' ? 'bg-primary' : 
+                                  day.quality === 'medium' ? 'bg-amber-500' : 'bg-red-500'
+                                }`}
+                                style={{ height: `${(day.hours / 10) * 100}%` }}
+                              ></div>
+                              <div className="text-xs text-muted-foreground mt-1">{day.day}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="text-sm">Average: <span className="font-medium">7.2 hours</span></div>
+                      <div className="flex gap-3">
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                          <span className="text-xs">Excellent</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-primary"></div>
+                          <span className="text-xs">Good</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                          <span className="text-xs">Medium</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Tracking Tools & Goals */}
+            <div className="md:col-span-1 space-y-6">
+              {/* Daily Check-in */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Today's Check-in</CardTitle>
+                  <CardDescription>How are you feeling?</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Mood</h4>
+                      <div className="flex justify-between">
+                        {['😔', '😐', '🙂', '😊', '😃'].map((emoji, index) => (
+                          <button 
+                            key={index} 
+                            className={`text-2xl p-2 hover:bg-primary/10 rounded-full transition-colors ${index === 2 ? 'ring-2 ring-primary' : ''}`}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Anxiety Level (0-10)</h4>
+                      <div className="px-2">
+                        <div className="h-4 bg-gradient-to-r from-green-500 via-amber-500 to-red-500 rounded-full"></div>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="10" 
+                          defaultValue="4" 
+                          className="w-full mt-2" 
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>0</span>
+                          <span>5</span>
+                          <span>10</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Sleep Quality</h4>
+                      <div className="flex justify-between gap-2">
+                        {['Poor', 'Fair', 'Good', 'Excellent'].map((quality, index) => (
+                          <button 
+                            key={index} 
+                            className={`text-xs flex-1 py-1.5 border rounded-md hover:bg-primary/10 transition-colors ${index === 2 ? 'bg-primary/10 border-primary' : ''}`}
+                          >
+                            {quality}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Notes</h4>
+                      <textarea 
+                        className="w-full h-20 p-2 text-sm border rounded-md" 
+                        placeholder="How are you feeling today? Any triggers or techniques that helped?"
+                      ></textarea>
+                    </div>
+                    
+                    <Button className="w-full">
+                      Save Today's Check-in
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Treatment Goals */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Treatment Goals</CardTitle>
+                  <CardDescription>Track your progress</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {patientData?.goals && patientData.goals.length > 0 ? (
+                      patientData.goals.map((goal) => (
+                        <div key={goal.id} className="space-y-2">
+                          <div className="flex justify-between">
+                            <h4 className="text-sm font-medium">{goal.name}</h4>
+                            <span className="text-sm">{goal.progress}%</span>
+                          </div>
+                          <Progress value={goal.progress} className="h-2" />
+                          <p className="text-xs text-muted-foreground">
+                            Target date: {new Date(goal.targetDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center py-4 text-muted-foreground">No goals set yet.</p>
+                    )}
+                    
+                    <Button variant="outline" size="sm" className="w-full">
+                      <PieChart className="h-4 w-4 mr-2" /> Add New Goal
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Care Gaps */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Health Recommendations</CardTitle>
+                  <CardDescription>Suggested follow-ups</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {patientData?.careGaps && patientData.careGaps.length > 0 ? (
+                      patientData.careGaps.map((gap) => (
+                        <div key={gap.id} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
+                          <div className={`p-1.5 rounded-full mt-0.5 ${
+                            gap.priority === 'high' ? 'bg-red-100 text-red-600' : 
+                            gap.priority === 'medium' ? 'bg-amber-100 text-amber-600' : 
+                            'bg-green-100 text-green-600'
+                          }`}>
+                            <Clock className="h-3.5 w-3.5" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium">{gap.name}</h4>
+                            <p className="text-xs text-muted-foreground">
+                              Due: {new Date(gap.dueDate).toLocaleDateString()}
+                            </p>
+                            <Badge 
+                              variant={gap.status === 'due' ? 'destructive' : 'outline'}
+                              className="mt-1 text-xs"
+                            >
+                              {gap.status === 'due' ? 'Due now' : 'Upcoming'}
+                            </Badge>
+                          </div>
+                          <Button size="sm" variant="outline" className="h-7">
+                            Schedule
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center py-4 text-muted-foreground">No recommendations at this time.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
