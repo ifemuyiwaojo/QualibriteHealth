@@ -116,15 +116,24 @@ export class TherapyNotesAdapter implements ApiAdapter {
    */
   async scheduleAppointment(appointmentData: Partial<Appointment>): Promise<Appointment> {
     try {
+      if (!appointmentData.patientId || !appointmentData.providerId) {
+        throw new Error('Patient ID and Provider ID are required to schedule an appointment');
+      }
+      
+      // Create a properly typed object for TherapyNotes API
+      const patientId = appointmentData.patientId;
+      const providerId = appointmentData.providerId;
+      const scheduledTime = appointmentData.scheduledTime || new Date().toISOString();
+      
       // Map our data structure to TherapyNotes expected format
       const therapyNotesData = {
-        patientId: appointmentData.patientId,
-        clinicianId: appointmentData.providerId,
-        startTime: appointmentData.scheduledTime,
-        duration: this.calculateDuration(appointmentData.scheduledTime, appointmentData.endTime),
-        appointmentType: appointmentData.visitType,
-        location: appointmentData.location,
-        notes: appointmentData.notes
+        patientId: patientId,
+        clinicianId: providerId,
+        startTime: scheduledTime,
+        duration: this.calculateDuration(scheduledTime, appointmentData.endTime),
+        appointmentType: appointmentData.visitType || 'INDIVIDUAL',
+        location: appointmentData.location || 'Online',
+        notes: appointmentData.notes || ''
       };
 
       const response = await this.request<any>(
@@ -135,16 +144,16 @@ export class TherapyNotesAdapter implements ApiAdapter {
 
       // Return the created appointment in our standard format
       return {
-        id: response.id,
-        patientId: appointmentData.patientId,
-        providerId: appointmentData.providerId,
-        providerName: appointmentData.providerName,
-        scheduledTime: response.startTime,
-        endTime: response.endTime,
-        status: this.mapAppointmentStatus(response.status),
-        visitType: response.appointmentType,
-        location: response.location || 'Online',
-        notes: response.notes
+        id: response.id || `temp-${Date.now()}`,
+        patientId: patientId,
+        providerId: providerId,
+        providerName: appointmentData.providerName || 'Provider',
+        scheduledTime: response.startTime || scheduledTime,
+        endTime: response.endTime || new Date(new Date(scheduledTime).getTime() + 30 * 60000).toISOString(),
+        status: this.mapAppointmentStatus(response.status || 'scheduled'),
+        visitType: response.appointmentType || appointmentData.visitType || 'INDIVIDUAL',
+        location: response.location || appointmentData.location || 'Online',
+        notes: response.notes || appointmentData.notes || ''
       };
     } catch (error) {
       console.error('Failed to schedule appointment with TherapyNotes:', error);

@@ -100,38 +100,68 @@ export default function AppointmentsPage() {
 
   const createVisitMutation = useMutation({
     mutationFn: async (values: z.infer<typeof scheduleFormSchema>) => {
-      const response = await fetch("/api/telehealth/visit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          patientIds: [user?.id.toString()],
-          patientNames: [user?.email],
+      // Use our modular API service
+      if (!apiService || !user) {
+        throw new Error('Service not available or user not authenticated');
+      }
+      
+      try {
+        // Create appointment data in our standardized format for TherapyNotes
+        const appointmentData = {
+          patientId: user.id.toString(),
           providerId: "provider-1",
           providerName: "Dr. Smith",
           scheduledTime: values.scheduledTime.toISOString(),
-          duration: parseInt(values.duration),
-          isGroupSession: values.isGroupSession,
-          visitType: values.isGroupSession ? 'GROUP' : 'VIDEO',
-          reasonForVisit: "Scheduled Visit",
-          maxParticipants: values.isGroupSession ? 8 : 2
-        }),
-      });
+          endTime: new Date(values.scheduledTime.getTime() + parseInt(values.duration) * 60000).toISOString(),
+          visitType: values.isGroupSession ? 'GROUP' : 'INDIVIDUAL',
+          location: 'Online',
+          notes: 'Scheduled via patient portal'
+        };
+        
+        // Use our TherapyNotes-compatible API service
+        return await apiService.scheduleAppointment(appointmentData);
+      } catch (error) {
+        console.error('Failed to schedule appointment with API service:', error);
+        
+        // Fallback to direct API call if needed (temporary while transitioning)
+        const response = await fetch("/api/telehealth/visit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            patientIds: [user?.id.toString()],
+            patientNames: [user?.email],
+            providerId: "provider-1",
+            providerName: "Dr. Smith",
+            scheduledTime: values.scheduledTime.toISOString(),
+            duration: parseInt(values.duration),
+            isGroupSession: values.isGroupSession,
+            visitType: values.isGroupSession ? 'GROUP' : 'VIDEO',
+            reasonForVisit: "Scheduled Visit",
+            maxParticipants: values.isGroupSession ? 8 : 2
+          }),
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to schedule appointment");
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to schedule appointment");
+        }
+
+        return response.json();
       }
-
-      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (newAppointment) => {
       toast({
         title: "Success",
         description: "Appointment scheduled successfully",
       });
       form.reset();
+      
+      // Update appointments list with the new appointment
+      if (newAppointment) {
+        setAppointments(prev => [...prev, newAppointment]);
+      }
     },
     onError: (error: Error) => {
       toast({
