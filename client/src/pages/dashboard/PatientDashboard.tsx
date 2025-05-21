@@ -141,46 +141,49 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// This will eventually be replaced with real API integration
+const mockNotifications = [
+  {
+    id: 1,
+    type: 'appointment',
+    title: 'Upcoming Appointment',
+    message: 'Reminder: You have an appointment with Dr. Sarah Wilson tomorrow at 1:00 PM.',
+    date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    read: false
+  },
+  {
+    id: 2,
+    type: 'medication',
+    title: 'Medication Reminder',
+    message: 'Time to take your Escitalopram (10mg). Mark as taken when complete.',
+    date: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    read: false
+  },
+  {
+    id: 3,
+    type: 'message',
+    title: 'New Message from Dr. Wilson',
+    message: "I reviewed your latest mood tracking data. Let's discuss it at your next appointment.",
+    date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    read: true
+  },
+  {
+    id: 4, 
+    type: 'system',
+    title: 'Lab Results Available',
+    message: 'Your recent lab results have been uploaded to your medical records.',
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    read: true
+  }
+];
+
 // Mock notifications data - this will be replaced with real API calls
 const useMockNotifications = (userId: number) => {
   return useQuery({
     queryKey: [`/api/patient/${userId}/notifications`],
     queryFn: async () => {
       // This will be replaced with an actual API call to fetch patient notifications
-      return [
-        {
-          id: 1,
-          type: 'appointment',
-          title: 'Upcoming Appointment',
-          message: 'Reminder: You have an appointment with Dr. Sarah Wilson tomorrow at 1:00 PM.',
-          date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          read: false
-        },
-        {
-          id: 2,
-          type: 'medication',
-          title: 'Medication Reminder',
-          message: 'Time to take your Escitalopram (10mg). Mark as taken when complete.',
-          date: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-          read: false
-        },
-        {
-          id: 3,
-          type: 'message',
-          title: 'New Message from Dr. Wilson',
-          message: "I've reviewed your latest mood tracking data. Let's discuss it at your next appointment.",
-          date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-          read: true
-        },
-        {
-          id: 4, 
-          type: 'system',
-          title: 'Lab Results Available',
-          message: 'Your recent lab results have been uploaded to your medical records.',
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          read: true
-        }
-      ];
+      return mockNotifications;
     },
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
@@ -225,12 +228,95 @@ export default function PatientDashboard() {
           <p className="text-muted-foreground mt-1">Welcome back, {user.email}</p>
         </div>
         <div className="flex gap-3">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="relative">
+                <Bell className="h-4 w-4 mr-2" />
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold flex items-center justify-center text-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0 max-h-[420px] overflow-auto" align="end">
+              <div className="flex items-center justify-between border-b px-3 py-2">
+                <h4 className="font-medium">Notifications</h4>
+                <Button variant="ghost" size="sm" className="h-7 gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span className="text-xs">Mark all as read</span>
+                </Button>
+              </div>
+              <div className="divide-y">
+                {notifications && notifications.length > 0 ? (
+                  notifications.map(notification => (
+                    <div 
+                      key={notification.id} 
+                      className={`p-3 hover:bg-muted/50 transition-colors ${!notification.read ? 'bg-primary/5' : ''}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`p-1.5 rounded-full mt-0.5 ${
+                          notification.type === 'appointment' ? 'bg-blue-100 text-blue-600' : 
+                          notification.type === 'medication' ? 'bg-amber-100 text-amber-600' : 
+                          notification.type === 'message' ? 'bg-green-100 text-green-600' : 
+                          'bg-slate-100 text-slate-600'
+                        }`}>
+                          {notification.type === 'appointment' ? (
+                            <Calendar className="h-3.5 w-3.5" />
+                          ) : notification.type === 'medication' ? (
+                            <Pill className="h-3.5 w-3.5" />
+                          ) : notification.type === 'message' ? (
+                            <MessageSquare className="h-3.5 w-3.5" />
+                          ) : (
+                            <BellIcon className="h-3.5 w-3.5" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <h5 className="text-sm font-medium">{notification.title}</h5>
+                            {!notification.read && (
+                              <span className="h-2 w-2 rounded-full bg-primary"></span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(notification.date).toLocaleTimeString([], { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                hour12: true 
+                              })}
+                            </span>
+                            <Button variant="ghost" size="sm" className="h-6 px-2">
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <p className="text-sm">No notifications</p>
+                  </div>
+                )}
+              </div>
+              <div className="border-t p-2">
+                <Button variant="ghost" size="sm" className="w-full justify-center text-xs">
+                  View all notifications
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
           <Button asChild variant="outline" size="sm" className="hidden md:flex">
             <Link href="/patient/messages">
-              <Bell className="h-4 w-4 mr-2" />
+              <MessageSquare className="h-4 w-4 mr-2" />
               Messages
             </Link>
           </Button>
+          
           <Button asChild>
             <Link href="/telehealth">
               <Video className="h-4 w-4 mr-2" />
