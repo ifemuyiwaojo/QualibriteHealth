@@ -10,6 +10,85 @@ import { motion } from "framer-motion";
 export default function Home() {
   return (
     <div className="flex flex-col w-full overflow-hidden">
+      {/* Page Header Section - Similar to original site */}
+      <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 overflow-hidden">
+        {/* Header background with medical professional image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1582750433449-648ed127bb54"
+            alt="Medical professional"
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-800/90 to-blue-600/80"></div>
+        </div>
+        
+        <div className="relative z-10 container mx-auto px-4 py-16">
+          <div className="text-center text-white max-w-4xl mx-auto">
+            <div className="flex justify-center mb-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-full p-6 border-2 border-white/20">
+                <img 
+                  src="/qualibrite-logo.png" 
+                  alt="Qualibrite Health" 
+                  className="h-16 w-auto filter brightness-0 invert"
+                />
+              </div>
+            </div>
+            <h1 className="text-lg font-semibold mb-2">Qualibrite Health</h1>
+            <h2 className="text-4xl md:text-6xl font-bold mb-4">
+              QUALITY MENTAL HEALTH
+            </h2>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6 text-yellow-300">
+              CARE WITHOUT A WAIT!
+            </h2>
+            <p className="text-xl md:text-2xl mb-8 text-blue-100">
+              FOR ADULTS & CHILDREN
+            </p>
+            
+            {/* Schedule info from original */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 inline-block">
+              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="font-semibold">Monday - Friday: 9:00AM - 7:00PM</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Weekend appointments available</p>
+                </div>
+                <div>
+                  <p className="font-semibold">(855) 773-2273</p>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              asChild 
+              className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-lg"
+            >
+              <Link href="/auth/register">LIVE CHAT</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Excellence Badge Section */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="inline-block relative">
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full p-8 shadow-2xl border-4 border-white mx-auto mb-4">
+              <div className="text-center text-white">
+                <div className="text-sm font-bold uppercase tracking-wider">Excellence</div>
+                <div className="text-2xl font-extrabold">★★★★★</div>
+                <div className="text-sm">in Mental Health Care</div>
+              </div>
+            </div>
+            <img
+              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef"
+              alt="Professional consultation"
+              className="w-full max-w-md mx-auto rounded-3xl shadow-2xl"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section - Premium telehealth design */}
       <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
         {/* Animated background elements */}
@@ -204,15 +283,15 @@ export default function Home() {
                   <div className="space-y-4 mb-8">
                     <div className="flex items-center space-x-3 text-gray-700">
                       <Clock className="h-5 w-5 text-blue-600" />
-                      <span className="font-medium">Monday - Saturday: 7:00AM - 5:00PM</span>
+                      <span className="font-medium">Monday - Friday: 9:00AM - 7:00PM</span>
                     </div>
                     <div className="flex items-center space-x-3 text-gray-700">
                       <Clock className="h-5 w-5 text-blue-600" />
-                      <span className="font-medium">Sunday: 7:00AM - 4:00PM</span>
+                      <span className="font-medium">Weekend appointments available</span>
                     </div>
                     <div className="flex items-center space-x-3 text-gray-700">
                       <Phone className="h-5 w-5 text-blue-600" />
-                      <span className="font-medium">(210) 555-1234</span>
+                      <span className="font-medium">(855) 773-2273</span>
                     </div>
                   </div>
 
@@ -783,9 +862,9 @@ export default function Home() {
                   asChild 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-xl font-semibold rounded-2xl px-12 py-6 transition-all duration-300"
+                  className="border-2 border-white/30 text-white hover:bg-white/10 hover:text-white backdrop-blur-sm text-xl font-semibold rounded-2xl px-12 py-6 transition-all duration-300"
                 >
-                  <Link href="/services">Explore Our Services</Link>
+                  <Link href="/services" className="text-white hover:text-white">Explore Our Services</Link>
                 </Button>
               </motion.div>
             </div>
@@ -824,7 +903,7 @@ export default function Home() {
                 <Phone className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Phone Number</h3>
-              <p className="text-blue-100 text-lg">(210) 555-1234</p>
+              <p className="text-blue-100 text-lg">(855) 773-2273</p>
             </motion.div>
 
             {/* Opening Hours */}
