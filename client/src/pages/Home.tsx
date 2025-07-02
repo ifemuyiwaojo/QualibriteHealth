@@ -3,68 +3,86 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { 
   Clock, UserCheck, CalendarCheck, Award, ShieldCheck, 
-  Brain, Heart, HeartPulse, ArrowRight, Star, Phone, Users, Monitor
+  Brain, Heart, HeartPulse, ArrowRight, Star, Phone, Users, Monitor, Mail
 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
   return (
     <div className="flex flex-col w-full overflow-hidden">
-      {/* Page Header Section - Similar to original site */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 overflow-hidden">
-        {/* Header background with medical professional image */}
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1582750433449-648ed127bb54"
-            alt="Medical professional"
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-800/90 to-blue-600/80"></div>
-        </div>
-        
-        <div className="relative z-10 container mx-auto px-4 py-16">
-          <div className="text-center text-white max-w-4xl mx-auto">
-            <div className="flex justify-center mb-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-full p-6 border-2 border-white/20">
-                <img 
-                  src="/qualibrite-logo.png" 
-                  alt="Qualibrite Health" 
-                  className="h-16 w-auto filter brightness-0 invert"
-                />
+      {/* Page Header Section - Using provided header image */}
+      <section className="relative bg-gradient-to-r from-teal-200 to-blue-200 overflow-hidden">
+        {/* Header with the exact design from provided image */}
+        <div className="relative container mx-auto px-4 py-8 md:py-16">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            {/* Left side content */}
+            <div className="text-left space-y-4 md:space-y-6">
+              {/* Top contact info */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
+                <div className="text-blue-700">
+                  Tel: <span className="font-semibold">(888) 511-3697</span>
+                </div>
+                <Button 
+                  asChild 
+                  size="sm"
+                  className="bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-2 rounded-md w-fit text-xs sm:text-sm"
+                >
+                  <Link href="/auth/register">SCHEDULE A CONSULTATION</Link>
+                </Button>
               </div>
-            </div>
-            <h1 className="text-lg font-semibold mb-2">Qualibrite Health</h1>
-            <h2 className="text-4xl md:text-6xl font-bold mb-4">
-              QUALITY MENTAL HEALTH
-            </h2>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 text-yellow-300">
-              CARE WITHOUT A WAIT!
-            </h2>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              FOR ADULTS & CHILDREN
-            </p>
-            
-            {/* Schedule info from original */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 inline-block">
-              <div className="grid md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="font-semibold">Monday - Friday: 9:00AM - 7:00PM</p>
-                </div>
-                <div>
-                  <p className="font-semibold">Weekend appointments available</p>
-                </div>
-                <div>
-                  <p className="font-semibold">(855) 773-2273</p>
+
+              {/* Logo and tagline */}
+              <div className="space-y-2">
+                <p className="text-xs sm:text-sm text-gray-600">A Division of</p>
+                <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                    <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Qualibrite Health</h1>
+                    <p className="text-xs sm:text-sm text-gray-600">Quality healthcare for a brighter outcome</p>
+                  </div>
                 </div>
               </div>
+
+              {/* Main heading */}
+              <div className="space-y-2 sm:space-y-4">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-blue-600 leading-tight">
+                  QUALITY<br />
+                  MENTAL HEALTH<br />
+                  <span className="text-blue-800">CARE WITHOUT A WAIT!</span>
+                </h2>
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-700 font-semibold">
+                  FOR ADULTS & CHILDREN
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <Button 
+                asChild 
+                className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-3 sm:px-6 sm:py-4 md:px-8 rounded-lg text-sm sm:text-base md:text-lg shadow-lg w-full sm:w-auto"
+              >
+                <Link href="/auth/register">Schedule a Consultation</Link>
+              </Button>
             </div>
-            
-            <Button 
-              asChild 
-              className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-lg"
-            >
-              <Link href="/auth/register">LIVE CHAT</Link>
-            </Button>
+
+            {/* Right side - Medical professional image */}
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2"
+                alt="Medical professional with stethoscope"
+                className="w-full h-auto rounded-lg shadow-xl"
+              />
+              {/* Live Chat floating button */}
+              <div className="absolute bottom-4 right-4">
+                <Button 
+                  asChild 
+                  className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-full shadow-lg"
+                >
+                  <Link href="/auth/register">💬 Let's Chat!</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -352,64 +370,100 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Us Section - Incorporating original site content */}
-      <section className="py-20 md:py-32 bg-white">
+      {/* About Us Section - Online telehealth focused */}
+      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-blue-50">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center max-w-4xl mx-auto mb-20"
+            className="text-center max-w-4xl mx-auto mb-16"
           >
-            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">About Us</span>
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 mt-4">
-              <span className="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-                Excellence in Mental Health Care
-              </span>
+            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">About Qualibrite Health</span>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 mt-4 text-gray-900">
+              Revolutionizing Mental Healthcare Through Technology
             </h2>
             <p className="text-xl text-gray-600 leading-relaxed">
-              As a fully online telehealth platform, QualiBrite Health is committed to providing convenient, accessible mental healthcare from anywhere. We understand that life doesn't wait, which is why we've eliminated the barriers of traditional in-person visits to deliver quality mental health care directly to you.
+              Our online telehealth platform breaks down barriers to quality mental health care, making expert psychiatric services accessible from anywhere, at any time.
             </p>
           </motion.div>
 
-          {/* Image and content section from original */}
-          <div className="grid gap-16 lg:grid-cols-2 items-center mb-20">
+          {/* Key benefits grid */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-16">
             <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="relative"
+              className="bg-white p-6 rounded-2xl shadow-lg text-center"
             >
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1576091160550-2173dba999ef"
-                  alt="Professional consultation"
-                  className="w-full h-[400px] object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/30 to-transparent"></div>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Monitor className="w-8 h-8 text-blue-600" />
               </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Secure Video Sessions</h3>
+              <p className="text-gray-600">HIPAA-compliant video consultations with your dedicated mental health provider</p>
             </motion.div>
-            
+
             <motion.div 
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="space-y-6"
+              className="bg-white p-6 rounded-2xl shadow-lg text-center"
             >
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Our online-first approach ensures continuity of care with the same licensed psychiatrist or therapist for every session. Through our secure telehealth platform, we've streamlined the treatment process to eliminate wait times and geographical barriers.
-              </p>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Patients begin with a comprehensive virtual intake session with our clinical team, followed by consistent monthly appointments with their dedicated mental health provider—all from the comfort and privacy of their own space.
-              </p>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                <span className="font-semibold text-blue-600">As a 100% telehealth platform, we deliver personalized mental health care wherever you are, whenever you need it.</span>
-              </p>
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">No Wait Times</h3>
+              <p className="text-gray-600">Quick appointment scheduling with flexible hours that fit your lifestyle</p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white p-6 rounded-2xl shadow-lg text-center md:col-span-2 lg:col-span-1"
+            >
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Privacy & Security</h3>
+              <p className="text-gray-600">End-to-end encrypted sessions ensuring complete confidentiality</p>
             </motion.div>
           </div>
+
+          {/* How it works section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl p-8 md:p-12 shadow-xl"
+          >
+            <h3 className="text-2xl md:text-3xl font-bold text-center mb-12 text-gray-900">How Our Telehealth Platform Works</h3>
+            
+            <div className="grid gap-8 md:grid-cols-3">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">1</div>
+                <h4 className="text-lg font-semibold mb-3 text-gray-900">Schedule Online</h4>
+                <p className="text-gray-600">Book your appointment through our secure platform in just a few clicks</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">2</div>
+                <h4 className="text-lg font-semibold mb-3 text-gray-900">Connect Securely</h4>
+                <p className="text-gray-600">Join your video session from any device with our encrypted telehealth technology</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">3</div>
+                <h4 className="text-lg font-semibold mb-3 text-gray-900">Receive Care</h4>
+                <p className="text-gray-600">Get personalized treatment from board-certified mental health professionals</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -887,74 +941,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section - From original site */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-blue-800 to-blue-900 text-white">
+      {/* Contact Section - Online clinic contact info */}
+      <section className="py-16 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="grid gap-16 lg:grid-cols-3">
-            {/* Phone Number */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Contact Info</h2>
+            <p className="text-xl text-gray-600">Get in touch with our telehealth team</p>
+          </motion.div>
+
+          <div className="grid gap-6 sm:gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+            {/* Phone */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-center"
+              className="flex items-center space-x-3 sm:space-x-4 p-4 sm:p-6 bg-white rounded-2xl shadow-lg"
             >
-              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Phone className="w-10 h-10 text-white" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Phone className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Phone Number</h3>
-              <p className="text-blue-100 text-lg">(855) 773-2273</p>
+              <div className="min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Phone</h3>
+                <p className="text-base sm:text-lg text-gray-700 break-all">(888) 511-3697</p>
+              </div>
             </motion.div>
 
-            {/* Opening Hours */}
+            {/* Email */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="text-center"
+              className="flex items-center space-x-3 sm:space-x-4 p-4 sm:p-6 bg-white rounded-2xl shadow-lg"
             >
-              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Clock className="w-10 h-10 text-white" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Opening Hours</h3>
-              <div className="text-blue-100 space-y-2">
-                <p>Monday - Friday: 9:00AM - 7:00PM</p>
-                <p>Weekend appointments available</p>
+              <div className="min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Email</h3>
+                <p className="text-base sm:text-lg text-gray-700 break-all">contact@qualibrite.health</p>
               </div>
-            </motion.div>
-
-            {/* Subscribe */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Heart className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Subscribe to our email mailing list</h3>
-              <Button 
-                asChild 
-                className="bg-white text-blue-800 hover:bg-blue-50 font-semibold px-8 py-3 rounded-xl"
-              >
-                <Link href="/contact">Subscribe for Updates</Link>
-              </Button>
             </motion.div>
           </div>
 
-          {/* Email contact */}
+          {/* Online Availability */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-center mt-16 pt-16 border-t border-white/20"
+            className="text-center mt-12 p-8 bg-blue-600 rounded-3xl text-white max-w-2xl mx-auto"
           >
-            <h3 className="text-2xl font-bold mb-4">Email</h3>
-            <p className="text-blue-100 text-lg">info@qualibritehealth.com</p>
+            <Clock className="w-12 h-12 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold mb-4">Online Consultations Available</h3>
+            <div className="space-y-2 text-blue-100">
+              <p className="text-lg">Monday - Friday: 9:00AM - 7:00PM</p>
+              <p>Weekend appointments available upon request</p>
+            </div>
+            <Button 
+              asChild 
+              className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-xl mt-6"
+            >
+              <Link href="/auth/register">Schedule Now</Link>
+            </Button>
           </motion.div>
         </div>
       </section>
