@@ -170,82 +170,7 @@ export default function Home() {
               transition={{ duration: 1, delay: 0.4 }}
               className="relative hidden lg:block"
             >
-              {/* Floating elements */}
-              <motion.div
-                animate={{
-                  y: [0, -10, 0],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute -top-8 -left-8 w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-400/20 to-purple-400/20 backdrop-blur-sm z-0 border border-white/30"
-              />
-              <motion.div
-                animate={{
-                  y: [0, 15, 0],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute -bottom-12 -right-12 w-32 h-32 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-400/20 backdrop-blur-sm z-0 border border-white/30"
-              />
-              
-              {/* Platform showcase card */}
-              <div className="relative z-10 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white text-center">
-                  <h3 className="text-xl font-bold mb-2">Advanced Telehealth Platform</h3>
-                  <p className="text-blue-100 text-sm">Experience the future of mental healthcare</p>
-                </div>
-                
-                <div className="p-8">
-                  <div className="space-y-6">
-                    <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-xl">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                        <Monitor className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">HD Video Consultations</div>
-                        <div className="text-sm text-gray-600">Crystal clear communication</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-xl">
-                      <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center">
-                        <ShieldCheck className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">HIPAA Secure Platform</div>
-                        <div className="text-sm text-gray-600">End-to-end encryption</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-xl">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <Users className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">Expert Psychiatrists</div>
-                        <div className="text-sm text-gray-600">Board-certified specialists</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 text-center">
-                    <Button 
-                      asChild 
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8 py-3 rounded-xl shadow-lg"
-                    >
-                      <Link href="/auth/register">Experience Our Platform</Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Floating stats */}
+              {/* Excellence badge from original site */}
               <motion.div
                 animate={{
                   y: [0, -8, 0],
@@ -255,14 +180,78 @@ export default function Home() {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="absolute -top-4 -right-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100"
+                className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-20"
               >
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">98%</div>
-                  <div className="text-xs text-gray-600 font-medium">Satisfaction</div>
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full p-6 shadow-2xl border-4 border-white">
+                  <div className="text-center text-white">
+                    <div className="text-xs font-bold uppercase tracking-wider">Excellence</div>
+                    <div className="text-lg font-extrabold">★★★★★</div>
+                    <div className="text-xs">Mental Health Care</div>
+                  </div>
                 </div>
               </motion.div>
+
+              {/* Main platform showcase */}
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white text-center">
+                  <h3 className="text-xl font-bold mb-2">QUALITY MENTAL HEALTH CARE</h3>
+                  <p className="text-blue-100 text-lg font-semibold">WITHOUT A WAIT!</p>
+                  <p className="text-blue-200 text-sm mt-1">For Adults & Children</p>
+                </div>
+                
+                <div className="p-8">
+                  {/* Key benefits from original site */}
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-center space-x-3 text-gray-700">
+                      <Clock className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium">Monday - Saturday: 7:00AM - 5:00PM</span>
+                    </div>
+                    <div className="flex items-center space-x-3 text-gray-700">
+                      <Clock className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium">Sunday: 7:00AM - 4:00PM</span>
+                    </div>
+                    <div className="flex items-center space-x-3 text-gray-700">
+                      <Phone className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium">(210) 555-1234</span>
+                    </div>
+                  </div>
+
+                  {/* Services grid from original site */}
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="text-center p-4 bg-blue-50 rounded-xl">
+                      <Brain className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                      <div className="text-sm font-semibold text-gray-900">Board Certified</div>
+                      <div className="text-xs text-gray-600">Excellence</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-xl">
+                      <Clock className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                      <div className="text-sm font-semibold text-gray-900">Open 7 Days</div>
+                      <div className="text-xs text-gray-600">Week Availability</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-xl">
+                      <Users className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+                      <div className="text-sm font-semibold text-gray-900">Accepting all major</div>
+                      <div className="text-xs text-gray-600">Health Insurers</div>
+                    </div>
+                    <div className="text-center p-4 bg-orange-50 rounded-xl">
+                      <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+                      <div className="text-sm font-semibold text-gray-900">Short wait</div>
+                      <div className="text-xs text-gray-600">Times</div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <Button 
+                      asChild 
+                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg text-lg"
+                    >
+                      <Link href="/auth/register">SCHEDULE APPOINTMENT</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
               
+              {/* Floating contact info */}
               <motion.div
                 animate={{
                   y: [0, 12, 0],
@@ -272,11 +261,11 @@ export default function Home() {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="absolute bottom-4 -left-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100"
+                className="absolute -bottom-6 -right-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 z-10"
               >
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-emerald-600">24/7</div>
-                  <div className="text-xs text-gray-600 font-medium">Support</div>
+                  <div className="text-lg font-bold text-green-600">LIVE CHAT</div>
+                  <div className="text-xs text-gray-600 font-medium">Available Now</div>
                 </div>
               </motion.div>
             </motion.div>
@@ -284,8 +273,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Section - Modern telehealth services */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-white to-slate-50">
+      {/* About Us Section - Incorporating original site content */}
+      <section className="py-20 md:py-32 bg-white">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -294,84 +283,222 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center max-w-4xl mx-auto mb-20"
           >
-            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">Telehealth Services</span>
+            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">About Us</span>
             <h2 className="text-4xl md:text-6xl font-bold mb-8 mt-4">
               <span className="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-                Comprehensive Mental Health Care
+                Excellence in Mental Health Care
               </span>
             </h2>
             <p className="text-xl text-gray-600 leading-relaxed">
-              Advanced telehealth technology meets expert psychiatric care. 
-              Experience personalized treatment from anywhere, anytime.
+              At QualiBrite Family Psychiatry, we are committed to providing prompt and timely effective mental healthcare. We understand the importance of providing prompt and timely effective mental health treatment to our patients. Our commitment to you is a compassionate, timely response to your urgent mental health needs.
+            </p>
+          </motion.div>
+
+          {/* Image and content section from original */}
+          <div className="grid gap-16 lg:grid-cols-2 items-center mb-20">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1576091160550-2173dba999ef"
+                  alt="Professional consultation"
+                  className="w-full h-[400px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/30 to-transparent"></div>
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <p className="text-lg text-gray-600 leading-relaxed">
+                We think the gold standard is getting the same psychiatrist or clinician every month. Because of this, we have streamlined our treatment process to accomplish just that.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Our goal is that patients will complete an initial one-hour intake with our clinical staff and then get scheduled with the same psychiatrist or clinician the following month.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                <span className="font-semibold text-blue-600">We use services online, so you will get exactly what you need.</span>
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section - Modern with original site information */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-slate-50 to-white">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center max-w-4xl mx-auto mb-20"
+          >
+            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-4 px-8 rounded-2xl inline-block mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold">OUR SERVICES</h2>
+            </div>
+            <p className="text-xl text-gray-600 leading-relaxed">
+              Comprehensive mental health services designed to meet your unique needs
             </p>
           </motion.div>
           
-          <div className="grid gap-8 lg:grid-cols-3">
-            {[
-              {
-                icon: Brain,
-                title: "Psychiatric Evaluation",
-                description: "Comprehensive virtual assessments using advanced diagnostic tools and secure video consultations.",
-                features: ["Initial Assessment", "Diagnostic Screening", "Treatment Planning", "Follow-up Care"],
-                color: "from-blue-500 to-blue-600"
-              },
-              {
-                icon: Monitor,
-                title: "Virtual Therapy Sessions",
-                description: "Individual and group therapy sessions through our secure telehealth platform.",
-                features: ["One-on-One Sessions", "Group Therapy", "Family Counseling", "Crisis Support"],
-                color: "from-purple-500 to-purple-600"
-              },
-              {
-                icon: HeartPulse,
-                title: "Medication Management",
-                description: "Expert medication monitoring and adjustments through virtual consultations.",
-                features: ["Prescription Management", "Side Effect Monitoring", "Dosage Adjustments", "Drug Interactions"],
-                color: "from-emerald-500 to-emerald-600"
-              },
-            ].map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className="group"
-              >
-                <Card className="h-full border-0 shadow-xl bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                  <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${service.color}`}></div>
-                  <CardContent className="p-8">
-                    <div className={`bg-gradient-to-r ${service.color} p-4 rounded-2xl inline-block mb-6 shadow-lg`}>
-                      <service.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-4 text-gray-900">{service.title}</h3>
-                    <p className="text-gray-600 mb-6 leading-relaxed">
-                      {service.description}
-                    </p>
-                    <ul className="space-y-3">
-                      {service.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center text-gray-700">
-                          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${service.color} mr-3`}></div>
-                          <span className="font-medium">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter className="p-8 pt-0">
-                    <Button 
-                      variant="ghost" 
-                      asChild 
-                      className="group-hover:translate-x-2 transition-transform duration-300 p-0 text-blue-600 hover:text-blue-700 font-semibold"
-                    >
-                      <Link href="/services">
-                        Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))}
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Mental Health Services */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <Card className="h-full border-0 shadow-xl bg-white overflow-hidden">
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56"
+                    alt="Mental Health Services"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-2xl font-bold">Mental Health Services</h3>
+                    <p className="text-blue-100">Comprehensive psychiatric care</p>
+                  </div>
+                </div>
+                <CardContent className="p-8">
+                  <ul className="space-y-3 text-gray-700">
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mr-3"></div>
+                      <span>Individual therapy sessions</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mr-3"></div>
+                      <span>Psychiatric evaluations</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mr-3"></div>
+                      <span>Medication management</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mr-3"></div>
+                      <span>Treatment planning</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Mental Health Services for families */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <Card className="h-full border-0 shadow-xl bg-white overflow-hidden">
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1542810634-71277d95dcbb"
+                    alt="Family Mental Health"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-2xl font-bold">Family Mental Health</h3>
+                    <p className="text-purple-100">Supporting families together</p>
+                  </div>
+                </div>
+                <CardContent className="p-8">
+                  <ul className="space-y-3 text-gray-700">
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-purple-500 mr-3"></div>
+                      <span>Family therapy sessions</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-purple-500 mr-3"></div>
+                      <span>Child and adolescent psychiatry</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-purple-500 mr-3"></div>
+                      <span>Parent consultation</span>
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-purple-500 mr-3"></div>
+                      <span>Crisis intervention</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Payment & Insurance Section from original site */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center max-w-4xl mx-auto mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-gray-900">Payment</h2>
+            <p className="text-xl text-gray-600 leading-relaxed">
+              We accept most major insurance plans and offer flexible payment options
+            </p>
+          </motion.div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-2xl shadow-lg"
+            >
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">We accept Credit and Debit Cards</h3>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-2xl shadow-lg"
+            >
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">We also accept Care Through Lending, Care, Cash, App, etc.</h3>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-2xl shadow-lg md:col-span-2 lg:col-span-1"
+            >
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Major Insurance Plans Accepted</h3>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -677,6 +804,78 @@ export default function Home() {
                 <span className="font-medium">24/7 Support</span>
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Contact Section - From original site */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-blue-800 to-blue-900 text-white">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-16 lg:grid-cols-3">
+            {/* Phone Number */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Phone className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Phone Number</h3>
+              <p className="text-blue-100 text-lg">(210) 555-1234</p>
+            </motion.div>
+
+            {/* Opening Hours */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Opening Hours</h3>
+              <div className="text-blue-100 space-y-2">
+                <p>Monday - Saturday: 7:00AM - 5:00PM</p>
+                <p>Sunday: 7:00AM - 4:00PM</p>
+              </div>
+            </motion.div>
+
+            {/* Subscribe */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Heart className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Subscribe to our email mailing list</h3>
+              <Button 
+                asChild 
+                className="bg-white text-blue-800 hover:bg-blue-50 font-semibold px-8 py-3 rounded-xl"
+              >
+                <Link href="/contact">Subscribe for Updates</Link>
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* Email contact */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="text-center mt-16 pt-16 border-t border-white/20"
+          >
+            <h3 className="text-2xl font-bold mb-4">Email</h3>
+            <p className="text-blue-100 text-lg">contact@qualibritehealth.com</p>
           </motion.div>
         </div>
       </section>
