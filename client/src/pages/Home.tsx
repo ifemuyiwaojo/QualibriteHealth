@@ -369,7 +369,7 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-xl text-gray-600 leading-relaxed">
-              At QualiBrite Family Psychiatry, we are committed to providing prompt and timely effective mental healthcare. We understand the importance of providing prompt and timely effective mental health treatment to our patients. Our commitment to you is a compassionate, timely response to your urgent mental health needs.
+              As a fully online telehealth platform, QualiBrite Health is committed to providing convenient, accessible mental healthcare from anywhere. We understand that life doesn't wait, which is why we've eliminated the barriers of traditional in-person visits to deliver quality mental health care directly to you.
             </p>
           </motion.div>
 
@@ -400,13 +400,13 @@ export default function Home() {
               className="space-y-6"
             >
               <p className="text-lg text-gray-600 leading-relaxed">
-                We think the gold standard is getting the same psychiatrist or clinician every month. Because of this, we have streamlined our treatment process to accomplish just that.
+                Our online-first approach ensures continuity of care with the same licensed psychiatrist or therapist for every session. Through our secure telehealth platform, we've streamlined the treatment process to eliminate wait times and geographical barriers.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Our goal is that patients will complete an initial one-hour intake with our clinical staff and then get scheduled with the same psychiatrist or clinician the following month.
+                Patients begin with a comprehensive virtual intake session with our clinical team, followed by consistent monthly appointments with their dedicated mental health provider—all from the comfort and privacy of their own space.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                <span className="font-semibold text-blue-600">We use services online, so you will get exactly what you need.</span>
+                <span className="font-semibold text-blue-600">As a 100% telehealth platform, we deliver personalized mental health care wherever you are, whenever you need it.</span>
               </p>
             </motion.div>
           </div>
@@ -919,8 +919,8 @@ export default function Home() {
               </div>
               <h3 className="text-2xl font-bold mb-4">Opening Hours</h3>
               <div className="text-blue-100 space-y-2">
-                <p>Monday - Saturday: 7:00AM - 5:00PM</p>
-                <p>Sunday: 7:00AM - 4:00PM</p>
+                <p>Monday - Friday: 9:00AM - 7:00PM</p>
+                <p>Weekend appointments available</p>
               </div>
             </motion.div>
 
@@ -954,7 +954,7 @@ export default function Home() {
             className="text-center mt-16 pt-16 border-t border-white/20"
           >
             <h3 className="text-2xl font-bold mb-4">Email</h3>
-            <p className="text-blue-100 text-lg">contact@qualibritehealth.com</p>
+            <p className="text-blue-100 text-lg">info@qualibritehealth.com</p>
           </motion.div>
         </div>
       </section>
