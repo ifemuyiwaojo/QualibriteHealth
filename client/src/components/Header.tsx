@@ -29,14 +29,25 @@ function HeaderComponent() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">
-              {!user ? 'LOGIN' : 
-               user.role === 'patient' ? '1 - PATIENT PORTAL' : 
-               user.role === 'provider' ? '2 - PROVIDER PORTAL' : 
-               user.role === 'admin' ? '3 - ADMIN PORTAL' : 
-               'QUALIBRITE FAMILY PSYCHIATRY'}
-            </span>
+          <Link href="/" className="mr-6 flex items-center space-x-3">
+            <img 
+              src="/qualibrite-logo.png" 
+              alt="Qualibrite Health" 
+              className="h-8 w-auto"
+            />
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-gray-900">
+                Qualibrite Health
+              </span>
+              {user && (
+                <span className="text-xs text-gray-500 font-medium">
+                  {user.role === 'patient' ? 'Patient Portal' : 
+                   user.role === 'provider' ? 'Provider Portal' : 
+                   user.role === 'admin' ? 'Admin Portal' : 
+                   'Healthcare Platform'}
+                </span>
+              )}
+            </div>
           </Link>
           <div className="flex gap-6">
             {navigation.map((item) => (
@@ -75,13 +86,14 @@ function HeaderComponent() {
         </Sheet>
 
         <div className="flex flex-1 items-center justify-between md:justify-end">
-          <Link href="/" className="md:hidden">
-            <span className="text-xl font-bold text-primary">
-              {!user ? 'LOGIN' : 
-               user.role === 'patient' ? '1 - PATIENT PORTAL' : 
-               user.role === 'provider' ? '2 - PROVIDER PORTAL' : 
-               user.role === 'admin' ? '3 - ADMIN PORTAL' : 
-               'QUALIBRITE FAMILY PSYCHIATRY'}
+          <Link href="/" className="md:hidden flex items-center space-x-2">
+            <img 
+              src="/qualibrite-logo.png" 
+              alt="Qualibrite Health" 
+              className="h-6 w-auto"
+            />
+            <span className="text-lg font-bold text-gray-900">
+              Qualibrite Health
             </span>
           </Link>
           <div className="flex items-center gap-2">
