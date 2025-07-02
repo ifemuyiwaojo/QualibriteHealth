@@ -986,7 +986,7 @@ export default function Home() {
               </div>
               <div className="min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Email</h3>
-                <p className="text-base sm:text-lg text-gray-700 break-all">contact@qualibrite.health</p>
+                <p className="text-base sm:text-lg text-gray-700 break-all">myhealth@qualibritehealth.com</p>
               </div>
             </motion.div>
           </div>
@@ -1002,8 +1002,8 @@ export default function Home() {
             <Clock className="w-12 h-12 mx-auto mb-4" />
             <h3 className="text-2xl font-bold mb-4">Online Consultations Available</h3>
             <div className="space-y-2 text-blue-100">
-              <p className="text-lg">Monday - Friday: 9:00AM - 7:00PM</p>
-              <p>Weekend appointments available upon request</p>
+              <p className="text-lg">Monday - Saturday: 7:00AM - 9:00PM</p>
+              <p className="text-lg">Sunday: 7:00AM - 6:00PM</p>
             </div>
             <Button 
               asChild 

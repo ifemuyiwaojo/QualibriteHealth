@@ -33,7 +33,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>contact@qualibrite.health</span>
+                <span>myhealth@qualibritehealth.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="font-medium text-blue-600">100% Online Telehealth Platform</span>
