@@ -194,40 +194,53 @@ export default function Home() {
                 className="absolute -bottom-12 -right-12 w-32 h-32 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-400/20 backdrop-blur-sm z-0 border border-white/30"
               />
               
-              {/* Main telehealth interface mockup */}
+              {/* Platform showcase card */}
               <div className="relative z-10 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
-                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
-                      <div className="w-3 h-3 rounded-full bg-white/30"></div>
-                    </div>
-                    <span className="text-sm font-medium">Secure Session</span>
-                  </div>
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white text-center">
+                  <h3 className="text-xl font-bold mb-2">Advanced Telehealth Platform</h3>
+                  <p className="text-blue-100 text-sm">Experience the future of mental healthcare</p>
                 </div>
                 
                 <div className="p-8">
-                  <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl mb-6 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-purple-900/50"></div>
-                    <Monitor className="w-20 h-20 text-white/70 relative z-10" />
-                    <div className="absolute bottom-4 left-4 bg-black/50 rounded-lg px-3 py-1">
-                      <span className="text-white text-sm">Dr. Sarah Johnson</span>
+                  <div className="space-y-6">
+                    <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-xl">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <Monitor className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">HD Video Consultations</div>
+                        <div className="text-sm text-gray-600">Crystal clear communication</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-xl">
+                      <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center">
+                        <ShieldCheck className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">HIPAA Secure Platform</div>
+                        <div className="text-sm text-gray-600">End-to-end encryption</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-xl">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <Users className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">Expert Psychiatrists</div>
+                        <div className="text-sm text-gray-600">Board-certified specialists</div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 font-medium">Session Duration</span>
-                      <span className="text-blue-600 font-semibold">45:23</span>
-                    </div>
-                    <div className="flex space-x-2">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style={{width: `${Math.random() * 100}%`}}></div>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="mt-8 text-center">
+                    <Button 
+                      asChild 
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8 py-3 rounded-xl shadow-lg"
+                    >
+                      <Link href="/auth/register">Experience Our Platform</Link>
+                    </Button>
                   </div>
                 </div>
               </div>
