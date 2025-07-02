@@ -141,6 +141,11 @@ Changelog:
 - July 02, 2025: Updated contact info for online-only business model
 - July 02, 2025: Fixed white-on-white text visibility issues
 - July 02, 2025: Revised About section to emphasize telehealth platform
+- July 02, 2025: Replaced header with provided medical professional image design
+- July 02, 2025: Removed physical address from contact section
+- July 02, 2025: Redesigned About Us page for online clinic focus
+- July 02, 2025: Implemented comprehensive mobile responsiveness
+- July 02, 2025: Updated contact information with new phone/email
 ```
 
 ## User Preferences

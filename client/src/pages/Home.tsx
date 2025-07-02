@@ -442,25 +442,25 @@ export default function Home() {
             viewport={{ once: true }}
             className="bg-white rounded-3xl p-8 md:p-12 shadow-xl"
           >
-            <h3 className="text-2xl md:text-3xl font-bold text-center mb-12 text-gray-900">How Our Telehealth Platform Works</h3>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900">How Our Telehealth Platform Works</h3>
             
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">1</div>
-                <h4 className="text-lg font-semibold mb-3 text-gray-900">Schedule Online</h4>
-                <p className="text-gray-600">Book your appointment through our secure platform in just a few clicks</p>
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg sm:text-xl">1</div>
+                <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-900">Schedule Online</h4>
+                <p className="text-sm sm:text-base text-gray-600">Book your appointment through our secure platform in just a few clicks</p>
               </div>
               
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">2</div>
-                <h4 className="text-lg font-semibold mb-3 text-gray-900">Connect Securely</h4>
-                <p className="text-gray-600">Join your video session from any device with our encrypted telehealth technology</p>
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg sm:text-xl">2</div>
+                <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-900">Connect Securely</h4>
+                <p className="text-sm sm:text-base text-gray-600">Join your video session from any device with our encrypted telehealth technology</p>
               </div>
               
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">3</div>
-                <h4 className="text-lg font-semibold mb-3 text-gray-900">Receive Care</h4>
-                <p className="text-gray-600">Get personalized treatment from board-certified mental health professionals</p>
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg sm:text-xl">3</div>
+                <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-900">Receive Care</h4>
+                <p className="text-sm sm:text-base text-gray-600">Get personalized treatment from board-certified mental health professionals</p>
               </div>
             </div>
           </motion.div>
