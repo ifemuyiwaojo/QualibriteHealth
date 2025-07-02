@@ -916,9 +916,9 @@ export default function Home() {
                   asChild 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-white/30 text-white hover:bg-white/10 hover:text-white backdrop-blur-sm text-xl font-semibold rounded-2xl px-12 py-6 transition-all duration-300"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-900 backdrop-blur-sm text-xl font-semibold rounded-2xl px-12 py-6 transition-all duration-300"
                 >
-                  <Link href="/services" className="text-white hover:text-white">Explore Our Services</Link>
+                  <Link href="/services">Explore Our Services</Link>
                 </Button>
               </motion.div>
             </div>

@@ -10,7 +10,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold">QualiBrite Health</h3>
             <p className="mt-4 text-sm text-muted-foreground">
-              Providing exceptional healthcare services with a focus on patient wellness and innovative medical solutions.
+              Online telehealth platform delivering quality mental health care through secure video consultations from licensed professionals.
             </p>
           </div>
           
@@ -29,15 +29,14 @@ export default function Footer() {
             <div className="mt-4 space-y-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <PhoneCall className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>(888) 511-3697</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
                 <span>contact@qualibrite.health</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>123 Medical Center Drive<br />Healthcare City, HC 12345</span>
+                <span className="font-medium text-blue-600">100% Online Telehealth Platform</span>
               </div>
             </div>
           </div>
