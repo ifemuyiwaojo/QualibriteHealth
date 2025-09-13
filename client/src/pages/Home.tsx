@@ -82,9 +82,11 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="flex items-center space-x-4"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Heart className="w-8 h-8 text-white" />
-                </div>
+                <img 
+                  src="/qualibrite-family-logo.png" 
+                  alt="Qualibrite Family Psychiatry" 
+                  className="w-16 h-16 object-contain"
+                />
                 <div>
                   <h2 className="text-2xl font-black text-slate-900">Qualibrite Family Psychiatry</h2>
                   <p className="text-slate-600 font-medium">Quality healthcare for a brighter outcome</p>
