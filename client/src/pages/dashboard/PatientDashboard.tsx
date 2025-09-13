@@ -170,105 +170,119 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-teal-800 to-slate-900">
-      <div className="container py-10">
-        {/* Header with Logo */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            <img 
-              src="/qualibrite-family-logo.png?v=3" 
-              alt="Qualibrite Family Psychiatry" 
-              className="w-16 h-16 object-contain"
-            />
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Qualibrite Family Psychiatry</h2>
-              <p className="text-teal-200">Secure Patient Portal</p>
+    <div className="min-h-screen bg-blue-50">
+      {/* Clean medical header */}
+      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-blue-200 shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/qualibrite-family-logo.png?v=3" 
+                alt="Qualibrite Family Psychiatry" 
+                className="w-8 h-8 object-contain"
+              />
+              <div>
+                <h1 className="text-lg font-semibold text-slate-900">Qualibrite Family Psychiatry</h1>
+                <p className="text-sm text-blue-600">Patient Portal</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-blue-600">Welcome, {user.email}</span>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/auth/logout">Logout</Link>
+              </Button>
             </div>
           </div>
         </div>
-        
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 p-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">Patient Dashboard</h1>
-              <p className="text-slate-600 mt-1">Welcome back, {user.email}</p>
-            </div>
-            <div className="flex gap-3">
-              <Button asChild variant="outline" size="sm" className="hidden md:flex">
-                <Link href="/patient/messages">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Messages
-                </Link>
-              </Button>
-              
-              <Button asChild>
-                <Link href="/telehealth">
-                  <Video className="h-4 w-4 mr-2" />
-                  Start Video Visit
-                </Link>
-              </Button>
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
+        <div className="bg-white border border-blue-200 shadow-lg rounded-lg">
+          <div className="p-6 border-b border-blue-200 bg-gradient-to-r from-blue-50/30 to-teal-50/30">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Patient Dashboard</h2>
+                <p className="text-sm text-blue-600 mt-1">Your medical information and appointments</p>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/patient/messages">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Messages
+                  </Link>
+                </Button>
+                
+                <Button asChild size="sm">
+                  <Link href="/telehealth">
+                    <Video className="h-4 w-4 mr-1" />
+                    Start Visit
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full md:w-auto">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="appointments">Appointments</TabsTrigger>
-              <TabsTrigger value="medications">Medications</TabsTrigger>
-              <TabsTrigger value="records">Medical Records</TabsTrigger>
-              <TabsTrigger value="health">Health Tracking</TabsTrigger>
-            </TabsList>
+          <div className="p-6">
 
-            <TabsContent value="overview" className="space-y-6">
-              {/* Quick Actions */}
-              <div className="grid gap-4 md:grid-cols-4">
-                <Card className="col-span-4 md:col-span-1">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button asChild variant="outline" className="w-full justify-start">
-                      <Link href="/patient/appointments">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Schedule Appointment
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full justify-start">
-                      <Link href="/patient/records">
-                        <FileText className="h-4 w-4 mr-2" />
-                        View Medical Records
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full justify-start">
-                      <Link href="/patient/medications">
-                        <Pill className="h-4 w-4 mr-2" />
-                        Manage Medications
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full justify-start">
-                      <Link href="/patient/profile">
-                        <User className="h-4 w-4 mr-2" />
-                        Update Profile
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full bg-blue-50 border border-blue-200 shadow-sm">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Overview</TabsTrigger>
+                <TabsTrigger value="appointments" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Appointments</TabsTrigger>
+                <TabsTrigger value="medications" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Medications</TabsTrigger>
+                <TabsTrigger value="records" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Medical Records</TabsTrigger>
+                <TabsTrigger value="health" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Health Tracking</TabsTrigger>
+              </TabsList>
 
-                {/* Content Cards */}
-                <div className="col-span-4 md:col-span-3 space-y-4">
-                  {/* Upcoming Appointments */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg">Upcoming Appointments</CardTitle>
-                        <Button variant="link" asChild className="p-0">
+              <TabsContent value="overview" className="space-y-4">
+                {/* Quick Actions */}
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="col-span-4 md:col-span-1">
+                    <div className="bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-200 p-4 rounded-lg shadow-sm">
+                      <h3 className="font-medium text-slate-900 mb-3">Quick Actions</h3>
+                      <div className="space-y-2">
+                        <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
                           <Link href="/patient/appointments">
-                            View All <ChevronRight className="h-4 w-4 ml-1" />
+                            <Calendar className="h-3 w-3 mr-2" />
+                            Schedule Appointment
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                          <Link href="/patient/records">
+                            <FileText className="h-3 w-3 mr-2" />
+                            View Medical Records
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                          <Link href="/patient/medications">
+                            <Pill className="h-3 w-3 mr-2" />
+                            Manage Medications
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                          <Link href="/patient/profile">
+                            <User className="h-3 w-3 mr-2" />
+                            Update Profile
                           </Link>
                         </Button>
                       </div>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+                  </div>
+
+                  {/* Content Cards */}
+                  <div className="col-span-4 md:col-span-3 space-y-4">
+                    {/* Upcoming Appointments */}
+                    <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                      <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium text-slate-900">Upcoming Appointments</h3>
+                          <Button variant="link" asChild className="p-0 h-auto text-sm">
+                            <Link href="/patient/appointments">
+                              View All <ChevronRight className="h-3 w-3 ml-1" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-4">
                       {isLoading ? (
                         <div className="animate-pulse space-y-3">
                           {[1, 2].map((i) => (
@@ -282,55 +296,55 @@ export default function PatientDashboard() {
                           ))}
                         </div>
                       ) : patientData?.appointments && patientData.appointments.length > 0 ? (
-                        <div className="space-y-3">
-                          {patientData.appointments.slice(0, 2).map((appointment) => (
-                            <div key={appointment.id} className="flex items-start gap-4 border-b pb-3 last:border-0 last:pb-0">
-                              <div className="bg-primary/10 p-2 rounded-full">
-                                {appointment.isVideo ? (
-                                  <Video className="h-5 w-5 text-primary" />
-                                ) : (
-                                  <Calendar className="h-5 w-5 text-primary" />
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex justify-between">
-                                  <div>
-                                    <h4 className="font-medium">{appointment.type}</h4>
-                                    <p className="text-sm text-muted-foreground">{formatDate(appointment.date)}</p>
-                                  </div>
-                                  <Badge variant={appointment.status === 'confirmed' ? 'default' : 'outline'}>
-                                    {appointment.status}
-                                  </Badge>
+                          <div className="space-y-3">
+                            {patientData.appointments.slice(0, 2).map((appointment) => (
+                              <div key={appointment.id} className="flex items-start gap-3 pb-3 border-b border-blue-100 last:border-0 last:pb-0">
+                                <div className="bg-blue-100 p-2 rounded-lg">
+                                  {appointment.isVideo ? (
+                                    <Video className="h-4 w-4 text-blue-600" />
+                                  ) : (
+                                    <Calendar className="h-4 w-4 text-blue-600" />
+                                  )}
                                 </div>
-                                <p className="text-sm mt-1">With {appointment.provider}</p>
+                                <div className="flex-1">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <h4 className="font-medium text-slate-900 text-sm">{appointment.type}</h4>
+                                      <p className="text-xs text-blue-600">{formatDate(appointment.date)}</p>
+                                      <p className="text-xs text-slate-500 mt-1">With {appointment.provider}</p>
+                                    </div>
+                                    <Badge variant={appointment.status === 'confirmed' ? 'default' : 'outline'} className="text-xs">
+                                      {appointment.status}
+                                    </Badge>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
                       ) : (
                         <p className="text-center py-4 text-muted-foreground">No upcoming appointments.</p>
                       )}
-                    </CardContent>
-                    <CardFooter className="pt-0">
-                      <Button onClick={handleScheduleTelehealth} variant="outline" className="w-full">
-                        Schedule New Appointment
-                      </Button>
-                    </CardFooter>
-                  </Card>
-
-                  {/* Medications Overview */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg">Medications</CardTitle>
-                        <Button variant="link" asChild className="p-0">
-                          <Link href="/patient/medications">
-                            Manage <ChevronRight className="h-4 w-4 ml-1" />
-                          </Link>
+                        </div>
+                      <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                        <Button onClick={handleScheduleTelehealth} variant="outline" size="sm" className="w-full">
+                          Schedule New Appointment
                         </Button>
                       </div>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+
+                    {/* Medications Overview */}
+                    <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                      <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-teal-50/50 to-blue-50/50">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium text-slate-900">Current Medications</h3>
+                          <Button variant="link" asChild className="p-0 h-auto text-sm">
+                            <Link href="/patient/medications">
+                              Manage <ChevronRight className="h-3 w-3 ml-1" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-4">
                       {isLoading ? (
                         <div className="animate-pulse space-y-4">
                           {[1, 2].map((i) => (
@@ -342,55 +356,56 @@ export default function PatientDashboard() {
                           ))}
                         </div>
                       ) : patientData?.medications && patientData.medications.length > 0 ? (
-                        <div className="space-y-4">
-                          {patientData.medications.map((medication) => (
-                            <div key={medication.id} className="border-b pb-4 last:border-0 last:pb-0">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-medium">{medication.name} {medication.dosage}</h4>
-                                  <p className="text-sm text-muted-foreground">{medication.instructions}</p>
+                          <div className="space-y-3">
+                            {patientData.medications.map((medication) => (
+                              <div key={medication.id} className="pb-3 border-b border-blue-100 last:border-0 last:pb-0">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h4 className="font-medium text-slate-900 text-sm">{medication.name} {medication.dosage}</h4>
+                                    <p className="text-xs text-blue-600">{medication.instructions}</p>
+                                  </div>
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                                    {medication.refills} refills
+                                  </Badge>
                                 </div>
-                                <Badge variant="outline" className="bg-green-50 text-green-800">
-                                  {medication.refills} refills left
-                                </Badge>
-                              </div>
-                              <div className="mt-2">
-                                <div className="flex justify-between text-sm mb-1">
-                                  <span>Adherence</span>
-                                  <span className="font-medium">{medication.adherenceRate}%</span>
+                                <div className="mb-2">
+                                  <div className="flex justify-between text-xs mb-1">
+                                    <span className="text-slate-600">Adherence</span>
+                                    <span className="font-medium text-slate-900">{medication.adherenceRate}%</span>
+                                  </div>
+                                  <Progress value={medication.adherenceRate} className="h-1" />
                                 </div>
-                                <Progress value={medication.adherenceRate} className="h-2" />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleMedicationAction(medication.id, 'taken')}
+                                    className="flex-1 text-xs"
+                                  >
+                                    <CheckCircle2 className="h-3 w-3 mr-1" /> Mark Taken
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleMedicationAction(medication.id, 'refill')}
+                                    className="flex-1 text-xs"
+                                  >
+                                    Request Refill
+                                  </Button>
+                                </div>
                               </div>
-                              <div className="flex gap-2 mt-3">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => handleMedicationAction(medication.id, 'taken')}
-                                  className="flex-1"
-                                >
-                                  <CheckCircle2 className="h-3 w-3 mr-1" /> Mark as Taken
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => handleMedicationAction(medication.id, 'refill')}
-                                  className="flex-1"
-                                >
-                                  Request Refill
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
                       ) : (
                         <p className="text-center py-4 text-muted-foreground">No medications prescribed.</p>
                       )}
-                    </CardContent>
-                  </Card>
+                        </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>

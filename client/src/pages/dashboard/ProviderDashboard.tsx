@@ -3,10 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
   Calendar, Users, ClipboardList, User, Clock, MessageSquare, Video, 
-  FileText, Activity, AlertCircle, TrendingUp, Plus, ChevronRight,
+  FileText, Activity, AlertCircle, Plus, ChevronRight,
   Stethoscope, CalendarClock, UserCheck, Clipboard
 } from "lucide-react";
 import { Link } from "wouter";
@@ -82,13 +81,6 @@ const useMockProviderData = (userId: number) => {
             patient: "Maria Garcia",
             priority: "medium", 
             due: "Tomorrow"
-          },
-          {
-            id: 3,
-            type: "Treatment Plan Update",
-            patient: "Robert Davis",
-            priority: "low",
-            due: "This Week"
           }
         ],
         statistics: {
@@ -137,412 +129,416 @@ export default function ProviderDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-teal-800 to-slate-900">
-      <div className="container py-10">
-        {/* Header with Logo */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            <img 
-              src="/qualibrite-family-logo.png?v=3" 
-              alt="Qualibrite Family Psychiatry" 
-              className="w-16 h-16 object-contain"
-            />
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Qualibrite Family Psychiatry</h2>
-              <p className="text-teal-200">Provider Portal</p>
+    <div className="min-h-screen bg-blue-50">
+      {/* Clean medical header */}
+      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-blue-200 shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/qualibrite-family-logo.png?v=3" 
+                alt="Qualibrite Family Psychiatry" 
+                className="w-8 h-8 object-contain"
+              />
+              <div>
+                <h1 className="text-lg font-semibold text-slate-900">Qualibrite Family Psychiatry</h1>
+                <p className="text-sm text-blue-600">Provider Portal</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-blue-600">Dr. {user.email}</span>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/auth/logout">Logout</Link>
+              </Button>
             </div>
           </div>
         </div>
-        
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 p-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">Provider Dashboard</h1>
-              <p className="text-slate-600 mt-1">Welcome back, Dr. {user.email}</p>
-            </div>
-            <div className="flex gap-3">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/provider/patients">
-                  <Users className="h-4 w-4 mr-2" />
-                  View All Patients
-                </Link>
-              </Button>
-              
-              <Button asChild>
-                <Link href="/provider/schedule">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Manage Schedule
-                </Link>
-              </Button>
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
+        <div className="bg-white border border-blue-200 shadow-lg rounded-lg">
+          <div className="p-6 border-b border-blue-200 bg-gradient-to-r from-blue-50/30 to-teal-50/30">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Provider Dashboard</h2>
+                <p className="text-sm text-blue-600 mt-1">Patient care and schedule management</p>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/provider/patients">
+                    <Users className="h-4 w-4 mr-1" />
+                    View Patients
+                  </Link>
+                </Button>
+                
+                <Button asChild size="sm">
+                  <Link href="/provider/schedule">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    Schedule
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="schedule">Today's Schedule</TabsTrigger>
-              <TabsTrigger value="patients">Recent Patients</TabsTrigger>
-              <TabsTrigger value="tasks">Pending Tasks</TabsTrigger>
-            </TabsList>
+          <div className="p-6">
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full bg-blue-50 border border-blue-200 shadow-sm">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Overview</TabsTrigger>
+                <TabsTrigger value="schedule" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Today's Schedule</TabsTrigger>
+                <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Recent Patients</TabsTrigger>
+                <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Pending Tasks</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
-              {/* Statistics Cards */}
-              <div className="grid gap-4 md:grid-cols-4">
-                {isLoading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Card key={i}>
-                      <CardHeader className="pb-2">
+              <TabsContent value="overview" className="space-y-4">
+                {/* Statistics Cards */}
+                <div className="grid gap-4 md:grid-cols-4">
+                  {isLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
                         <div className="animate-pulse">
-                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                          <div className="h-8 bg-muted rounded w-1/2"></div>
+                          <div className="h-3 bg-blue-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-6 bg-blue-200 rounded w-1/2"></div>
                         </div>
-                      </CardHeader>
-                    </Card>
-                  ))
-                ) : providerData ? (
-                  <>
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Patients</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{providerData.statistics.totalPatients}</div>
-                        <p className="text-xs text-muted-foreground">Active in care</p>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    ))
+                  ) : providerData ? (
+                    <>
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Total Patients</span>
+                          <Users className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-slate-900">{providerData.statistics.totalPatients}</div>
+                        <p className="text-xs text-slate-500">Active in care</p>
+                      </div>
 
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Today's Appointments</CardTitle>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{providerData.statistics.todayAppointments}</div>
-                        <p className="text-xs text-muted-foreground">Scheduled appointments</p>
-                      </CardContent>
-                    </Card>
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Today's Appointments</span>
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-slate-900">{providerData.statistics.todayAppointments}</div>
+                        <p className="text-xs text-slate-500">Scheduled appointments</p>
+                      </div>
 
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Pending Reviews</CardTitle>
-                        <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{providerData.statistics.pendingReviews}</div>
-                        <p className="text-xs text-muted-foreground">Require attention</p>
-                      </CardContent>
-                    </Card>
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Pending Reviews</span>
+                          <ClipboardList className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-slate-900">{providerData.statistics.pendingReviews}</div>
+                        <p className="text-xs text-slate-500">Require attention</p>
+                      </div>
 
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Completed Today</CardTitle>
-                        <Activity className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{providerData.statistics.completedToday}</div>
-                        <p className="text-xs text-muted-foreground">Appointments finished</p>
-                      </CardContent>
-                    </Card>
-                  </>
-                ) : null}
-              </div>
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Completed Today</span>
+                          <Activity className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-slate-900">{providerData.statistics.completedToday}</div>
+                        <p className="text-xs text-slate-500">Appointments finished</p>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+                
+                {/* Quick Actions and Today's Overview */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-200 rounded-lg shadow-sm">
+                    <div className="p-4 border-b border-blue-200">
+                      <h3 className="font-medium text-slate-900">Quick Actions</h3>
+                      <p className="text-sm text-blue-600">Common provider tasks</p>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                        <Link href="/provider/patients/new">
+                          <Plus className="h-3 w-3 mr-2" />
+                          Add New Patient
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                        <Link href="/provider/appointments/new">
+                          <CalendarClock className="h-3 w-3 mr-2" />
+                          Schedule Appointment
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                        <Link href="/provider/prescriptions">
+                          <FileText className="h-3 w-3 mr-2" />
+                          Manage Prescriptions
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
+                        <Link href="/provider/records">
+                          <Clipboard className="h-3 w-3 mr-2" />
+                          Review Medical Records
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
 
-              {/* Quick Actions */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                    <CardDescription>Common provider tasks</CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-3">
-                    <Button asChild variant="outline" className="justify-start">
-                      <Link href="/provider/patients/new">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add New Patient
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="justify-start">
-                      <Link href="/provider/appointments/new">
-                        <CalendarClock className="h-4 w-4 mr-2" />
-                        Schedule Appointment
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="justify-start">
-                      <Link href="/provider/prescriptions">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Manage Prescriptions
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="justify-start">
-                      <Link href="/provider/records">
-                        <Clipboard className="h-4 w-4 mr-2" />
-                        Review Medical Records
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Today's Overview */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Today's Overview</CardTitle>
-                    <CardDescription>Your schedule and important items</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isLoading ? (
-                      <div className="animate-pulse space-y-3">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded bg-muted"></div>
-                            <div className="space-y-1 flex-1">
-                              <div className="h-3 bg-muted rounded w-3/4"></div>
-                              <div className="h-2 bg-muted rounded w-1/2"></div>
+                  {/* Today's Overview */}
+                  <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                      <h3 className="font-medium text-slate-900">Today's Overview</h3>
+                      <p className="text-sm text-blue-600">Your schedule and important items</p>
+                    </div>
+                    <div className="p-4">
+                      {isLoading ? (
+                        <div className="animate-pulse space-y-3">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded bg-blue-200"></div>
+                              <div className="space-y-1 flex-1">
+                                <div className="h-3 bg-blue-200 rounded w-3/4"></div>
+                                <div className="h-2 bg-blue-200 rounded w-1/2"></div>
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                      ) : providerData?.todaySchedule && providerData.todaySchedule.length > 0 ? (
+                        <div className="space-y-3">
+                          {providerData.todaySchedule.slice(0, 3).map((appointment) => (
+                            <div key={appointment.id} className="flex items-start gap-3 p-2 border border-blue-100 rounded">
+                              <div className="bg-blue-100 p-1.5 rounded">
+                                {appointment.isVideo ? (
+                                  <Video className="h-4 w-4 text-blue-600" />
+                                ) : (
+                                  <Clock className="h-4 w-4 text-blue-600" />
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <p className="font-medium text-slate-900 text-sm">{appointment.patient}</p>
+                                    <p className="text-xs text-blue-600">
+                                      {formatTime(appointment.time)} • {appointment.type}
+                                    </p>
+                                  </div>
+                                  <Badge variant={appointment.status === 'confirmed' ? 'default' : 'outline'} className="text-xs">
+                                    {appointment.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-center py-4 text-slate-500 text-sm">No appointments scheduled for today.</p>
+                      )}
+                    </div>
+                    <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/provider/schedule">
+                          View Full Schedule <ChevronRight className="h-3 w-3 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="schedule" className="space-y-4">
+                <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                  <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                    <h3 className="font-medium text-slate-900">Today's Schedule</h3>
+                    <p className="text-sm text-blue-600">All appointments for {new Date().toLocaleDateString()}</p>
+                  </div>
+                  <div className="p-4">
+                    {isLoading ? (
+                      <div className="animate-pulse space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center gap-4 p-3 border border-blue-100 rounded">
+                            <div className="h-10 w-10 rounded bg-blue-200"></div>
+                            <div className="space-y-2 flex-1">
+                              <div className="h-4 bg-blue-200 rounded w-1/3"></div>
+                              <div className="h-3 bg-blue-200 rounded w-1/2"></div>
+                            </div>
+                            <div className="h-8 w-20 bg-blue-200 rounded"></div>
                           </div>
                         ))}
                       </div>
                     ) : providerData?.todaySchedule && providerData.todaySchedule.length > 0 ? (
                       <div className="space-y-3">
-                        {providerData.todaySchedule.slice(0, 3).map((appointment) => (
-                          <div key={appointment.id} className="flex items-start gap-3 p-2 rounded-lg border">
-                            <div className="bg-primary/10 p-1.5 rounded">
+                        {providerData.todaySchedule.map((appointment) => (
+                          <div key={appointment.id} className="flex items-center gap-4 p-3 border border-blue-100 rounded hover:bg-blue-50">
+                            <div className="bg-blue-100 p-2 rounded">
                               {appointment.isVideo ? (
-                                <Video className="h-4 w-4 text-primary" />
+                                <Video className="h-5 w-5 text-blue-600" />
                               ) : (
-                                <Clock className="h-4 w-4 text-primary" />
+                                <UserCheck className="h-5 w-5 text-blue-600" />
                               )}
                             </div>
                             <div className="flex-1">
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="font-medium text-sm">{appointment.patient}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatTime(appointment.time)} • {appointment.type}
+                                  <h4 className="font-medium text-slate-900">{appointment.patient}</h4>
+                                  <p className="text-sm text-blue-600">
+                                    {formatTime(appointment.time)} • {appointment.duration} min • {appointment.type}
                                   </p>
                                 </div>
-                                <Badge variant={appointment.status === 'confirmed' ? 'default' : 'outline'} className="text-xs">
+                                <Badge variant={appointment.status === 'confirmed' ? 'default' : 'outline'}>
                                   {appointment.status}
                                 </Badge>
                               </div>
+                            </div>
+                            <div className="flex gap-2">
+                              {appointment.isVideo && (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleStartVideoCall(appointment.patient)}
+                                >
+                                  <Video className="h-4 w-4 mr-1" />
+                                  Join Call
+                                </Button>
+                              )}
+                              <Button variant="outline" size="sm" asChild>
+                                <Link href={`/provider/patient/${appointment.id}`}>
+                                  View Chart
+                                </Link>
+                              </Button>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-center py-4 text-muted-foreground">No appointments scheduled for today.</p>
+                      <p className="text-center py-8 text-slate-500">No appointments scheduled for today.</p>
                     )}
-                  </CardContent>
-                  <CardFooter className="pt-0">
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/provider/schedule">
-                        View Full Schedule <ChevronRight className="h-4 w-4 ml-1" />
-                      </Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            </TabsContent>
+                  </div>
+                </div>
+              </TabsContent>
 
-            <TabsContent value="schedule" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Today's Schedule</CardTitle>
-                  <CardDescription>All appointments for {new Date().toLocaleDateString()}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="animate-pulse space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center gap-4 p-3 border rounded-lg">
-                          <div className="h-10 w-10 rounded bg-muted"></div>
-                          <div className="space-y-2 flex-1">
-                            <div className="h-4 bg-muted rounded w-1/3"></div>
-                            <div className="h-3 bg-muted rounded w-1/2"></div>
-                          </div>
-                          <div className="h-8 w-20 bg-muted rounded"></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : providerData?.todaySchedule && providerData.todaySchedule.length > 0 ? (
-                    <div className="space-y-4">
-                      {providerData.todaySchedule.map((appointment) => (
-                        <div key={appointment.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50">
-                          <div className="bg-primary/10 p-2 rounded-full">
-                            {appointment.isVideo ? (
-                              <Video className="h-5 w-5 text-primary" />
-                            ) : (
-                              <UserCheck className="h-5 w-5 text-primary" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{appointment.patient}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {formatTime(appointment.time)} • {appointment.duration} min • {appointment.type}
-                                </p>
-                              </div>
-                              <Badge variant={appointment.status === 'confirmed' ? 'default' : 'outline'}>
-                                {appointment.status}
-                              </Badge>
+              <TabsContent value="patients" className="space-y-4">
+                <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                  <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-teal-50/50 to-blue-50/50">
+                    <h3 className="font-medium text-slate-900">Recent Patients</h3>
+                    <p className="text-sm text-blue-600">Recently seen patients requiring follow-up</p>
+                  </div>
+                  <div className="p-4">
+                    {isLoading ? (
+                      <div className="animate-pulse space-y-4">
+                        {[1, 2].map((i) => (
+                          <div key={i} className="flex items-center gap-4 p-3 border border-blue-100 rounded">
+                            <div className="h-10 w-10 rounded-full bg-blue-200"></div>
+                            <div className="space-y-2 flex-1">
+                              <div className="h-4 bg-blue-200 rounded w-1/4"></div>
+                              <div className="h-3 bg-blue-200 rounded w-1/3"></div>
                             </div>
+                            <div className="h-6 w-16 bg-blue-200 rounded"></div>
                           </div>
-                          <div className="flex gap-2">
-                            {appointment.isVideo && (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleStartVideoCall(appointment.patient)}
-                              >
-                                <Video className="h-4 w-4 mr-1" />
-                                Join Call
-                              </Button>
-                            )}
+                        ))}
+                      </div>
+                    ) : providerData?.recentPatients && providerData.recentPatients.length > 0 ? (
+                      <div className="space-y-3">
+                        {providerData.recentPatients.map((patient) => (
+                          <div key={patient.id} className="flex items-center gap-4 p-3 border border-blue-100 rounded hover:bg-blue-50">
+                            <div className="bg-blue-100 p-2 rounded">
+                              <User className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium text-slate-900">{patient.name}</h4>
+                                  <p className="text-sm text-blue-600">
+                                    {patient.condition} • Last visit: {new Date(patient.lastVisit).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-xs text-slate-500">
+                                    Next: {new Date(patient.nextAppointment).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <Badge variant={patient.status === 'active' ? 'default' : 'secondary'}>
+                                  {patient.status}
+                                </Badge>
+                              </div>
+                            </div>
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/provider/patient/${appointment.id}`}>
+                              <Link href={`/provider/patient/${patient.id}`}>
                                 View Chart
                               </Link>
                             </Button>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center py-8 text-muted-foreground">No appointments scheduled for today.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center py-8 text-slate-500">No recent patients to show.</p>
+                    )}
+                  </div>
+                  <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/provider/patients">
+                        View All Patients <ChevronRight className="h-3 w-3 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
 
-            <TabsContent value="patients" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Patients</CardTitle>
-                  <CardDescription>Recently seen patients requiring follow-up</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="animate-pulse space-y-4">
-                      {[1, 2].map((i) => (
-                        <div key={i} className="flex items-center gap-4 p-3 border rounded-lg">
-                          <div className="h-10 w-10 rounded-full bg-muted"></div>
-                          <div className="space-y-2 flex-1">
-                            <div className="h-4 bg-muted rounded w-1/4"></div>
-                            <div className="h-3 bg-muted rounded w-1/3"></div>
-                          </div>
-                          <div className="h-6 w-16 bg-muted rounded"></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : providerData?.recentPatients && providerData.recentPatients.length > 0 ? (
-                    <div className="space-y-4">
-                      {providerData.recentPatients.map((patient) => (
-                        <div key={patient.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50">
-                          <div className="bg-primary/10 p-2 rounded-full">
-                            <User className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{patient.name}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {patient.condition} • Last visit: {new Date(patient.lastVisit).toLocaleDateString()}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Next: {new Date(patient.nextAppointment).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <Badge variant={patient.status === 'active' ? 'default' : 'secondary'}>
-                                {patient.status}
-                              </Badge>
+              <TabsContent value="tasks" className="space-y-4">
+                <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                  <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                    <h3 className="font-medium text-slate-900">Pending Tasks</h3>
+                    <p className="text-sm text-blue-600">Items requiring your attention</p>
+                  </div>
+                  <div className="p-4">
+                    {isLoading ? (
+                      <div className="animate-pulse space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center gap-4 p-3 border border-blue-100 rounded">
+                            <div className="h-8 w-8 rounded bg-blue-200"></div>
+                            <div className="space-y-2 flex-1">
+                              <div className="h-4 bg-blue-200 rounded w-1/3"></div>
+                              <div className="h-3 bg-blue-200 rounded w-1/2"></div>
                             </div>
+                            <div className="h-6 w-16 bg-blue-200 rounded"></div>
                           </div>
-                          <Button variant="outline" size="sm" asChild>
-                            <Link href={`/provider/patient/${patient.id}`}>
-                              View Chart
-                            </Link>
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center py-8 text-muted-foreground">No recent patients to show.</p>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/provider/patients">
-                      View All Patients <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="tasks" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pending Tasks</CardTitle>
-                  <CardDescription>Items requiring your attention</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="animate-pulse space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center gap-4 p-3 border rounded-lg">
-                          <div className="h-8 w-8 rounded bg-muted"></div>
-                          <div className="space-y-2 flex-1">
-                            <div className="h-4 bg-muted rounded w-1/3"></div>
-                            <div className="h-3 bg-muted rounded w-1/2"></div>
-                          </div>
-                          <div className="h-6 w-16 bg-muted rounded"></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : providerData?.pendingTasks && providerData.pendingTasks.length > 0 ? (
-                    <div className="space-y-4">
-                      {providerData.pendingTasks.map((task) => (
-                        <div key={task.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50">
-                          <div className={`p-1.5 rounded ${
-                            task.priority === 'high' ? 'bg-red-100 text-red-600' :
-                            task.priority === 'medium' ? 'bg-orange-100 text-orange-600' :
-                            'bg-blue-100 text-blue-600'
-                          }`}>
-                            <AlertCircle className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{task.type}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Patient: {task.patient} • Due: {task.due}
-                                </p>
-                              </div>
-                              <Badge variant={
-                                task.priority === 'high' ? 'destructive' :
-                                task.priority === 'medium' ? 'default' : 'secondary'
-                              }>
-                                {task.priority} priority
-                              </Badge>
+                        ))}
+                      </div>
+                    ) : providerData?.pendingTasks && providerData.pendingTasks.length > 0 ? (
+                      <div className="space-y-3">
+                        {providerData.pendingTasks.map((task) => (
+                          <div key={task.id} className="flex items-center gap-4 p-3 border border-blue-100 rounded hover:bg-blue-50">
+                            <div className={`p-1.5 rounded ${
+                              task.priority === 'high' ? 'bg-red-100 text-red-600' :
+                              task.priority === 'medium' ? 'bg-orange-100 text-orange-600' :
+                              'bg-blue-100 text-blue-600'
+                            }`}>
+                              <AlertCircle className="h-4 w-4" />
                             </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium text-slate-900">{task.type}</h4>
+                                  <p className="text-sm text-blue-600">
+                                    Patient: {task.patient} • Due: {task.due}
+                                  </p>
+                                </div>
+                                <Badge variant={
+                                  task.priority === 'high' ? 'destructive' :
+                                  task.priority === 'medium' ? 'default' : 'secondary'
+                                }>
+                                  {task.priority} priority
+                                </Badge>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleTaskComplete(task.id)}
+                            >
+                              Complete
+                            </Button>
                           </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleTaskComplete(task.id)}
-                          >
-                            Complete
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center py-8 text-muted-foreground">No pending tasks.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center py-8 text-slate-500">No pending tasks.</p>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>

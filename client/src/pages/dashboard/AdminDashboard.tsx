@@ -15,9 +15,7 @@ import {
   Key,
   Unlock,
   Database,
-  TrendingUp,
   Lock,
-  Eye,
   CheckCircle,
   AlertCircle,
   Clock
@@ -114,489 +112,432 @@ export default function AdminDashboard() {
   const { data: adminData, isLoading } = useMockAdminData(user.id);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-teal-800 to-slate-900">
-      <div className="container py-10">
-        {/* Header with Logo */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            <img 
-              src="/qualibrite-family-logo.png?v=3" 
-              alt="Qualibrite Family Psychiatry" 
-              className="w-16 h-16 object-contain"
-            />
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Qualibrite Family Psychiatry</h2>
-              <p className="text-teal-200">
-                {user.isSuperadmin ? "Superadmin Portal" : "Admin Portal"}
-              </p>
+    <div className="min-h-screen bg-blue-50">
+      {/* Clean medical header */}
+      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-blue-200 shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/qualibrite-family-logo.png?v=3" 
+                alt="Qualibrite Family Psychiatry" 
+                className="w-8 h-8 object-contain"
+              />
+              <div>
+                <h1 className="text-lg font-semibold text-slate-900">Qualibrite Family Psychiatry</h1>
+                <p className="text-sm text-blue-600">
+                  {user.isSuperadmin ? "Superadmin Portal" : "Admin Portal"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-blue-600">{user.email}</span>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/auth/logout">Logout</Link>
+              </Button>
             </div>
           </div>
         </div>
-        
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 p-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">
-                {user.isSuperadmin ? "Superadmin Dashboard" : "Admin Dashboard"}
-              </h1>
-              <p className="text-slate-600 mt-1">Welcome back, {user.email}</p>
-            </div>
-            <div className="flex gap-3">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/admin/security">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Security Status
-                </Link>
-              </Button>
-              
-              <Button asChild variant="destructive" size="sm">
-                <Link href="/admin/security">
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  Emergency Access
-                </Link>
-              </Button>
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
+        <div className="bg-white border border-blue-200 shadow-lg rounded-lg">
+          <div className="p-6 border-b border-blue-200 bg-gradient-to-r from-blue-50/30 to-teal-50/30">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">
+                  {user.isSuperadmin ? "Superadmin Dashboard" : "Admin Dashboard"}
+                </h2>
+                <p className="text-sm text-blue-600 mt-1">System administration and user management</p>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/admin/security">
+                    <Shield className="h-4 w-4 mr-1" />
+                    Security Status
+                  </Link>
+                </Button>
+                
+                <Button asChild variant="destructive" size="sm">
+                  <Link href="/admin/security">
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    Emergency Access
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="users">User Management</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="system">System</TabsTrigger>
-            </TabsList>
+          <div className="p-6">
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full bg-blue-50 border border-blue-200 shadow-sm">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Overview</TabsTrigger>
+                <TabsTrigger value="users" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">User Management</TabsTrigger>
+                <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">Security</TabsTrigger>
+                <TabsTrigger value="system" className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-blue-300 data-[state=active]:shadow-sm">System</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
-              {/* Statistics Cards */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {isLoading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Card key={i}>
-                      <CardHeader className="pb-2">
-                        <div className="animate-pulse">
-                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                          <div className="h-8 bg-muted rounded w-1/2"></div>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  ))
-                ) : adminData ? (
-                  <>
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{adminData.statistics.totalUsers}</div>
-                        <p className="text-xs text-muted-foreground">All user accounts</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Active Patients</CardTitle>
-                        <UserCog className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{adminData.statistics.activePatients}</div>
-                        <p className="text-xs text-muted-foreground">Currently in care</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Security Alerts</CardTitle>
-                        <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-orange-600">{adminData.statistics.systemAlerts}</div>
-                        <p className="text-xs text-muted-foreground">Require attention</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Locked Accounts</CardTitle>
-                        <Lock className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold text-red-600">{adminData.statistics.lockedAccounts}</div>
-                        <p className="text-xs text-muted-foreground">Need unlocking</p>
-                      </CardContent>
-                    </Card>
-                  </>
-                ) : null}
-              </div>
-
-              {/* Recent Activity and System Status */}
-              <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Recent Activity</CardTitle>
-                    <CardDescription>Latest system events and user actions</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoading ? (
-                      <div className="animate-pulse space-y-3">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex items-center gap-3 p-2 border rounded-lg">
-                            <div className="h-8 w-8 rounded bg-muted"></div>
-                            <div className="space-y-1 flex-1">
-                              <div className="h-3 bg-muted rounded w-3/4"></div>
-                              <div className="h-2 bg-muted rounded w-1/2"></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : adminData?.recentActivity && adminData.recentActivity.length > 0 ? (
-                      <div className="space-y-3">
-                        {adminData.recentActivity.map((activity) => (
-                          <div key={activity.id} className="flex items-start gap-3 p-2 border rounded-lg">
-                            <div className={`p-1.5 rounded ${
-                              activity.status === 'success' ? 'bg-green-100 text-green-600' :
-                              activity.status === 'warning' ? 'bg-orange-100 text-orange-600' :
-                              'bg-blue-100 text-blue-600'
-                            }`}>
-                              {activity.status === 'success' ? (
-                                <CheckCircle className="h-4 w-4" />
-                              ) : activity.status === 'warning' ? (
-                                <AlertCircle className="h-4 w-4" />
-                              ) : (
-                                <Clock className="h-4 w-4" />
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{activity.action}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {activity.user} • {formatDateTime(activity.timestamp)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-center py-4 text-muted-foreground">No recent activity.</p>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/audit-logs">
-                        View Full Audit Log
-                      </Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">System Status</CardTitle>
-                    <CardDescription>Current system health and performance</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isLoading ? (
-                      <div className="animate-pulse space-y-3">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex justify-between items-center p-2 border rounded-lg">
-                            <div className="h-4 bg-muted rounded w-1/3"></div>
-                            <div className="h-6 w-16 bg-muted rounded"></div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : adminData?.systemStatus ? (
-                      <>
-                        <div className="flex justify-between items-center p-2 border rounded-lg">
-                          <span className="text-sm font-medium">Database</span>
-                          <Badge variant={adminData.systemStatus.dbStatus === 'healthy' ? 'default' : 'destructive'}>
-                            {adminData.systemStatus.dbStatus}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between items-center p-2 border rounded-lg">
-                          <span className="text-sm font-medium">Authentication</span>
-                          <Badge variant={adminData.systemStatus.authService === 'healthy' ? 'default' : 'destructive'}>
-                            {adminData.systemStatus.authService}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between items-center p-2 border rounded-lg">
-                          <span className="text-sm font-medium">Backup Status</span>
-                          <Badge variant={adminData.systemStatus.backupStatus === 'completed' ? 'default' : 'destructive'}>
-                            {adminData.systemStatus.backupStatus}
-                          </Badge>
-                        </div>
-                        <div className="p-2 border rounded-lg">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm font-medium">Last Backup</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDateTime(adminData.systemStatus.lastBackup)}
-                          </p>
-                        </div>
-                      </>
-                    ) : null}
-                  </CardContent>
-                  <CardFooter>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/system-health">
-                        View System Health
-                      </Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="users" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {user.isSuperadmin && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <UserPlus className="h-5 w-5" />
-                        Admin Management
-                      </CardTitle>
-                      <CardDescription>Create and manage administrator accounts</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/admin/users?role=admin">Manage Admins</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Patient Management
-                    </CardTitle>
-                    <CardDescription>Manage patient accounts and access</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/users?role=patient">Manage Patients</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <UserCog className="h-5 w-5" />
-                      Provider Management
-                    </CardTitle>
-                    <CardDescription>Manage healthcare providers and credentials</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/users?role=provider">Manage Providers</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Staff Management
-                    </CardTitle>
-                    <CardDescription>Manage support staff and coordinators</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button asChild variant="outline" size="sm" className="w-full">
-                      <Link href="/admin/users?role=intake_coordinator">Intake Coordinators</Link>
-                    </Button>
-                    <Button asChild variant="outline" size="sm" className="w-full">
-                      <Link href="/admin/users?role=practice_manager">Practice Managers</Link>
-                    </Button>
-                    <Button asChild variant="outline" size="sm" className="w-full">
-                      <Link href="/admin/users?role=billing">Billing Staff</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Key className="h-5 w-5" />
-                      Password Management
-                    </CardTitle>
-                    <CardDescription>Generate and manage temporary passwords</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/generate-temp-password">Generate Passwords</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Unlock className="h-5 w-5" />
-                      Account Recovery
-                    </CardTitle>
-                    <CardDescription>Unlock locked user accounts</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/account-unlock">Unlock Accounts</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="security" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Security Center
-                    </CardTitle>
-                    <CardDescription>Monitor security alerts and system health</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/security">Security Dashboard</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ActivitySquare className="h-5 w-5" />
-                      Audit Logs
-                    </CardTitle>
-                    <CardDescription>View detailed system activity logs</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/audit-logs">View Audit Logs</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      Compliance Reports
-                    </CardTitle>
-                    <CardDescription>Generate HIPAA compliance reports</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/admin/compliance">View Reports</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Security Alerts */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Security Alerts</CardTitle>
-                  <CardDescription>Recent security events requiring attention</CardDescription>
-                </CardHeader>
-                <CardContent>
+              <TabsContent value="overview" className="space-y-4">
+                {/* Statistics Cards */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {isLoading ? (
-                    <div className="animate-pulse space-y-3">
-                      {[1, 2].map((i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
-                          <div className="h-8 w-8 rounded bg-muted"></div>
-                          <div className="space-y-1 flex-1">
-                            <div className="h-4 bg-muted rounded w-3/4"></div>
-                            <div className="h-3 bg-muted rounded w-1/2"></div>
-                          </div>
-                          <div className="h-6 w-16 bg-muted rounded"></div>
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="animate-pulse">
+                          <div className="h-3 bg-blue-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-6 bg-blue-200 rounded w-1/2"></div>
                         </div>
-                      ))}
+                      </div>
+                    ))
+                  ) : adminData ? (
+                    <>
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Total Users</span>
+                          <Users className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-slate-900">{adminData.statistics.totalUsers}</div>
+                        <p className="text-xs text-slate-500">All user accounts</p>
+                      </div>
+
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Active Patients</span>
+                          <UserCog className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-slate-900">{adminData.statistics.activePatients}</div>
+                        <p className="text-xs text-slate-500">Currently in care</p>
+                      </div>
+
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Security Alerts</span>
+                          <AlertTriangle className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-orange-600">{adminData.statistics.systemAlerts}</div>
+                        <p className="text-xs text-slate-500">Require attention</p>
+                      </div>
+
+                      <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-blue-600">Locked Accounts</span>
+                          <Lock className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xl font-semibold text-red-600">{adminData.statistics.lockedAccounts}</div>
+                        <p className="text-xs text-slate-500">Need unlocking</p>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+
+                {/* Recent Activity and System Status */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                      <h3 className="font-medium text-slate-900">Recent Activity</h3>
+                      <p className="text-sm text-blue-600">Latest system events and user actions</p>
                     </div>
-                  ) : adminData?.securityAlerts && adminData.securityAlerts.length > 0 ? (
-                    <div className="space-y-3">
-                      {adminData.securityAlerts.map((alert) => (
-                        <div key={alert.id} className="flex items-start gap-3 p-3 border rounded-lg">
-                          <div className={`p-1.5 rounded ${
-                            alert.severity === 'high' ? 'bg-red-100 text-red-600' :
-                            alert.severity === 'medium' ? 'bg-orange-100 text-orange-600' :
-                            'bg-blue-100 text-blue-600'
-                          }`}>
-                            <AlertTriangle className="h-4 w-4" />
+                    <div className="p-4">
+                      {isLoading ? (
+                        <div className="animate-pulse space-y-3">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3 p-2 border border-blue-100 rounded">
+                              <div className="h-8 w-8 rounded bg-blue-200"></div>
+                              <div className="space-y-1 flex-1">
+                                <div className="h-3 bg-blue-200 rounded w-3/4"></div>
+                                <div className="h-2 bg-blue-200 rounded w-1/2"></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : adminData?.recentActivity && adminData.recentActivity.length > 0 ? (
+                        <div className="space-y-3">
+                          {adminData.recentActivity.map((activity) => (
+                            <div key={activity.id} className="flex items-start gap-3 p-2 border border-blue-100 rounded">
+                              <div className={`p-1.5 rounded ${
+                                activity.status === 'success' ? 'bg-green-100 text-green-600' :
+                                activity.status === 'warning' ? 'bg-orange-100 text-orange-600' :
+                                'bg-blue-100 text-blue-600'
+                              }`}>
+                                {activity.status === 'success' ? (
+                                  <CheckCircle className="h-4 w-4" />
+                                ) : activity.status === 'warning' ? (
+                                  <AlertCircle className="h-4 w-4" />
+                                ) : (
+                                  <Clock className="h-4 w-4" />
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-slate-900">{activity.action}</p>
+                                <p className="text-xs text-blue-600">
+                                  {activity.user} • {formatDateTime(activity.timestamp)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-center py-4 text-slate-500">No recent activity.</p>
+                      )}
+                    </div>
+                    <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/admin/audit-logs">
+                          View Full Audit Log
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                      <h3 className="font-medium text-slate-900">System Status</h3>
+                      <p className="text-sm text-blue-600">Current system health and performance</p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      {isLoading ? (
+                        <div className="animate-pulse space-y-3">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex justify-between items-center p-2 border border-blue-100 rounded">
+                              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                              <div className="h-6 w-16 bg-gray-200 rounded"></div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : adminData?.systemStatus ? (
+                        <>
+                          <div className="flex justify-between items-center p-2 border border-blue-100 rounded">
+                            <span className="text-sm font-medium text-slate-900">Database</span>
+                            <Badge variant={adminData.systemStatus.dbStatus === 'healthy' ? 'default' : 'destructive'} className="text-xs">
+                              {adminData.systemStatus.dbStatus}
+                            </Badge>
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{alert.message}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDateTime(alert.timestamp)}
+                          <div className="flex justify-between items-center p-2 border border-blue-100 rounded">
+                            <span className="text-sm font-medium text-slate-900">Authentication</span>
+                            <Badge variant={adminData.systemStatus.authService === 'healthy' ? 'default' : 'destructive'} className="text-xs">
+                              {adminData.systemStatus.authService}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between items-center p-2 border border-blue-100 rounded">
+                            <span className="text-sm font-medium text-slate-900">Backup Status</span>
+                            <Badge variant={adminData.systemStatus.backupStatus === 'completed' ? 'default' : 'destructive'} className="text-xs">
+                              {adminData.systemStatus.backupStatus}
+                            </Badge>
+                          </div>
+                          <div className="p-2 border border-blue-100 rounded">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm font-medium text-slate-900">Last Backup</span>
+                            </div>
+                            <p className="text-xs text-blue-600">
+                              {formatDateTime(adminData.systemStatus.lastBackup)}
                             </p>
                           </div>
-                          <Badge variant={
-                            alert.severity === 'high' ? 'destructive' :
-                            alert.severity === 'medium' ? 'default' : 'secondary'
-                          }>
-                            {alert.severity}
-                          </Badge>
-                        </div>
-                      ))}
+                        </>
+                      ) : null}
                     </div>
-                  ) : (
-                    <p className="text-center py-8 text-muted-foreground">No security alerts.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                    <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/admin/system-health">
+                          View System Health
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
 
-            <TabsContent value="system" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5" />
-                      System Settings
-                    </CardTitle>
-                    <CardDescription>Configure system-wide settings</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
+              <TabsContent value="users" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {user.isSuperadmin && (
+                    <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
+                      <div className="flex items-center gap-2 mb-3">
+                        <UserPlus className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-medium text-slate-900">Admin Management</h3>
+                      </div>
+                      <p className="text-sm text-blue-600 mb-3">Create and manage administrator accounts</p>
+                      <Button asChild variant="outline" size="sm" className="w-full">
+                        <Link href="/admin/users?role=admin">Manage Admins</Link>
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Patient Management</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Manage patient accounts and access</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/users?role=patient">Manage Patients</Link>
+                    </Button>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <UserCog className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Provider Management</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Manage healthcare providers and credentials</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/users?role=provider">Manage Providers</Link>
+                    </Button>
+                  </div>
+                  
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Staff Management</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Manage support staff and coordinators</p>
+                    <div className="space-y-2">
+                      <Button asChild variant="outline" size="sm" className="w-full text-xs">
+                        <Link href="/admin/users?role=intake_coordinator">Intake Coordinators</Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="w-full text-xs">
+                        <Link href="/admin/users?role=practice_manager">Practice Managers</Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="w-full text-xs">
+                        <Link href="/admin/users?role=billing">Billing Staff</Link>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Key className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Password Management</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Generate and manage temporary passwords</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/generate-temp-password">Generate Passwords</Link>
+                    </Button>
+                  </div>
+                  
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Unlock className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Account Recovery</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Unlock locked user accounts</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/account-unlock">Unlock Accounts</Link>
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="security" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Security Center</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Monitor security alerts and system health</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/security">Security Dashboard</Link>
+                    </Button>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ActivitySquare className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Audit Logs</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">View detailed system activity logs</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/audit-logs">View Audit Logs</Link>
+                    </Button>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Compliance Reports</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Generate HIPAA compliance reports</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link href="/admin/compliance">View Reports</Link>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Security Alerts */}
+                {adminData?.securityAlerts && adminData.securityAlerts.length > 0 && (
+                  <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
+                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                      <h3 className="font-medium text-slate-900">Security Alerts</h3>
+                      <p className="text-sm text-blue-600">Recent security events requiring attention</p>
+                    </div>
+                    <div className="p-4">
+                      <div className="space-y-3">
+                        {adminData.securityAlerts.map((alert) => (
+                          <div key={alert.id} className="flex items-start gap-3 p-3 border border-blue-100 rounded">
+                            <div className={`p-1.5 rounded ${
+                              alert.severity === 'high' ? 'bg-red-100 text-red-600' :
+                              alert.severity === 'medium' ? 'bg-orange-100 text-orange-600' :
+                              'bg-blue-100 text-blue-600'
+                            }`}>
+                              <AlertTriangle className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-slate-900">{alert.message}</p>
+                              <p className="text-xs text-blue-600">
+                                {formatDateTime(alert.timestamp)}
+                              </p>
+                            </div>
+                            <Badge variant={
+                              alert.severity === 'high' ? 'destructive' :
+                              alert.severity === 'medium' ? 'default' : 'secondary'
+                            } className="text-xs">
+                              {alert.severity}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="system" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Settings className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">System Settings</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Configure system-wide settings</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
                       <Link href="/admin/settings">Manage Settings</Link>
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Database className="h-5 w-5" />
-                      Database Management
-                    </CardTitle>
-                    <CardDescription>Monitor database health and backups</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Database className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">Database Management</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">Monitor database health and backups</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
                       <Link href="/admin/database">Database Console</Link>
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      System Analytics
-                    </CardTitle>
-                    <CardDescription>View system performance metrics</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild variant="outline" className="w-full">
+                  <div className="bg-white border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ActivitySquare className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-medium text-slate-900">System Analytics</h3>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-3">View system performance metrics</p>
+                    <Button asChild variant="outline" size="sm" className="w-full">
                       <Link href="/admin/analytics">View Analytics</Link>
                     </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>
