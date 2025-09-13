@@ -68,7 +68,7 @@ export default function Home() {
                   <Button 
                     asChild 
                     size="sm"
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-xl"
+                    className="bg-teal-600 hover:bg-white hover:text-black text-white font-semibold px-4 py-2 rounded-xl"
                   >
                     <Link href="/auth/register">Book Now</Link>
                   </Button>
@@ -149,14 +149,14 @@ export default function Home() {
               >
                 <Button 
                   asChild 
-                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-white hover:to-gray-50 text-white hover:text-black font-bold px-8 py-4 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
                   <Link href="/auth/register">Schedule Your Consultation</Link>
                 </Button>
                 <Button 
                   variant="outline" 
                   asChild 
-                  className="border-2 border-teal-600 text-teal-600 hover:bg-teal-50 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+                  className="border-2 border-teal-600 text-teal-600 hover:bg-teal-50 hover:text-black font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
                 >
                   <Link href="/about">Learn More</Link>
                 </Button>
@@ -214,7 +214,7 @@ export default function Home() {
                 <div className="absolute bottom-4 right-4">
                   <Button 
                     asChild 
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-full shadow-lg transition-all duration-300"
+                    className="bg-teal-600 hover:bg-white hover:text-black text-white font-semibold px-4 py-2 rounded-full shadow-lg transition-all duration-300"
                   >
                     <Link href="/auth/register">💬 Start Chat</Link>
                   </Button>
@@ -279,7 +279,7 @@ export default function Home() {
               </div>
               <Button 
                 asChild 
-                className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl"
+                className="bg-teal-600 hover:bg-white hover:text-black text-white font-semibold px-6 py-3 rounded-xl"
               >
                 <Link href="/auth/register">Start Video Session</Link>
               </Button>
@@ -351,7 +351,7 @@ export default function Home() {
               <Button 
                 asChild 
                 variant="outline" 
-                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
+                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-black"
               >
                 <Link href="/contact">Start Chat</Link>
               </Button>
@@ -379,7 +379,7 @@ export default function Home() {
               <Button 
                 asChild 
                 variant="outline" 
-                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
+                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-black"
               >
                 <Link href="tel:+18885113697">Call (888) 511-3697</Link>
               </Button>
@@ -407,7 +407,7 @@ export default function Home() {
               <Button 
                 asChild 
                 variant="outline" 
-                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
+                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-black"
               >
                 <Link href="/about">Learn More</Link>
               </Button>
@@ -1067,7 +1067,7 @@ export default function Home() {
                 <Button 
                   asChild 
                   size="lg" 
-                  className="bg-white text-blue-900 hover:bg-blue-50 text-xl font-bold rounded-2xl px-12 py-6 shadow-2xl hover:shadow-white/20 transition-all duration-300 border-0"
+                  className="bg-white text-blue-900 hover:bg-gray-50 hover:text-black text-xl font-bold rounded-2xl px-12 py-6 shadow-2xl hover:shadow-white/20 transition-all duration-300 border-0"
                 >
                   <Link href="/auth/register">Start Your Journey Today</Link>
                 </Button>
@@ -1077,7 +1077,7 @@ export default function Home() {
                   asChild 
                   variant="outline" 
                   size="lg" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-blue-900 backdrop-blur-sm text-xl font-semibold rounded-2xl px-12 py-6 transition-all duration-300"
+                  className="border-2 border-white text-white hover:bg-white hover:text-black backdrop-blur-sm text-xl font-semibold rounded-2xl px-12 py-6 transition-all duration-300"
                 >
                   <Link href="/services">Explore Our Services</Link>
                 </Button>
