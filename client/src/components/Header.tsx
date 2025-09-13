@@ -31,7 +31,7 @@ function HeaderComponent() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-3">
             <img 
-              src="/qualibrite-family-logo.png?v=2" 
+              src="/qualibrite-family-logo.png?v=3" 
               alt="Qualibrite Family Psychiatry" 
               className="h-12 w-auto"
             />
@@ -88,7 +88,7 @@ function HeaderComponent() {
         <div className="flex flex-1 items-center justify-between md:justify-end">
           <Link href="/" className="md:hidden flex items-center space-x-2">
             <img 
-              src="/qualibrite-family-logo.png?v=2" 
+              src="/qualibrite-family-logo.png?v=3" 
               alt="Qualibrite Family Psychiatry" 
               className="h-10 w-auto"
             />
