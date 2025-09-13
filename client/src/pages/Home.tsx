@@ -600,9 +600,9 @@ export default function Home() {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-2xl font-bold">Mental Health Services</h3>
-                    <p className="text-blue-100">Comprehensive psychiatric care</p>
+                  <div className="absolute bottom-4 left-4 right-4 text-white text-center">
+                    <h3 className="text-xl md:text-2xl font-bold">Individual Mental Health Services</h3>
+                    <p className="text-blue-100 text-sm md:text-base">Comprehensive psychiatric care</p>
                   </div>
                 </div>
                 <CardContent className="p-8">
@@ -644,9 +644,9 @@ export default function Home() {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-2xl font-bold">Family Mental Health</h3>
-                    <p className="text-purple-100">Supporting families together</p>
+                  <div className="absolute bottom-4 left-4 right-4 text-white text-center">
+                    <h3 className="text-xl md:text-2xl font-bold">Family Mental Health Services</h3>
+                    <p className="text-purple-100 text-sm md:text-base">Supporting families together</p>
                   </div>
                 </div>
                 <CardContent className="p-8">
@@ -691,44 +691,89 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+            {/* Credit & Debit Cards */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="text-center p-6 bg-white rounded-2xl shadow-lg"
+              className="group"
             >
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShieldCheck className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">We accept Credit and Debit Cards</h3>
+              <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
+                <CardContent className="p-6">
+                  <div className="relative mb-6">
+                    <img
+                      src="/Credit_and_debit_cards_payment_option_bfcfe5ae.png"
+                      alt="Credit and debit cards payment"
+                      className="w-full h-40 object-cover rounded-xl"
+                    />
+                    <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <ShieldCheck className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-center text-gray-900">Credit & Debit Cards</h3>
+                  <p className="text-gray-600 text-center">
+                    Secure payment processing with all major credit and debit cards including Visa, Mastercard, and American Express
+                  </p>
+                </CardContent>
+              </Card>
             </motion.div>
 
+            {/* Insurance Plans */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="text-center p-6 bg-white rounded-2xl shadow-lg"
+              className="group"
             >
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">We also accept Care Through Lending, Care, Cash, App, etc.</h3>
+              <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
+                <CardContent className="p-6">
+                  <div className="relative mb-6">
+                    <img
+                      src="/Insurance_coverage_and_benefits_documentation_abc6b590.png"
+                      alt="Insurance coverage and benefits"
+                      className="w-full h-40 object-cover rounded-xl"
+                    />
+                    <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-center text-gray-900">Insurance Coverage</h3>
+                  <p className="text-gray-600 text-center">
+                    We accept most major insurance plans including PPO, HMO, and Medicare for mental health services
+                  </p>
+                </CardContent>
+              </Card>
             </motion.div>
 
+            {/* Self-Pay Options */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="text-center p-6 bg-white rounded-2xl shadow-lg md:col-span-2 lg:col-span-1"
+              className="group"
             >
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Major Insurance Plans Accepted</h3>
+              <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
+                <CardContent className="p-6">
+                  <div className="relative mb-6">
+                    <img
+                      src="/Self-pay_cash_and_mobile_payment_options_b865abdb.png"
+                      alt="Self-pay cash and mobile payment options"
+                      className="w-full h-40 object-cover rounded-xl"
+                    />
+                    <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-center text-gray-900">Self-Pay Options</h3>
+                  <p className="text-gray-600 text-center">
+                    Affordable self-pay rates with flexible payment plans, cash payments, and mobile payment apps
+                  </p>
+                </CardContent>
+              </Card>
             </motion.div>
           </div>
         </div>
