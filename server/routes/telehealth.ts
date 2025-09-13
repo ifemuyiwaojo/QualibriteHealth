@@ -55,7 +55,7 @@ const handleVSeeError = (error: any) => {
     }
 
     return new Error(
-      axiosError.response?.data?.message || 
+      (axiosError.response?.data as any)?.message || 
       'Telehealth service error. Please try again.'
     );
   }
@@ -228,6 +228,231 @@ router.post('/generate-contact-image', async (req, res) => {
     });
   } catch (error: any) {
     console.error('Failed to generate contact image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-live-chat-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a friendly mental health support specialist engaged in live chat support. Show a professional, diverse person sitting at a modern desk with multiple monitors displaying chat interfaces, smiling warmly while typing responses. The setting should be a contemporary customer service environment with modern technology, comfortable lighting, and a welcoming atmosphere. Include details like headset, ergonomic chair, plants, and professional office decor that conveys immediate, caring support. High-quality portrait photography, 85mm lens, perfect lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `live-chat-support-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Live chat support image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate live chat image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-call-team-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a professional mental health phone support team. Show diverse, caring professionals in a modern call center environment, each wearing professional headsets and actively engaged in phone conversations with patients. The scene should convey warmth, professionalism, and immediate availability. Include modern office workstations, multiple phone lines, comfortable seating, and professional lighting. The team members should appear empathetic and highly trained. Professional office photography with excellent lighting, shot at medium angle, deep focus, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `call-team-support-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Call team support image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate call team image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-home-therapy-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image for a home page showing an elegant telehealth therapy session in progress. Show a professional, diverse therapist conducting a video call with a patient from a beautifully designed, modern home office. The therapist should appear highly competent and caring, sitting at a contemporary desk with a large monitor showing the video call interface. Include warm, natural lighting, modern furniture, plants, books, and professional decor that creates a welcoming, therapeutic atmosphere. High-quality lifestyle photography, 50mm lens, perfect composition, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `home-therapy-session-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Home therapy session image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate home therapy image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-platform-features-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing the advanced features of a telehealth platform. Show a sleek, modern computer setup with multiple screens displaying a sophisticated telehealth interface, video calls, patient records, and scheduling systems. The scene should be in a high-tech medical office environment with professional lighting and contemporary design. Include details like medical certificates on walls, modern office furniture, and technology that conveys cutting-edge healthcare innovation. High-quality technology photography, wide-angle lens, excellent lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `platform-features-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Platform features image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate platform features image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-individual-therapy-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing an individual therapy session via telehealth. Show a professional, diverse therapist in a warm, modern office setting conducting a video therapy session on a large monitor. The therapist should appear highly competent, empathetic, and engaged. Include comfortable seating, plants, books, soft lighting, and professional decor that creates a calming, therapeutic atmosphere. The scene should convey trust, professionalism, and effective one-on-one mental health care. High-quality portrait photography, 85mm lens, perfect lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `individual-therapy-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Individual therapy image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate individual therapy image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-group-therapy-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a group therapy session conducted via telehealth. Show a professional therapist facilitating a video group session with multiple participants visible on a large screen. The setting should be a modern, comfortable office with warm lighting. The therapist should appear skilled and caring, managing the group discussion professionally. Include modern technology, comfortable seating, and a supportive environment that encourages open communication. High-quality technology photography, wide-angle lens, excellent lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `group-therapy-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Group therapy image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate group therapy image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-medication-management-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a medication management consultation. Show a professional psychiatrist in a modern medical office conducting a telehealth medication review session. The psychiatrist should appear highly competent and trustworthy, sitting at a desk with medical references, prescription materials, and a computer displaying patient information. Include medical diplomas on the wall, modern office furniture, and professional lighting that conveys expert psychiatric care. High-quality medical photography, 85mm lens, perfect focus, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `medication-management-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Medication management image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate medication management image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-crisis-intervention-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing crisis intervention support. Show a professional mental health crisis counselor in a modern support center, available 24/7 for emergency mental health situations. The counselor should appear calm, compassionate, and highly trained, sitting at a workstation with multiple communication devices (phone, computer, headset). Include emergency protocol materials, calming office environment, and technology that conveys immediate, professional crisis support. High-quality emergency services photography, excellent lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `crisis-intervention-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Crisis intervention image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate crisis intervention image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-team-photo-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a diverse team of mental health professionals. Show a group of 5-6 licensed psychiatrists, therapists, and mental health specialists in a modern medical office setting. The team should appear highly professional, diverse in ethnicity and gender, wearing appropriate medical/professional attire. Include a contemporary office environment with natural lighting, modern furniture, and medical credentials/diplomas visible. The team should convey expertise, compassion, and trustworthiness. High-quality team photography, wide-angle lens, perfect lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `team-photo-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Team photo image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate team photo image:', error);
     res.status(500).json({
       success: false,
       error: error.message

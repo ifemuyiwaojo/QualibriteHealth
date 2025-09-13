@@ -16,7 +16,8 @@ const contactMethods = [
     primary: "(888) 511-3697",
     secondary: "Monday - Sunday, 7:00 AM - 10:00 PM",
     gradient: "from-blue-400 to-indigo-500",
-    action: "Call Now"
+    action: "Call Now",
+    image: "/call-team-support-1757752765131.png"
   },
   {
     icon: MessageCircle,
@@ -25,7 +26,8 @@ const contactMethods = [
     primary: "Available 24/7",
     secondary: "Quick response guaranteed",
     gradient: "from-emerald-400 to-teal-500",
-    action: "Start Chat"
+    action: "Start Chat",
+    image: "/live-chat-support-1757752758775.png"
   },
   {
     icon: Calendar,
@@ -34,7 +36,8 @@ const contactMethods = [
     primary: "Next Available: Today",
     secondary: "Same-day appointments available",
     gradient: "from-purple-400 to-pink-500",
-    action: "Book Now"
+    action: "Book Now",
+    image: "/contact-support-1757752648444.png"
   }
 ];
 
@@ -215,8 +218,15 @@ export default function Contact() {
               >
                 <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300">
                   <CardContent className="p-8 text-center h-full flex flex-col">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${method.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      <method.icon className="w-8 h-8 text-white" />
+                    <div className="mb-6 relative">
+                      <img
+                        src={method.image}
+                        alt={`${method.title} - Professional support team`}
+                        className="w-full h-48 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className={`absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br ${method.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        <method.icon className="w-6 h-6 text-white" />
+                      </div>
                     </div>
                     <h3 className="text-xl font-bold mb-2 text-slate-800">{method.title}</h3>
                     <p className="text-slate-600 mb-4">{method.subtitle}</p>

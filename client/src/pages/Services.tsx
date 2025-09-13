@@ -15,7 +15,8 @@ const services = [
     description: "One-on-one therapy sessions tailored to your unique needs. Our experienced therapists provide a safe, confidential space to work through personal challenges.",
     features: ["Personalized treatment plans", "Flexible scheduling", "Evidence-based approaches"],
     gradient: "from-teal-400 to-cyan-500",
-    delay: 0.1
+    delay: 0.1,
+    image: "/attached_assets/generated_images/Mental_health_online_therapy_support_4e8375f7.png"
   },
   {
     icon: Users,
@@ -23,7 +24,8 @@ const services = [
     description: "Supportive group sessions where participants can share experiences and learn from others facing similar challenges in a structured, therapeutic environment.",
     features: ["Peer support network", "Guided discussions", "Shared healing experiences"],
     gradient: "from-cyan-400 to-blue-500",
-    delay: 0.2
+    delay: 0.2,
+    image: "/attached_assets/generated_images/telehealth/telehealth_platform_features_photorealistic.png"
   },
   {
     icon: Pill,
@@ -31,7 +33,8 @@ const services = [
     description: "Expert psychiatric medication management and monitoring to ensure optimal treatment outcomes with regular follow-up care.",
     features: ["Regular monitoring", "Dosage optimization", "Side effect management"],
     gradient: "from-emerald-400 to-teal-500",
-    delay: 0.3
+    delay: 0.3,
+    image: "/attached_assets/generated_images/services-consultation-1757752642064.png"
   },
   {
     icon: Video,
@@ -39,7 +42,8 @@ const services = [
     description: "Convenient online psychiatric care from the comfort of your home, maintaining the same high quality of in-person sessions.",
     features: ["HD video quality", "Secure platform", "Home comfort"],
     gradient: "from-blue-400 to-cyan-500",
-    delay: 0.4
+    delay: 0.4,
+    image: "/attached_assets/generated_images/home-therapy-session-1757752770182.png"
   },
   {
     icon: PhoneCall,
@@ -47,7 +51,8 @@ const services = [
     description: "24/7 emergency mental health support and intervention services for urgent situations requiring immediate attention.",
     features: ["24/7 availability", "Immediate response", "Emergency protocols"],
     gradient: "from-rose-400 to-pink-500",
-    delay: 0.5
+    delay: 0.5,
+    image: "/attached_assets/generated_images/call-team-support-1757752765131.png"
   },
   {
     icon: ClipboardCheck,
@@ -55,7 +60,8 @@ const services = [
     description: "Comprehensive psychological evaluations and testing to provide accurate diagnoses and guide treatment planning.",
     features: ["Comprehensive testing", "Detailed reports", "Treatment planning"],
     gradient: "from-purple-400 to-indigo-500",
-    delay: 0.6
+    delay: 0.6,
+    image: "/attached_assets/generated_images/contact-support-1757752648444.png"
   },
 ];
 
@@ -230,6 +236,13 @@ export default function Services() {
                 <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                   <div className={`h-2 bg-gradient-to-r ${service.gradient}`}></div>
                   <CardHeader className="space-y-4 pb-4">
+                    <div className="mb-4">
+                      <img
+                        src={service.image}
+                        alt={`${service.title} - Professional mental health service`}
+                        className="w-full h-48 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
                     <div className="flex items-center gap-4">
                       <div className={`w-14 h-14 bg-gradient-to-br ${service.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                         <service.icon className="w-7 h-7 text-white" />

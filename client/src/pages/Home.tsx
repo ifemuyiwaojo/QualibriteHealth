@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { 
   Clock, UserCheck, CalendarCheck, Award, ShieldCheck, 
-  Brain, Heart, HeartPulse, ArrowRight, Star, Phone, Users, Monitor, Mail
+  Brain, Heart, HeartPulse, ArrowRight, Star, Phone, Users, Monitor, Mail, CheckCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -220,6 +220,197 @@ export default function Home() {
                   </Button>
                 </div>
               </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Features with Photorealistic Images */}
+      <section className="py-24 bg-gradient-to-b from-slate-50 to-white">
+        <div className="container">
+          <div className="text-center mb-16">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold mb-4 text-slate-800"
+            >
+              Advanced Telehealth Platform
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-lg text-slate-600 max-w-2xl mx-auto"
+            >
+              Experience quality mental health care through our state-of-the-art platform
+            </motion.p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-2 items-center">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <h3 className="text-2xl font-bold text-slate-800">Professional Video Consultations</h3>
+              <p className="text-lg text-slate-600 leading-relaxed">
+                Connect with licensed psychiatrists and therapists through our secure, 
+                HIPAA-compliant platform. High-definition video and crystal-clear audio 
+                ensure you receive the same quality care as in-person visits.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-teal-600" />
+                  <span className="text-slate-700">HD video quality for clear communication</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-teal-600" />
+                  <span className="text-slate-700">Bank-level security and encryption</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-teal-600" />
+                  <span className="text-slate-700">Works on any device, anywhere</span>
+                </div>
+              </div>
+              <Button 
+                asChild 
+                className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl"
+              >
+                <Link href="/auth/register">Start Video Session</Link>
+              </Button>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-teal-100 to-cyan-100 rounded-3xl p-8 shadow-xl">
+                <img
+                  src="/home-therapy-session-1757752770182.png"
+                  alt="Professional conducting therapy session via telehealth platform"
+                  className="w-full h-auto rounded-2xl shadow-lg"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Live Support Section with Real Images */}
+      <section className="py-24 bg-gradient-to-br from-cyan-50 to-teal-50">
+        <div className="container">
+          <div className="text-center mb-16">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold mb-4 text-slate-800"
+            >
+              24/7 Live Support
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-lg text-slate-600 max-w-2xl mx-auto"
+            >
+              Our dedicated support team is always ready to help you access the care you need
+            </motion.p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="mb-6">
+                <img
+                  src="/live-chat-support-1757752758775.png"
+                  alt="Live chat support specialist ready to help"
+                  className="w-full h-48 object-cover rounded-xl"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-slate-800">Live Chat Support</h3>
+              <p className="text-slate-600 mb-4">
+                Get instant help with appointments, technical questions, or general inquiries 
+                through our live chat system.
+              </p>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
+              >
+                <Link href="/contact">Start Chat</Link>
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="mb-6">
+                <img
+                  src="/call-team-support-1757752765131.png"
+                  alt="Professional phone support team"
+                  className="w-full h-48 object-cover rounded-xl"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-slate-800">Phone Support</h3>
+              <p className="text-slate-600 mb-4">
+                Speak directly with our trained support staff for personalized assistance 
+                with scheduling and care coordination.
+              </p>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
+              >
+                <Link href="tel:+18885113697">Call (888) 511-3697</Link>
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="mb-6">
+                <img
+                  src="/platform-features-1757752775236.png"
+                  alt="Advanced telehealth platform features"
+                  className="w-full h-48 object-cover rounded-xl"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-slate-800">Advanced Platform</h3>
+              <p className="text-slate-600 mb-4">
+                Experience our cutting-edge telehealth technology with secure video calls, 
+                scheduling, and patient records.
+              </p>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
+              >
+                <Link href="/about">Learn More</Link>
+              </Button>
             </motion.div>
           </div>
         </div>
