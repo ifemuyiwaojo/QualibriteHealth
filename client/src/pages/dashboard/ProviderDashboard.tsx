@@ -131,7 +131,7 @@ export default function ProviderDashboard() {
   return (
     <div className="min-h-screen bg-blue-50">
       {/* Clean medical header */}
-      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-blue-200 shadow-sm">
+      <div className="bg-white border-b border-blue-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -157,7 +157,7 @@ export default function ProviderDashboard() {
 
       <div className="container mx-auto px-6 py-6">
         <div className="bg-white border border-blue-200 shadow-lg rounded-lg">
-          <div className="p-6 border-b border-blue-200 bg-gradient-to-r from-blue-50/30 to-teal-50/30">
+          <div className="p-6 border-b border-blue-200 bg-blue-50">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-slate-900">Provider Dashboard</h2>
@@ -245,7 +245,7 @@ export default function ProviderDashboard() {
                 
                 {/* Quick Actions and Today's Overview */}
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-200 rounded-lg shadow-sm">
+                  <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
                     <div className="p-4 border-b border-blue-200">
                       <h3 className="font-medium text-slate-900">Quick Actions</h3>
                       <p className="text-sm text-blue-600">Common provider tasks</p>
@@ -280,7 +280,7 @@ export default function ProviderDashboard() {
 
                   {/* Today's Overview */}
                   <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
-                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                    <div className="p-4 border-b border-blue-200 bg-blue-50">
                       <h3 className="font-medium text-slate-900">Today's Overview</h3>
                       <p className="text-sm text-blue-600">Your schedule and important items</p>
                     </div>
@@ -328,7 +328,7 @@ export default function ProviderDashboard() {
                         <p className="text-center py-4 text-slate-500 text-sm">No appointments scheduled for today.</p>
                       )}
                     </div>
-                    <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                    <div className="p-4 border-t border-blue-200 bg-blue-50">
                       <Button asChild variant="outline" size="sm" className="w-full">
                         <Link href="/provider/schedule">
                           View Full Schedule <ChevronRight className="h-3 w-3 ml-1" />
@@ -411,7 +411,7 @@ export default function ProviderDashboard() {
 
               <TabsContent value="patients" className="space-y-4">
                 <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
-                  <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-teal-50/50 to-blue-50/50">
+                  <div className="p-4 border-b border-blue-200 bg-blue-50">
                     <h3 className="font-medium text-slate-900">Recent Patients</h3>
                     <p className="text-sm text-blue-600">Recently seen patients requiring follow-up</p>
                   </div>
@@ -464,7 +464,7 @@ export default function ProviderDashboard() {
                       <p className="text-center py-8 text-slate-500">No recent patients to show.</p>
                     )}
                   </div>
-                  <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                  <div className="p-4 border-t border-blue-200 bg-blue-50">
                     <Button asChild variant="outline" size="sm" className="w-full">
                       <Link href="/provider/patients">
                         View All Patients <ChevronRight className="h-3 w-3 ml-1" />

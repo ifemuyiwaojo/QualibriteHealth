@@ -114,7 +114,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-blue-50">
       {/* Clean medical header */}
-      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-blue-200 shadow-sm">
+      <div className="bg-white border-b border-blue-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-6 py-6">
         <div className="bg-white border border-blue-200 shadow-lg rounded-lg">
-          <div className="p-6 border-b border-blue-200 bg-gradient-to-r from-blue-50/30 to-teal-50/30">
+          <div className="p-6 border-b border-blue-200 bg-blue-50">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-slate-900">
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                 {/* Recent Activity and System Status */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
-                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                    <div className="p-4 border-b border-blue-200 bg-blue-50">
                       <h3 className="font-medium text-slate-900">Recent Activity</h3>
                       <p className="text-sm text-blue-600">Latest system events and user actions</p>
                     </div>
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
                         <p className="text-center py-4 text-slate-500">No recent activity.</p>
                       )}
                     </div>
-                    <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                    <div className="p-4 border-t border-blue-200 bg-blue-50">
                       <Button asChild variant="outline" size="sm" className="w-full">
                         <Link href="/admin/audit-logs">
                           View Full Audit Log
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
-                    <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                    <div className="p-4 border-b border-blue-200 bg-blue-50">
                       <h3 className="font-medium text-slate-900">System Status</h3>
                       <p className="text-sm text-blue-600">Current system health and performance</p>
                     </div>
@@ -335,7 +335,7 @@ export default function AdminDashboard() {
                         </>
                       ) : null}
                     </div>
-                    <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                    <div className="p-4 border-t border-blue-200 bg-blue-50">
                       <Button asChild variant="outline" size="sm" className="w-full">
                         <Link href="/admin/system-health">
                           View System Health

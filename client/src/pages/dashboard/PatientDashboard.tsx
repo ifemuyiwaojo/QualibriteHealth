@@ -172,7 +172,7 @@ export default function PatientDashboard() {
   return (
     <div className="min-h-screen bg-blue-50">
       {/* Clean medical header */}
-      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-blue-200 shadow-sm">
+      <div className="bg-white border-b border-blue-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -198,7 +198,7 @@ export default function PatientDashboard() {
 
       <div className="container mx-auto px-6 py-6">
         <div className="bg-white border border-blue-200 shadow-lg rounded-lg">
-          <div className="p-6 border-b border-blue-200 bg-gradient-to-r from-blue-50/30 to-teal-50/30">
+          <div className="p-6 border-b border-blue-200 bg-blue-50">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-slate-900">Patient Dashboard</h2>
@@ -237,7 +237,7 @@ export default function PatientDashboard() {
                 {/* Quick Actions */}
                 <div className="grid gap-4 md:grid-cols-4">
                   <div className="col-span-4 md:col-span-1">
-                    <div className="bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-200 p-4 rounded-lg shadow-sm">
+                    <div className="bg-white border border-blue-200 p-4 rounded-lg shadow-sm">
                       <h3 className="font-medium text-slate-900 mb-3">Quick Actions</h3>
                       <div className="space-y-2">
                         <Button asChild variant="outline" size="sm" className="w-full justify-start text-xs">
@@ -272,7 +272,7 @@ export default function PatientDashboard() {
                   <div className="col-span-4 md:col-span-3 space-y-4">
                     {/* Upcoming Appointments */}
                     <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
-                      <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50/50 to-teal-50/50">
+                      <div className="p-4 border-b border-blue-200 bg-blue-50">
                         <div className="flex justify-between items-center">
                           <h3 className="font-medium text-slate-900">Upcoming Appointments</h3>
                           <Button variant="link" asChild className="p-0 h-auto text-sm">
@@ -325,7 +325,7 @@ export default function PatientDashboard() {
                         <p className="text-center py-4 text-muted-foreground">No upcoming appointments.</p>
                       )}
                         </div>
-                      <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                      <div className="p-4 border-t border-blue-200 bg-blue-50">
                         <Button onClick={handleScheduleTelehealth} variant="outline" size="sm" className="w-full">
                           Schedule New Appointment
                         </Button>
@@ -334,7 +334,7 @@ export default function PatientDashboard() {
 
                     {/* Medications Overview */}
                     <div className="bg-white border border-blue-200 rounded-lg shadow-sm">
-                      <div className="p-4 border-b border-blue-200 bg-gradient-to-r from-teal-50/50 to-blue-50/50">
+                      <div className="p-4 border-b border-blue-200 bg-blue-50">
                         <div className="flex justify-between items-center">
                           <h3 className="font-medium text-slate-900">Current Medications</h3>
                           <Button variant="link" asChild className="p-0 h-auto text-sm">
