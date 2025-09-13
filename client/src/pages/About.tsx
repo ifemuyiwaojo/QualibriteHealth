@@ -9,20 +9,46 @@ import {
 export default function About() {
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 py-20 text-white">
-        <div className="container">
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+      {/* Modern Hero Section */}
+      <section className="bg-gradient-to-br from-teal-600 via-teal-700 to-slate-800 py-24 md:py-32 text-white relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-teal-300/20 to-transparent rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container relative z-10">
+          <div className="mx-auto max-w-5xl text-center">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-semibold mb-8">
+              <Heart className="w-4 h-4 mr-2" />
               About Qualibrite Health
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
+              Pioneering the Future of
+              <span className="block text-teal-200">Mental Healthcare</span>
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100 mb-8">
-              Pioneering the future of mental healthcare through innovative telehealth technology
+            <p className="text-xl md:text-2xl text-teal-100 mb-8 leading-relaxed">
+              Revolutionizing access to quality mental health care through innovative telehealth technology
             </p>
-            <p className="text-lg text-blue-200 max-w-3xl mx-auto">
-              We're revolutionizing access to quality mental health care by removing geographical barriers 
-              and making professional psychiatric services available to everyone, everywhere.
+            <p className="text-lg text-teal-200 max-w-4xl mx-auto leading-relaxed">
+              We're breaking down geographical barriers and making professional psychiatric services accessible to everyone, everywhere, creating a new standard of care that prioritizes convenience without compromising quality.
             </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+              <Button 
+                asChild 
+                className="bg-white text-teal-700 hover:bg-teal-50 font-bold px-8 py-4 rounded-xl text-lg shadow-lg transition-all duration-300"
+              >
+                <Link href="/auth/register">Start Your Journey</Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                asChild 
+                className="border-2 border-white text-white hover:bg-white hover:text-teal-700 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+              >
+                <Link href="/">Learn More</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -55,11 +81,19 @@ export default function About() {
               </div>
               <div className="relative">
                 <img
-                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f"
-                  alt="Digital Healthcare"
+                  src="/attached_assets/generated_images/Mental_health_online_therapy_support_4e8375f7.png"
+                  alt="Online mental health therapy session"
                   className="rounded-2xl shadow-2xl"
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-transparent rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-teal-600/20 to-transparent rounded-2xl"></div>
+                
+                {/* Floating trust badge */}
+                <div className="absolute -bottom-4 -right-4 bg-white rounded-xl p-4 shadow-xl border border-slate-100">
+                  <div className="flex items-center gap-2 text-sm">
+                    <ShieldCheck className="w-5 h-5 text-teal-600" />
+                    <span className="font-semibold text-slate-800">HIPAA Secure</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -67,12 +101,16 @@ export default function About() {
       </section>
 
       {/* Platform Features */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-24 bg-gradient-to-b from-slate-50 to-white">
         <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Why Choose Our Telehealth Platform</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Advanced technology meets compassionate care to deliver exceptional mental health services
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-sm font-semibold mb-6">
+              <Award className="w-4 h-4 mr-2" />
+              Platform Excellence
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-slate-900">Why Choose Our Telehealth Platform</h2>
+            <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+              Advanced technology meets compassionate care to deliver exceptional mental health services that make a real difference in your life
             </p>
           </div>
 

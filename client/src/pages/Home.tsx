@@ -10,107 +10,10 @@ import { motion } from "framer-motion";
 export default function Home() {
   return (
     <div className="flex flex-col w-full overflow-hidden">
-      {/* Page Header Section - Using provided header image */}
-      <section className="relative bg-gradient-to-r from-teal-200 to-blue-200 overflow-hidden">
-        {/* Header with the exact design from provided image */}
-        <div className="relative container mx-auto px-4 py-8 md:py-16">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            {/* Left side content */}
-            <div className="text-left space-y-4 md:space-y-6">
-              {/* Top contact info */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
-                <div className="text-blue-700">
-                  Tel: <span className="font-semibold">(888) 511-3697</span>
-                </div>
-                <Button 
-                  asChild 
-                  size="sm"
-                  className="bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-2 rounded-md w-fit text-xs sm:text-sm"
-                >
-                  <Link href="/auth/register">SCHEDULE A CONSULTATION</Link>
-                </Button>
-              </div>
-
-              {/* Logo and tagline */}
-              <div className="space-y-2">
-                <p className="text-xs sm:text-sm text-gray-600">A Division of</p>
-                <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-4">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                    <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Qualibrite Health</h1>
-                    <p className="text-xs sm:text-sm text-gray-600">Quality healthcare for a brighter outcome</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Main heading */}
-              <div className="space-y-2 sm:space-y-4">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-blue-600 leading-tight">
-                  QUALITY<br />
-                  MENTAL HEALTH<br />
-                  <span className="text-blue-800">CARE WITHOUT A WAIT!</span>
-                </h2>
-                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-700 font-semibold">
-                  FOR ADULTS & CHILDREN
-                </p>
-              </div>
-
-              {/* CTA Button */}
-              <Button 
-                asChild 
-                className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-3 sm:px-6 sm:py-4 md:px-8 rounded-lg text-sm sm:text-base md:text-lg shadow-lg w-full sm:w-auto"
-              >
-                <Link href="/auth/register">Schedule a Consultation</Link>
-              </Button>
-            </div>
-
-            {/* Right side - Medical professional image */}
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2"
-                alt="Medical professional with stethoscope"
-                className="w-full h-auto rounded-lg shadow-xl"
-              />
-              {/* Live Chat floating button */}
-              <div className="absolute bottom-4 right-4">
-                <Button 
-                  asChild 
-                  className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-full shadow-lg"
-                >
-                  <Link href="/auth/register">💬 Let's Chat!</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Excellence Badge Section */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4 text-center">
-          <div className="inline-block relative">
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full p-8 shadow-2xl border-4 border-white mx-auto mb-4">
-              <div className="text-center text-white">
-                <div className="text-sm font-bold uppercase tracking-wider">Excellence</div>
-                <div className="text-2xl font-extrabold">★★★★★</div>
-                <div className="text-sm">in Mental Health Care</div>
-              </div>
-            </div>
-            <img
-              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef"
-              alt="Professional consultation"
-              className="w-full max-w-md mx-auto rounded-3xl shadow-2xl"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Hero Section - Premium telehealth design */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
+      {/* Modern Hero Section */}
+      <section className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/30 flex items-center overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{
               x: [0, 30, 0],
@@ -121,7 +24,7 @@ export default function Home() {
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-100/40 to-purple-100/40 rounded-full blur-3xl"
+            className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-teal-100/40 to-blue-100/40 rounded-full blur-3xl"
           />
           <motion.div
             animate={{
@@ -133,242 +36,246 @@ export default function Home() {
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-cyan-100/30 to-blue-100/30 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{
-              x: [0, 15, 0],
-              y: [0, -15, 0],
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute top-1/2 left-1/3 w-64 h-64 bg-gradient-to-br from-indigo-100/20 to-blue-100/20 rounded-full blur-2xl"
+            className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-cyan-100/30 to-teal-100/30 rounded-full blur-3xl"
           />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid gap-12 lg:gap-20 lg:grid-cols-2 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* Left content */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="flex flex-col justify-center space-y-8"
             >
-              {/* Logo */}
+              {/* Trust badge and contact */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="inline-flex items-center px-4 py-2 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-sm font-semibold max-w-max"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  HIPAA Compliant Platform
+                </motion.div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="text-slate-600">
+                    <Phone className="w-4 h-4 inline mr-1" />
+                    <span className="font-semibold">(888) 511-3697</span>
+                  </div>
+                  <Button 
+                    asChild 
+                    size="sm"
+                    className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-xl"
+                  >
+                    <Link href="/auth/register">Book Now</Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Brand identity */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex items-center space-x-4 mb-2"
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="flex items-center space-x-4"
               >
-                <img 
-                  src="/qualibrite-logo.png" 
-                  alt="Qualibrite Health" 
-                  className="h-16 w-auto"
-                />
+                <div className="w-16 h-16 bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Qualibrite Health</h2>
-                  <p className="text-sm text-gray-600 font-medium">Quality healthcare for a brighter outcome</p>
+                  <h2 className="text-2xl font-bold text-slate-900">Qualibrite Health</h2>
+                  <p className="text-slate-600 font-medium">Quality healthcare for a brighter outcome</p>
                 </div>
               </motion.div>
-
-              {/* Trust badge */}
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold max-w-max"
-              >
-                <ShieldCheck className="w-4 h-4 mr-2" />
-                HIPAA Compliant & Secure Platform
-              </motion.div>
               
+              {/* Main headline */}
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl leading-tight"
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[0.9] tracking-tight"
               >
-                <span className="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-                  Advanced
-                </span>
-                <br />
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent font-extrabold">
-                  Telehealth
-                </span>
-                <br />
-                <span className="text-gray-900">
-                  Psychiatry
-                </span>
+                <span className="text-slate-900">Quality</span><br />
+                <span className="bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">Mental Health</span><br />
+                <span className="text-slate-700">Care Without a Wait</span>
               </motion.h1>
               
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-                className="text-xl md:text-2xl text-gray-600 leading-relaxed font-medium"
+                transition={{ duration: 0.8, delay: 0.7 }}
+                className="text-xl md:text-2xl text-slate-600 leading-relaxed font-medium"
               >
-                Comprehensive mental health care from the comfort of your home.<br />
-                <span className="text-blue-700 font-semibold">Expert psychiatrists • Secure platform • Flexible scheduling</span>
+                Professional telehealth services for adults & children.<br />
+                <span className="text-teal-700 font-semibold">Expert psychiatrists • Secure platform • Flexible scheduling</span>
               </motion.p>
               
+              {/* Key features */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.0 }}
-                className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-xl max-w-lg"
+                transition={{ duration: 0.8, delay: 0.9 }}
+                className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/50 shadow-xl"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center text-gray-700">
-                    <Clock className="h-5 w-5 mr-3 text-blue-600" />
-                    <span className="font-medium">Same-day appointments available</span>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="flex items-center text-slate-700">
+                    <Clock className="h-5 w-5 mr-3 text-teal-600" />
+                    <span className="font-medium">Same-day appointments</span>
                   </div>
-                  <div className="flex items-center text-gray-700">
-                    <Monitor className="h-5 w-5 mr-3 text-blue-600" />
-                    <span className="font-medium">Advanced telehealth technology</span>
+                  <div className="flex items-center text-slate-700">
+                    <Monitor className="h-5 w-5 mr-3 text-teal-600" />
+                    <span className="font-medium">Advanced technology</span>
                   </div>
-                  <div className="flex items-center text-gray-700">
-                    <Users className="h-5 w-5 mr-3 text-blue-600" />
-                    <span className="font-medium">Adults & pediatric specialists</span>
+                  <div className="flex items-center text-slate-700">
+                    <Users className="h-5 w-5 mr-3 text-teal-600" />
+                    <span className="font-medium">Adult & pediatric care</span>
+                  </div>
+                  <div className="flex items-center text-slate-700">
+                    <Star className="h-5 w-5 mr-3 text-teal-600" />
+                    <span className="font-medium">5-star rated service</span>
                   </div>
                 </div>
               </motion.div>
               
+              {/* Call to action */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.2 }}
-                className="flex flex-col sm:flex-row gap-4 pt-6"
+                transition={{ duration: 0.8, delay: 1.1 }}
+                className="flex flex-col sm:flex-row gap-4 pt-4"
               >
                 <Button 
                   asChild 
-                  size="lg" 
-                  className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-xl px-10 py-4 border-0"
+                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
-                  <Link href="/auth/register">Start Your Journey</Link>
+                  <Link href="/auth/register">Schedule Your Consultation</Link>
                 </Button>
                 <Button 
-                  asChild 
                   variant="outline" 
-                  size="lg" 
-                  className="text-lg font-semibold bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 rounded-xl px-10 py-4 border-2 border-gray-200 hover:border-blue-300"
+                  asChild 
+                  className="border-2 border-teal-600 text-teal-600 hover:bg-teal-50 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
                 >
-                  <Link href="/telehealth">Virtual Care Demo</Link>
+                  <Link href="/about">Learn More</Link>
                 </Button>
               </motion.div>
+              
+              {/* Operating hours */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.3 }}
+                className="text-sm text-slate-600 bg-slate-50 rounded-xl p-4"
+              >
+                <p className="font-semibold text-slate-800 mb-1">Operating Hours:</p>
+                <p>Monday - Saturday: 7:00AM – 9:00PM</p>
+                <p>Sunday: 7:00AM – 6:00PM</p>
+              </motion.div>
             </motion.div>
-            
+
+            {/* Right side - Hero image */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 0.4 }}
-              className="relative hidden lg:block"
+              className="relative"
             >
-              {/* Excellence badge from original site */}
-              <motion.div
-                animate={{
-                  y: [0, -8, 0],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-20"
-              >
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full p-6 shadow-2xl border-4 border-white">
-                  <div className="text-center text-white">
-                    <div className="text-xs font-bold uppercase tracking-wider">Excellence</div>
-                    <div className="text-lg font-extrabold">★★★★★</div>
-                    <div className="text-xs">Mental Health Care</div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Main platform showcase */}
-              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white text-center">
-                  <h3 className="text-xl font-bold mb-2">QUALITY MENTAL HEALTH CARE</h3>
-                  <p className="text-blue-100 text-lg font-semibold">WITHOUT A WAIT!</p>
-                  <p className="text-blue-200 text-sm mt-1">For Adults & Children</p>
-                </div>
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+                <img
+                  src="/attached_assets/generated_images/Telehealth_consultation_hero_image_0a3bef76.png"
+                  alt="Healthcare professionals conducting telehealth consultations"
+                  className="w-full h-auto"
+                />
                 
-                <div className="p-8">
-                  {/* Key benefits from original site */}
-                  <div className="space-y-4 mb-8">
-                    <div className="flex items-center space-x-3 text-gray-700">
-                      <Clock className="h-5 w-5 text-blue-600" />
-                      <span className="font-medium">Monday - Friday: 9:00AM - 7:00PM</span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-gray-700">
-                      <Clock className="h-5 w-5 text-blue-600" />
-                      <span className="font-medium">Weekend appointments available</span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-gray-700">
-                      <Phone className="h-5 w-5 text-blue-600" />
-                      <span className="font-medium">(855) 773-2273</span>
-                    </div>
-                  </div>
-
-                  {/* Services grid from original site */}
-                  <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="text-center p-4 bg-blue-50 rounded-xl">
-                      <Brain className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                      <div className="text-sm font-semibold text-gray-900">Board Certified</div>
-                      <div className="text-xs text-gray-600">Excellence</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-xl">
-                      <Clock className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                      <div className="text-sm font-semibold text-gray-900">Open 7 Days</div>
-                      <div className="text-xs text-gray-600">Week Availability</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-xl">
-                      <Users className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                      <div className="text-sm font-semibold text-gray-900">Accepting all major</div>
-                      <div className="text-xs text-gray-600">Health Insurers</div>
-                    </div>
-                    <div className="text-center p-4 bg-orange-50 rounded-xl">
-                      <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-                      <div className="text-sm font-semibold text-gray-900">Short wait</div>
-                      <div className="text-xs text-gray-600">Times</div>
+                {/* Floating excellence badge */}
+                <motion.div
+                  animate={{
+                    y: [0, -8, 0],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute -top-6 -right-6 z-10"
+                >
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full p-4 shadow-2xl border-4 border-white">
+                    <div className="text-center text-white">
+                      <div className="text-xs font-bold uppercase tracking-wider">Excellence</div>
+                      <div className="text-lg font-extrabold">★★★★★</div>
+                      <div className="text-xs">Mental Health</div>
                     </div>
                   </div>
-                  
-                  <div className="text-center">
-                    <Button 
-                      asChild 
-                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg text-lg"
-                    >
-                      <Link href="/auth/register">SCHEDULE APPOINTMENT</Link>
-                    </Button>
-                  </div>
+                </motion.div>
+                
+                {/* Live chat button */}
+                <div className="absolute bottom-4 right-4">
+                  <Button 
+                    asChild 
+                    className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-full shadow-lg transition-all duration-300"
+                  >
+                    <Link href="/auth/register">💬 Start Chat</Link>
+                  </Button>
                 </div>
               </div>
-              
-              {/* Floating contact info */}
-              <motion.div
-                animate={{
-                  y: [0, 12, 0],
-                }}
-                transition={{
-                  duration: 4.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute -bottom-6 -right-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 z-10"
-              >
-                <div className="text-center">
-                  <div className="text-lg font-bold text-green-600">LIVE CHAT</div>
-                  <div className="text-xs text-gray-600 font-medium">Available Now</div>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
+
+      {/* Trust Indicators Section */}
+      <section className="py-16 bg-white border-t border-slate-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Trusted by Thousands</h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">Join the community of patients who've found quality mental healthcare through our platform</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <UserCheck className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">10,000+</h3>
+              <p className="text-slate-600 font-medium">Patients Served</p>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Star className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">4.9/5</h3>
+              <p className="text-slate-600 font-medium">Patient Rating</p>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Award className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">Board Certified</h3>
+              <p className="text-slate-600 font-medium">Psychiatrists</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
 
       {/* About Us Section - Online telehealth focused */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-blue-50">
