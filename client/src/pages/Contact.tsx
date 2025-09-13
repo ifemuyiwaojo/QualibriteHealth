@@ -165,14 +165,15 @@ export default function Contact() {
             >
               <Button 
                 asChild 
-                className="bg-white text-purple-600 hover:bg-purple-50 hover:scale-105 font-bold px-8 py-4 rounded-xl text-lg shadow-lg transition-all duration-300"
+                variant="ghost"
+                className="!bg-white !text-purple-700 hover:!bg-purple-50 hover:!text-purple-800 hover:scale-105 font-bold px-8 py-4 rounded-xl text-lg shadow-lg transition-all duration-300"
               >
                 <Link href="/auth/register">Get Started Now</Link>
               </Button>
               <Button 
-                variant="outline" 
                 asChild 
-                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 hover:scale-105 backdrop-blur-sm font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
+                variant="ghost"
+                className="!bg-white/20 !text-white border-2 border-white hover:!bg-white hover:!text-purple-700 hover:scale-105 backdrop-blur-sm font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
               >
                 <Link href="tel:+18885113697">Call (888) 511-3697</Link>
               </Button>
@@ -237,7 +238,8 @@ export default function Contact() {
                       </div>
                       <Button 
                         asChild 
-                        className={`bg-gradient-to-r ${method.gradient} hover:shadow-xl hover:scale-105 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg border border-white/20`}
+                        variant="ghost"
+                        className={`bg-gradient-to-r ${method.gradient} hover:!bg-white hover:!text-slate-800 hover:scale-105 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg border border-white/20`}
                       >
                         <Link href="/contact">{method.action}</Link>
                       </Button>
@@ -477,10 +479,10 @@ export default function Contact() {
                 </Link>
               </Button>
               <Button 
-                variant="outline" 
                 asChild 
+                variant="ghost"
                 size="lg"
-                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 hover:scale-105 backdrop-blur-sm font-bold px-10 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
+                className="!bg-white/20 !text-white border-2 border-white hover:!bg-white hover:!text-purple-700 hover:scale-105 backdrop-blur-sm font-bold px-10 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
               >
                 <Link href="tel:+18885113697">Call Now</Link>
               </Button>
