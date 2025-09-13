@@ -184,8 +184,8 @@ export default function Home() {
             >
               <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
                 <img
-                  src="/Telehealth_consultation_hero_image_0a3bef76.png"
-                  alt="Healthcare professionals conducting telehealth consultations"
+                  src="/telehealth_hero_photorealistic.png"
+                  alt="Professional mental health provider conducting telehealth consultation"
                   className="w-full h-auto"
                 />
                 

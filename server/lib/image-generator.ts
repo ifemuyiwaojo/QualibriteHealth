@@ -27,7 +27,7 @@ export async function generateTelehealthImage(options: ImageGenerationOptions): 
 
     const imagePath = path.join(outputDir, options.filename);
 
-    // IMPORTANT: only this gemini model supports image generation
+    // IMPORTANT: only this gemini model supports image generation  
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
       contents: [{ role: "user", parts: [{ text: options.prompt }] }],
@@ -70,7 +70,9 @@ export async function generateTelehealthImage(options: ImageGenerationOptions): 
 
 // Predefined prompts for the telehealth platform
 export const TELEHEALTH_PROMPTS = {
-  heroImage: `Create a photorealistic, professional hero image for a mental health telehealth platform. Show a warm, diverse healthcare provider (psychiatrist or therapist) conducting a video consultation on a modern laptop or tablet. The scene should be in a clean, calming office environment with soft natural lighting streaming through windows. Include plants and warm, professional decor. The provider should appear approachable and trustworthy. The lighting should be golden hour style, creating a sense of comfort and accessibility. High resolution, professional photography quality, shot with a professional camera using shallow depth of field.`,
+  heroImage: `Create a BOLD, photorealistic, professional hero image for a mental health telehealth platform that makes a statement of QUALITY services. Show a confident, diverse healthcare provider (psychiatrist or therapist) conducting a video consultation on a modern laptop. The scene should be in a pristine, modern office environment with dramatic professional lighting. The provider should appear highly competent and trustworthy, wearing professional attire. Include high-end office furniture, modern technology, and subtle luxury elements that convey premium healthcare services. Studio-quality photography with perfect lighting, shot with a professional camera at 85mm lens, shallow depth of field, ultra-high resolution, crisp details.`,
+  
+  aboutPageImage: `Create a BOLD, photorealistic image for the About section of a premium mental health telehealth platform. Show a confident, professional mental health specialist (diverse, approachable but highly competent) in a modern, luxury medical office setting. The person should be looking directly at the camera with a warm but professional smile, conveying expertise and trustworthiness. Include modern medical technology, elegant office decor, diplomas/certifications on the wall, and premium furnishings that signal quality healthcare services. Use dramatic, professional lighting with soft shadows. Shot with professional camera, 85mm portrait lens, perfect shallow depth of field, ultra-high resolution, magazine-quality photography.`,
   
   platformFeatures: `Generate a photorealistic image showcasing modern telehealth technology across multiple devices. Show a smartphone, tablet, and laptop displaying the same secure video consultation interface. The devices should be arranged on a clean, modern white desk with professional lighting. The interface should look clean, accessible, and healthcare-focused with calming blue and white colors. Include subtle healthcare elements like a stethoscope or medical notes nearby. Professional product photography style with crisp details and soft shadows.`,
   
