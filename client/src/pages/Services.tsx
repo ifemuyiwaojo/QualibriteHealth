@@ -16,7 +16,7 @@ const services = [
     features: ["Personalized treatment plans", "Flexible scheduling", "Evidence-based approaches"],
     gradient: "from-teal-400 to-cyan-500",
     delay: 0.1,
-    image: "/attached_assets/generated_images/Mental_health_online_therapy_support_4e8375f7.png"
+    image: "/Mental_health_online_therapy_support_4e8375f7.png"
   },
   {
     icon: Users,
@@ -25,7 +25,7 @@ const services = [
     features: ["Peer support network", "Guided discussions", "Shared healing experiences"],
     gradient: "from-cyan-400 to-blue-500",
     delay: 0.2,
-    image: "/attached_assets/generated_images/telehealth/telehealth_platform_features_photorealistic.png"
+    image: "/telehealth_platform_features_photorealistic.png"
   },
   {
     icon: Pill,
@@ -34,7 +34,7 @@ const services = [
     features: ["Regular monitoring", "Dosage optimization", "Side effect management"],
     gradient: "from-emerald-400 to-teal-500",
     delay: 0.3,
-    image: "/attached_assets/generated_images/services-consultation-1757752642064.png"
+    image: "/services-consultation-1757752642064.png"
   },
   {
     icon: Video,
@@ -43,7 +43,7 @@ const services = [
     features: ["HD video quality", "Secure platform", "Home comfort"],
     gradient: "from-blue-400 to-cyan-500",
     delay: 0.4,
-    image: "/attached_assets/generated_images/home-therapy-session-1757752770182.png"
+    image: "/home-therapy-session-1757752770182.png"
   },
   {
     icon: PhoneCall,
@@ -52,7 +52,7 @@ const services = [
     features: ["24/7 availability", "Immediate response", "Emergency protocols"],
     gradient: "from-rose-400 to-pink-500",
     delay: 0.5,
-    image: "/attached_assets/generated_images/call-team-support-1757752765131.png"
+    image: "/call-team-support-1757752765131.png"
   },
   {
     icon: ClipboardCheck,
@@ -61,7 +61,7 @@ const services = [
     features: ["Comprehensive testing", "Detailed reports", "Treatment planning"],
     gradient: "from-purple-400 to-indigo-500",
     delay: 0.6,
-    image: "/attached_assets/generated_images/contact-support-1757752648444.png"
+    image: "/contact-support-1757752648444.png"
   },
 ];
 
