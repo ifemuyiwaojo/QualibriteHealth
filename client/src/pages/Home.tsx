@@ -595,8 +595,8 @@ export default function Home() {
               <Card className="h-full border-0 shadow-xl bg-white overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56"
-                    alt="Mental Health Services"
+                    src="/Comprehensive_mental_health_services_clinic_14b78a56.png"
+                    alt="Mental Health Services - Professional therapy session"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent"></div>
@@ -639,8 +639,8 @@ export default function Home() {
               <Card className="h-full border-0 shadow-xl bg-white overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1542810634-71277d95dcbb"
-                    alt="Family Mental Health"
+                    src="/Family_therapy_session_with_parents_and_children_b0a30d22.png"
+                    alt="Family Mental Health - Group and family therapy"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 to-transparent"></div>

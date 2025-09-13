@@ -17,7 +17,7 @@ const contactMethods = [
     secondary: "Monday - Sunday, 7:00 AM - 10:00 PM",
     gradient: "from-blue-400 to-indigo-500",
     action: "Call Now",
-    image: "/call-team-support-1757752765131.png"
+    image: "/Healthcare_professional_taking_patient_calls_5d050097.png"
   },
   {
     icon: MessageCircle,
@@ -27,7 +27,7 @@ const contactMethods = [
     secondary: "Quick response guaranteed",
     gradient: "from-emerald-400 to-teal-500",
     action: "Start Chat",
-    image: "/live-chat-support-1757752758775.png"
+    image: "/Live_chat_support_specialist_helping_clients_f76c66e4.png"
   },
   {
     icon: Calendar,
@@ -37,7 +37,7 @@ const contactMethods = [
     secondary: "Same-day appointments available",
     gradient: "from-purple-400 to-pink-500",
     action: "Book Now",
-    image: "/contact-support-1757752648444.png"
+    image: "/Patient_scheduling_appointment_online_comfortably_2a703150.png"
   }
 ];
 
