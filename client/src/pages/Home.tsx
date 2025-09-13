@@ -86,7 +86,7 @@ export default function Home() {
                   <Heart className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900">Qualibrite Health</h2>
+                  <h2 className="text-2xl font-black text-slate-900">Qualibrite Family Psychiatry</h2>
                   <p className="text-slate-600 font-medium">Quality healthcare for a brighter outcome</p>
                 </div>
               </motion.div>
@@ -149,7 +149,7 @@ export default function Home() {
               >
                 <Button 
                   asChild 
-                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-white hover:to-gray-50 text-white hover:text-black font-bold px-8 py-4 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:bg-white text-white hover:text-black font-bold px-8 py-4 rounded-xl text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
                   <Link href="/auth/register">Schedule Your Consultation</Link>
                 </Button>
@@ -478,7 +478,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center max-w-4xl mx-auto mb-16"
           >
-            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">About Qualibrite Health</span>
+            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">About Qualibrite Family Psychiatry</span>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 mt-4 text-gray-900">
               Revolutionizing Mental Healthcare Through Technology
             </h2>
@@ -917,12 +917,12 @@ export default function Home() {
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4">
                     <img 
-                      src="/qualibrite-logo.png" 
-                      alt="Qualibrite Health" 
+                      src="/qualibrite-family-logo.png" 
+                      alt="Qualibrite Family Psychiatry" 
                       className="h-12 w-auto"
                     />
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">Qualibrite Health</h3>
+                      <h3 className="text-xl font-bold text-gray-900">Qualibrite Family Psychiatry</h3>
                       <p className="text-gray-600 text-sm">Pioneering Telehealth Excellence</p>
                     </div>
                   </div>
@@ -965,7 +965,7 @@ export default function Home() {
               
               <div className="space-y-6">
                 <p className="text-xl leading-relaxed text-gray-600">
-                  Qualibrite Health combines cutting-edge telehealth technology with compassionate psychiatric care to deliver exceptional mental health services.
+                  Qualibrite Family Psychiatry combines cutting-edge telehealth technology with compassionate psychiatric care to deliver exceptional mental health services.
                 </p>
                 <p className="text-lg leading-relaxed text-gray-600">
                   Our board-certified psychiatrists and licensed therapists leverage advanced secure platforms to provide personalized, evidence-based treatment from anywhere.

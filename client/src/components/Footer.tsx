@@ -21,7 +21,7 @@ export default function Footer() {
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">Qualibrite Health</h3>
+                <h3 className="text-2xl font-bold">Qualibrite Family Psychiatry</h3>
                 <p className="text-teal-200 text-sm">Quality healthcare for a brighter outcome</p>
               </div>
             </div>

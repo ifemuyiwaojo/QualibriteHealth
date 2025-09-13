@@ -75,7 +75,7 @@ export default function Register() {
         setLocation("/dashboard");
         toast({
           title: "Registration Successful",
-          description: "Welcome to QualiBrite Health!",
+          description: "Welcome to Qualibrite Family Psychiatry!",
         });
       } else {
         throw new Error("Invalid response format");
@@ -114,7 +114,7 @@ export default function Register() {
                 <div className="w-8 h-8 bg-gradient-to-br from-white to-pink-100 rounded-xl"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-black text-white">Qualibrite Health</h1>
+                <h1 className="text-2xl font-black text-white">Qualibrite Family Psychiatry</h1>
                 <p className="text-pink-100 text-sm">Join Our Platform</p>
               </div>
             </div>

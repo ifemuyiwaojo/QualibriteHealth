@@ -232,7 +232,7 @@ export default function Login() {
                 <div className="w-8 h-8 bg-gradient-to-br from-white to-cyan-100 rounded-xl"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-black text-white">Qualibrite Health</h1>
+                <h1 className="text-2xl font-black text-white">Qualibrite Family Psychiatry</h1>
                 <p className="text-cyan-100 text-sm">Secure Patient Portal</p>
               </div>
             </div>

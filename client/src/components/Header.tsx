@@ -31,13 +31,13 @@ function HeaderComponent() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-3">
             <img 
-              src="/qualibrite-logo.png" 
-              alt="Qualibrite Health" 
+              src="/qualibrite-family-logo.png" 
+              alt="Qualibrite Family Psychiatry" 
               className="h-8 w-auto"
             />
             <div className="flex flex-col">
               <span className="text-lg font-black text-gray-900">
-                Qualibrite Health
+                Qualibrite Family Psychiatry
               </span>
               {user && (
                 <span className="text-xs text-gray-500 font-medium">
@@ -88,12 +88,12 @@ function HeaderComponent() {
         <div className="flex flex-1 items-center justify-between md:justify-end">
           <Link href="/" className="md:hidden flex items-center space-x-2">
             <img 
-              src="/qualibrite-logo.png" 
-              alt="Qualibrite Health" 
+              src="/qualibrite-family-logo.png" 
+              alt="Qualibrite Family Psychiatry" 
               className="h-6 w-auto"
             />
             <span className="text-lg font-black text-gray-900">
-              Qualibrite Health
+              Qualibrite Family Psychiatry
             </span>
           </Link>
           <div className="flex items-center gap-2">

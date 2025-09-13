@@ -50,7 +50,7 @@ export default function About() {
               className="inline-flex items-center px-6 py-3 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white text-sm font-semibold mb-8"
             >
               <Heart className="w-4 h-4 mr-2" />
-              About Qualibrite Health
+              About Qualibrite Family Psychiatry
             </motion.div>
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
