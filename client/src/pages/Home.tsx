@@ -592,7 +592,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="relative"
             >
-              <Card className="h-full border-0 shadow-xl bg-white overflow-hidden">
+              <Card className="h-full border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden rounded-3xl hover:shadow-2xl transition-all duration-300">
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src="/Comprehensive_mental_health_services_clinic_14b78a56.png"
@@ -636,7 +636,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="relative"
             >
-              <Card className="h-full border-0 shadow-xl bg-white overflow-hidden">
+              <Card className="h-full border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden rounded-3xl hover:shadow-2xl transition-all duration-300">
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src="/Family_therapy_session_with_parents_and_children_b0a30d22.png"
@@ -700,22 +700,28 @@ export default function Home() {
               viewport={{ once: true }}
               className="group"
             >
-              <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
-                <CardContent className="p-6">
-                  <div className="relative mb-6">
+              <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300 rounded-3xl">
+                <CardContent className="p-8 text-center h-full flex flex-col">
+                  <div className="mb-6 relative">
                     <img
                       src="/Credit_and_debit_cards_payment_option_bfcfe5ae.png"
                       alt="Credit and debit cards payment"
-                      className="w-full h-40 object-cover rounded-xl"
+                      className="w-full h-48 object-cover rounded-2xl shadow-md group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="absolute bottom-3 right-3 w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <ShieldCheck className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-center text-gray-900">Credit & Debit Cards</h3>
-                  <p className="text-gray-600 text-center">
+                  <h3 className="text-xl font-bold mb-3 text-slate-800">Credit & Debit Cards</h3>
+                  <p className="text-slate-600 mb-4 flex-grow">
                     Secure payment processing with all major credit and debit cards including Visa, Mastercard, and American Express
                   </p>
+                  <Button 
+                    asChild 
+                    className="bg-gradient-to-r from-green-400 to-green-500 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 w-full"
+                  >
+                    <Link href="/contact">Learn More</Link>
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
@@ -728,22 +734,28 @@ export default function Home() {
               viewport={{ once: true }}
               className="group"
             >
-              <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
-                <CardContent className="p-6">
-                  <div className="relative mb-6">
+              <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300 rounded-3xl">
+                <CardContent className="p-8 text-center h-full flex flex-col">
+                  <div className="mb-6 relative">
                     <img
                       src="/Insurance_coverage_and_benefits_documentation_abc6b590.png"
                       alt="Insurance coverage and benefits"
-                      className="w-full h-40 object-cover rounded-xl"
+                      className="w-full h-48 object-cover rounded-2xl shadow-md group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="absolute bottom-3 right-3 w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Heart className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-center text-gray-900">Insurance Coverage</h3>
-                  <p className="text-gray-600 text-center">
+                  <h3 className="text-xl font-bold mb-3 text-slate-800">Insurance Coverage</h3>
+                  <p className="text-slate-600 mb-4 flex-grow">
                     We accept most major insurance plans including PPO, HMO, and Medicare for mental health services
                   </p>
+                  <Button 
+                    asChild 
+                    className="bg-gradient-to-r from-blue-400 to-blue-500 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 w-full"
+                  >
+                    <Link href="/contact">Learn More</Link>
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
@@ -756,22 +768,28 @@ export default function Home() {
               viewport={{ once: true }}
               className="group"
             >
-              <Card className="h-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
-                <CardContent className="p-6">
-                  <div className="relative mb-6">
+              <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300 rounded-3xl">
+                <CardContent className="p-8 text-center h-full flex flex-col">
+                  <div className="mb-6 relative">
                     <img
                       src="/Self-pay_cash_and_mobile_payment_options_b865abdb.png"
                       alt="Self-pay cash and mobile payment options"
-                      className="w-full h-40 object-cover rounded-xl"
+                      className="w-full h-48 object-cover rounded-2xl shadow-md group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="absolute bottom-3 right-3 w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Users className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-center text-gray-900">Self-Pay Options</h3>
-                  <p className="text-gray-600 text-center">
+                  <h3 className="text-xl font-bold mb-3 text-slate-800">Self-Pay Options</h3>
+                  <p className="text-slate-600 mb-4 flex-grow">
                     Affordable self-pay rates with flexible payment plans, cash payments, and mobile payment apps
                   </p>
+                  <Button 
+                    asChild 
+                    className="bg-gradient-to-r from-purple-400 to-purple-500 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 w-full"
+                  >
+                    <Link href="/contact">Learn More</Link>
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>

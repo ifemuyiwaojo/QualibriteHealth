@@ -224,7 +224,7 @@ export default function Contact() {
                         alt={`${method.title} - Professional support team`}
                         className="w-full h-48 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-300"
                       />
-                      <div className={`absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br ${method.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <div className={`absolute bottom-3 right-3 w-12 h-12 bg-gradient-to-br ${method.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                         <method.icon className="w-6 h-6 text-white" />
                       </div>
                     </div>
