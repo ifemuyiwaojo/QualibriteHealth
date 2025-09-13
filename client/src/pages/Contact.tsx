@@ -216,32 +216,34 @@ export default function Contact() {
                 whileHover={{ y: -5, scale: 1.02 }}
                 className="group"
               >
-                <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300">
-                  <CardContent className="p-8 text-center h-full flex flex-col">
-                    <div className="mb-6 relative">
-                      <img
-                        src={method.image}
-                        alt={`${method.title} - Professional support team`}
-                        className="w-full h-48 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className={`absolute bottom-3 right-3 w-12 h-12 bg-gradient-to-br ${method.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <method.icon className="w-6 h-6 text-white" />
+                <div className="w-full aspect-square">
+                  <Card className="h-full w-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300 rounded-full overflow-hidden">
+                    <CardContent className="p-8 text-center h-full flex flex-col justify-center items-center">
+                      <div className="mb-4 relative w-full">
+                        <img
+                          src={method.image}
+                          alt={`${method.title} - Professional support team`}
+                          className="w-full h-32 object-cover rounded-2xl shadow-md group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className={`absolute bottom-2 right-2 w-10 h-10 bg-gradient-to-br ${method.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                          <method.icon className="w-5 h-5 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-slate-800">{method.title}</h3>
-                    <p className="text-slate-600 mb-4">{method.subtitle}</p>
-                    <div className="mb-4 flex-grow">
-                      <div className="text-lg font-semibold text-slate-800 mb-1">{method.primary}</div>
-                      <div className="text-sm text-slate-600">{method.secondary}</div>
-                    </div>
-                    <Button 
-                      asChild 
-                      className={`bg-gradient-to-r ${method.gradient} hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 w-full`}
-                    >
-                      <Link href="/contact">{method.action}</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                      <h3 className="text-lg font-bold mb-2 text-slate-800">{method.title}</h3>
+                      <p className="text-slate-600 text-sm mb-2">{method.subtitle}</p>
+                      <div className="mb-3 flex-grow">
+                        <div className="text-base font-semibold text-slate-800 mb-1">{method.primary}</div>
+                        <div className="text-xs text-slate-600">{method.secondary}</div>
+                      </div>
+                      <Button 
+                        asChild 
+                        className={`bg-gradient-to-r ${method.gradient} hover:opacity-90 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300 text-sm`}
+                      >
+                        <Link href="/contact">{method.action}</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -283,29 +285,31 @@ export default function Contact() {
                 whileHover={{ y: -5 }}
                 className="group"
               >
-                <Card className="h-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300">
-                  <CardContent className="p-8">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className={`w-14 h-14 bg-gradient-to-br ${dept.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                        <dept.icon className="w-7 h-7 text-white" />
+                <div className="w-full aspect-[4/3]">
+                  <Card className="h-full w-full bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-2xl transition-all duration-300 rounded-full overflow-hidden">
+                    <CardContent className="p-6 h-full flex flex-col justify-center items-center text-center">
+                      <div className="mb-4">
+                        <div className={`w-12 h-12 bg-gradient-to-br ${dept.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 mx-auto`}>
+                          <dept.icon className="w-6 h-6 text-white" />
+                        </div>
                       </div>
-                      <h3 className="text-xl font-bold text-slate-800">{dept.name}</h3>
-                    </div>
-                    
-                    <p className="text-slate-600 mb-6 leading-relaxed">{dept.description}</p>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Phone className="w-4 h-4 text-slate-500" />
-                        <span className="text-slate-700 font-semibold">{dept.phone}</span>
+                      <h3 className="text-lg font-bold text-slate-800 mb-3">{dept.name}</h3>
+                      
+                      <p className="text-slate-600 mb-4 leading-relaxed text-sm">{dept.description}</p>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2">
+                          <Phone className="w-3 h-3 text-slate-500" />
+                          <span className="text-slate-700 font-semibold text-sm">{dept.phone}</span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2">
+                          <Mail className="w-3 h-3 text-slate-500" />
+                          <span className="text-slate-700 text-xs">{dept.email}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Mail className="w-4 h-4 text-slate-500" />
-                        <span className="text-slate-700">{dept.email}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </div>
               </motion.div>
             ))}
           </div>
