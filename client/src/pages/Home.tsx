@@ -83,7 +83,7 @@ export default function Home() {
                 className="flex items-center space-x-4"
               >
                 <img 
-                  src="/qualibrite-family-logo.png" 
+                  src="/qualibrite-family-logo.png?v=2" 
                   alt="Qualibrite Family Psychiatry" 
                   className="w-20 h-20 object-contain"
                 />
@@ -919,7 +919,7 @@ export default function Home() {
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4">
                     <img 
-                      src="/qualibrite-family-logo.png" 
+                      src="/qualibrite-family-logo.png?v=2" 
                       alt="Qualibrite Family Psychiatry" 
                       className="h-16 w-auto"
                     />
