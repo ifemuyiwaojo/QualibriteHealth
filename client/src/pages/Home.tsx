@@ -85,7 +85,7 @@ export default function Home() {
                 <img 
                   src="/qualibrite-family-logo.png" 
                   alt="Qualibrite Family Psychiatry" 
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain"
                 />
                 <div>
                   <h2 className="text-2xl font-black text-slate-900">Qualibrite Family Psychiatry</h2>
@@ -921,7 +921,7 @@ export default function Home() {
                     <img 
                       src="/qualibrite-family-logo.png" 
                       alt="Qualibrite Family Psychiatry" 
-                      className="h-12 w-auto"
+                      className="h-16 w-auto"
                     />
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">Qualibrite Family Psychiatry</h3>

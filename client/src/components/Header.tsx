@@ -33,7 +33,7 @@ function HeaderComponent() {
             <img 
               src="/qualibrite-family-logo.png" 
               alt="Qualibrite Family Psychiatry" 
-              className="h-8 w-auto"
+              className="h-12 w-auto"
             />
             <div className="flex flex-col">
               <span className="text-lg font-black text-gray-900">
@@ -90,7 +90,7 @@ function HeaderComponent() {
             <img 
               src="/qualibrite-family-logo.png" 
               alt="Qualibrite Family Psychiatry" 
-              className="h-6 w-auto"
+              className="h-10 w-auto"
             />
             <span className="text-lg font-black text-gray-900">
               Qualibrite Family Psychiatry
