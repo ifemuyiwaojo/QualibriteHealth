@@ -163,20 +163,24 @@ export default function Contact() {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center mt-12"
             >
-              <Button 
-                asChild 
-                variant="ghost"
-                className="!bg-white !text-purple-700 hover:!bg-purple-50 hover:!text-purple-800 hover:scale-105 font-bold px-8 py-4 rounded-xl text-lg shadow-lg transition-all duration-300"
+              <Link 
+                href="/auth/register"
+                className="inline-block bg-white text-purple-700 hover:bg-purple-50 hover:text-purple-800 hover:scale-105 font-bold px-8 py-4 rounded-xl text-lg shadow-lg transition-all duration-300 cursor-pointer"
+                style={{
+                  transition: 'all 0.3s ease',
+                }}
               >
-                <Link href="/auth/register">Get Started Now</Link>
-              </Button>
-              <Button 
-                asChild 
-                variant="ghost"
-                className="!bg-white/20 !text-white border-2 border-white hover:!bg-white hover:!text-purple-700 hover:scale-105 backdrop-blur-sm font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
+                Get Started Now
+              </Link>
+              <Link 
+                href="tel:+18885113697"
+                className="inline-block bg-white/20 text-white border-2 border-white hover:bg-white hover:text-purple-700 hover:scale-105 backdrop-blur-sm font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg cursor-pointer"
+                style={{
+                  transition: 'all 0.3s ease',
+                }}
               >
-                <Link href="tel:+18885113697">Call (888) 511-3697</Link>
-              </Button>
+                Call (888) 511-3697
+              </Link>
             </motion.div>
           </div>
         </div>
@@ -236,13 +240,23 @@ export default function Contact() {
                         <div className="text-base font-semibold text-slate-800 mb-1">{method.primary}</div>
                         <div className="text-xs text-slate-600">{method.secondary}</div>
                       </div>
-                      <Button 
-                        asChild 
-                        variant="ghost"
-                        className={`bg-gradient-to-r ${method.gradient} hover:!bg-white hover:!text-slate-800 hover:scale-105 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg border border-white/20`}
+                      <Link 
+                        href="/contact"
+                        className={`inline-block bg-gradient-to-r ${method.gradient} hover:bg-white hover:text-slate-800 hover:scale-105 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg text-center border border-white/20 cursor-pointer`}
+                        style={{
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'white';
+                          e.currentTarget.style.color = '#1e293b';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '';
+                          e.currentTarget.style.color = 'white';
+                        }}
                       >
-                        <Link href="/contact">{method.action}</Link>
-                      </Button>
+                        {method.action}
+                      </Link>
                     </CardContent>
                   </Card>
                 </div>
@@ -468,24 +482,19 @@ export default function Contact() {
               viewport={{ once: true }}
               className="flex flex-col sm:flex-row gap-6 justify-center"
             >
-              <Button 
-                asChild 
-                size="lg"
-                className="bg-white text-purple-600 hover:bg-purple-50 hover:scale-105 font-bold px-10 py-4 rounded-xl text-lg shadow-xl transition-all duration-300"
+              <Link 
+                href="/auth/register"
+                className="inline-flex items-center bg-white text-purple-600 hover:bg-purple-50 hover:scale-105 font-bold px-10 py-4 rounded-xl text-lg shadow-xl transition-all duration-300 cursor-pointer group"
               >
-                <Link href="/auth/register" className="group">
-                  Start Your Journey
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button 
-                asChild 
-                variant="ghost"
-                size="lg"
-                className="!bg-white/20 !text-white border-2 border-white hover:!bg-white hover:!text-purple-700 hover:scale-105 backdrop-blur-sm font-bold px-10 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
+                Start Your Journey
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link 
+                href="tel:+18885113697"
+                className="inline-block bg-white/20 text-white border-2 border-white hover:bg-white hover:text-purple-700 hover:scale-105 backdrop-blur-sm font-bold px-10 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg cursor-pointer"
               >
-                <Link href="tel:+18885113697">Call Now</Link>
-              </Button>
+                Call Now
+              </Link>
             </motion.div>
           </div>
         </div>

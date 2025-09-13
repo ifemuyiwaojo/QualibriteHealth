@@ -97,12 +97,39 @@ export default function Register() {
   }, [register, toast, isSubmitting, setLocation]);
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-orange-400 flex items-center justify-center relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-white/20 to-transparent rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-br from-pink-200/25 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-orange-200/15 to-transparent rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="container mx-auto px-4 z-10">
+        <div className="flex flex-col items-center">
+          {/* Logo and branding */}
+          <div className="mb-8 text-center">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-white to-pink-100 rounded-xl"></div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-white">Qualibrite Health</h1>
+                <p className="text-pink-100 text-sm">Join Our Platform</p>
+              </div>
+            </div>
+          </div>
+          
+          <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl overflow-hidden">
+            <CardHeader className="space-y-1 bg-gradient-to-r from-slate-50 to-pink-50/30 pb-8">
+              <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-slate-800 to-pink-700 bg-clip-text text-transparent">
+                Create Your Account
+              </CardTitle>
+              <p className="text-center text-slate-600 mt-2">
+                Start your journey to better mental health
+              </p>
+            </CardHeader>
+            <CardContent className="p-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Email field */}
@@ -233,6 +260,8 @@ export default function Register() {
           </div>
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 }

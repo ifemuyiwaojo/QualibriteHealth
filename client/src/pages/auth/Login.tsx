@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { ForgotPasswordForm } from "@/components/ForgotPasswordForm";
 import { ForgotEmailForm } from "@/components/ForgotEmailForm";
@@ -202,22 +202,56 @@ export default function Login() {
     );
   }
 
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user) {
+      console.log("User already logged in, redirecting to dashboard");
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
+
   if (user) {
-    console.log("User already logged in, redirecting to dashboard");
-    return <Link href="/dashboard" replace />;
+    return null; // Return null while redirecting
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">
-            {mfaRequired ? 'Two-Factor Authentication' :
-             forgotMode === 'password' ? 'Forgot Password' :
-             forgotMode === 'email' ? 'Forgot Email' : 'Sign in'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-gradient-to-br from-teal-400 via-blue-500 to-purple-600 flex items-center justify-center relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-white/20 to-transparent rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-br from-cyan-200/25 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-200/15 to-transparent rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="container mx-auto px-4 z-10">
+        <div className="flex flex-col items-center">
+          {/* Logo and branding */}
+          <div className="mb-8 text-center">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-white to-cyan-100 rounded-xl"></div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-white">Qualibrite Health</h1>
+                <p className="text-cyan-100 text-sm">Secure Patient Portal</p>
+              </div>
+            </div>
+          </div>
+          
+          <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl overflow-hidden">
+            <CardHeader className="space-y-1 bg-gradient-to-r from-slate-50 to-cyan-50/30 pb-8">
+              <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-slate-800 to-teal-700 bg-clip-text text-transparent">
+                {mfaRequired ? 'Two-Factor Authentication' :
+                 forgotMode === 'password' ? 'Forgot Password' :
+                 forgotMode === 'email' ? 'Forgot Email' : 'Welcome Back'}
+              </CardTitle>
+              <p className="text-center text-slate-600 mt-2">
+                {mfaRequired ? 'Enter your verification code' :
+                 forgotMode === 'password' ? 'Reset your password' :
+                 forgotMode === 'email' ? 'Recover your email' : 'Sign in to access your account'}
+              </p>
+            </CardHeader>
+            <CardContent className="p-8">
           {mfaRequired && pendingUser ? (
             <MfaVerification
               email={pendingUser.email}
@@ -335,6 +369,8 @@ export default function Login() {
           )}
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 }
