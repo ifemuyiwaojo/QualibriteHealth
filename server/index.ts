@@ -36,8 +36,13 @@ const apiLimiter = rateLimit({
 
 const app = express();
 
-// Enable trust proxy for accurate IP detection in production/proxy environments
-app.set('trust proxy', true);
+// Enable trust proxy for accurate IP detection in production/proxy environments  
+// Use environment variable to control trusted proxy hops (defaults to 1 for single reverse proxy)
+const trustProxyHops = parseInt(process.env.TRUST_PROXY_HOPS || '1', 10);
+app.set('trust proxy', trustProxyHops);
+
+// Log trust proxy configuration for debugging
+console.log(`Trust proxy configuration: ${trustProxyHops} hop(s)`);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
