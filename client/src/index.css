@@ -13,7 +13,7 @@
     --card-foreground: 222 84% 5%; /* slate-900 */
     --popover: 0 0% 100%; /* white */
     --popover-foreground: 222 84% 5%; /* slate-900 */
-    --primary: 198 93% 60%; /* blue-500 */
+    --primary: 221 83% 47%; /* blue-700 - WCAG AA compliant */
     --primary-foreground: 0 0% 98%; /* white */
     --secondary: 214 32% 91%; /* blue-100 */
     --secondary-foreground: 222 84% 5%; /* slate-900 */
@@ -21,11 +21,11 @@
     --muted-foreground: 215 16% 47%; /* slate-600 */
     --accent: 180 78% 87%; /* teal-200 */
     --accent-foreground: 222 84% 5%; /* slate-900 */
-    --destructive: 0 84% 60%; /* red-500 */
+    --destructive: 0 72% 41%; /* red-700 - WCAG AA compliant */
     --destructive-foreground: 0 0% 98%; /* white */
-    --border: 214 32% 91%; /* blue-100 */
-    --input: 214 32% 91%; /* blue-100 */
-    --ring: 198 93% 60%; /* blue-500 */
+    --border: 214 32% 85%; /* slightly darker for better affordance */
+    --input: 214 32% 85%; /* slightly darker for better affordance */
+    --ring: 221 83% 45%; /* blue-700 dark - focus visibility */
     --chart-1: 198 93% 60%; /* blue-500 */
     --chart-2: 180 78% 60%; /* teal-500 */
     --chart-3: 142 71% 45%; /* green-600 */
