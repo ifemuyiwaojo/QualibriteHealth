@@ -81,7 +81,7 @@ export default function About() {
               </div>
               <div className="relative">
                 <img
-                  src="/attached_assets/generated_images/Mental_health_online_therapy_support_4e8375f7.png"
+                  src="/Mental_health_online_therapy_support_4e8375f7.png"
                   alt="Online mental health therapy session"
                   className="rounded-2xl shadow-2xl"
                 />
