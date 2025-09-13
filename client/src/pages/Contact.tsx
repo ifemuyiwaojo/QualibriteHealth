@@ -172,7 +172,7 @@ export default function Contact() {
               <Button 
                 variant="outline" 
                 asChild 
-                className="border-2 border-white/50 text-white hover:bg-white/10 hover:scale-105 backdrop-blur-sm font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 hover:scale-105 backdrop-blur-sm font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
               >
                 <Link href="tel:+18885113697">Call (888) 511-3697</Link>
               </Button>
@@ -237,7 +237,7 @@ export default function Contact() {
                       </div>
                       <Button 
                         asChild 
-                        className={`bg-gradient-to-r ${method.gradient} hover:opacity-90 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg`}
+                        className={`bg-gradient-to-r ${method.gradient} hover:shadow-xl hover:scale-105 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg border border-white/20`}
                       >
                         <Link href="/contact">{method.action}</Link>
                       </Button>
@@ -480,7 +480,7 @@ export default function Contact() {
                 variant="outline" 
                 asChild 
                 size="lg"
-                className="border-2 border-white/50 text-white hover:bg-white/10 hover:scale-105 backdrop-blur-sm font-semibold px-10 py-4 rounded-xl text-lg transition-all duration-300"
+                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 hover:scale-105 backdrop-blur-sm font-bold px-10 py-4 rounded-xl text-lg transition-all duration-300 shadow-lg"
               >
                 <Link href="tel:+18885113697">Call Now</Link>
               </Button>
