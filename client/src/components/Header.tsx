@@ -36,7 +36,7 @@ function HeaderComponent() {
               className="h-8 w-auto"
             />
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-gray-900">
+              <span className="text-lg font-black text-gray-900">
                 Qualibrite Health
               </span>
               {user && (
@@ -92,7 +92,7 @@ function HeaderComponent() {
               alt="Qualibrite Health" 
               className="h-6 w-auto"
             />
-            <span className="text-lg font-bold text-gray-900">
+            <span className="text-lg font-black text-gray-900">
               Qualibrite Health
             </span>
           </Link>

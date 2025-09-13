@@ -237,7 +237,7 @@ export default function Contact() {
                       </div>
                       <Button 
                         asChild 
-                        className={`bg-gradient-to-r ${method.gradient} hover:opacity-90 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300 text-sm`}
+                        className={`bg-gradient-to-r ${method.gradient} hover:opacity-90 text-white font-bold px-4 py-2 rounded-xl transition-all duration-300 text-sm shadow-lg`}
                       >
                         <Link href="/contact">{method.action}</Link>
                       </Button>
