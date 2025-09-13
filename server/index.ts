@@ -35,6 +35,10 @@ const apiLimiter = rateLimit({
 });
 
 const app = express();
+
+// Enable trust proxy for accurate IP detection in production/proxy environments
+app.set('trust proxy', true);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
