@@ -460,4 +460,104 @@ router.post('/generate-team-photo-image', async (req, res) => {
   }
 });
 
+router.post('/generate-specific-individual-therapy-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a one-on-one individual therapy session in progress. Show a professional therapist sitting across from a client in a warm, private therapy office. The therapist should appear empathetic and engaged, taking notes or listening actively. Include comfortable seating (two chairs facing each other), soft lighting, plants, bookshelves with psychology books, and a calm, confidential atmosphere. The scene should convey trust, privacy, personalized care, and therapeutic connection. High-quality portrait photography, 85mm lens, warm natural lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `specific-individual-therapy-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Specific individual therapy image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate specific individual therapy image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-specific-group-therapy-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing an actual group therapy session in progress. Show 6-8 diverse participants sitting in a circle with a professional group therapist facilitating the discussion. The setting should be a warm, comfortable group therapy room with soft lighting and a supportive atmosphere. Participants should appear engaged in sharing and listening, creating a sense of community and mutual support. Include comfortable seating arranged in a circle, warm lighting, and a safe, therapeutic environment. High-quality group photography, wide-angle lens, natural lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `specific-group-therapy-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Specific group therapy image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate specific group therapy image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-specific-crisis-intervention-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a mental health crisis intervention specialist providing immediate support. Show a compassionate, highly trained crisis counselor on a phone call or video session, providing urgent mental health support with a calm, professional demeanor. The setting should be a specialized crisis response center with multiple communication devices, emergency protocols visible, and a 24/7 support environment. Include headsets, computer monitors, crisis hotline materials, and a professional but urgently responsive atmosphere. High-quality emergency services photography, excellent lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `specific-crisis-intervention-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Specific crisis intervention image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate specific crisis intervention image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-specific-psychological-assessment-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image showing a professional psychological assessment session in progress. Show a licensed psychologist conducting comprehensive psychological testing with a client. Include psychological assessment materials, testing forms, cognitive assessment tools, and evaluation documents on a desk. The psychologist should appear highly competent and professional, explaining assessment procedures to the client. The setting should be a professional psychology office with assessment materials, testing protocols, and diagnostic references visible. High-quality medical photography, 85mm lens, professional lighting, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `specific-psychological-assessment-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Specific psychological assessment image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate specific psychological assessment image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 export default router;

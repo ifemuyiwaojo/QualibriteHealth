@@ -16,7 +16,7 @@ const services = [
     features: ["Personalized treatment plans", "Flexible scheduling", "Evidence-based approaches"],
     gradient: "from-teal-400 to-cyan-500",
     delay: 0.1,
-    image: "/Mental_health_online_therapy_support_4e8375f7.png"
+    image: "/Individual_therapy_session_in_progress_3aa1f825.png"
   },
   {
     icon: Users,
@@ -25,7 +25,7 @@ const services = [
     features: ["Peer support network", "Guided discussions", "Shared healing experiences"],
     gradient: "from-cyan-400 to-blue-500",
     delay: 0.2,
-    image: "/telehealth_platform_features_photorealistic.png"
+    image: "/Group_therapy_session_in_circle_3ee22aff.png"
   },
   {
     icon: Pill,
@@ -52,7 +52,7 @@ const services = [
     features: ["24/7 availability", "Immediate response", "Emergency protocols"],
     gradient: "from-rose-400 to-pink-500",
     delay: 0.5,
-    image: "/call-team-support-1757752765131.png"
+    image: "/Crisis_intervention_specialist_providing_support_b060aee1.png"
   },
   {
     icon: ClipboardCheck,
@@ -61,7 +61,7 @@ const services = [
     features: ["Comprehensive testing", "Detailed reports", "Treatment planning"],
     gradient: "from-purple-400 to-indigo-500",
     delay: 0.6,
-    image: "/contact-support-1757752648444.png"
+    image: "/Psychological_assessment_session_with_testing_materials_9a7dc793.png"
   },
 ];
 
