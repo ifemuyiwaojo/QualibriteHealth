@@ -5,6 +5,34 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Bright healthcare theme colors */
+    --background: 218 100% 97%; /* blue-50 equivalent */
+    --foreground: 222 84% 5%; /* slate-900 equivalent */
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 222 84% 5%; /* slate-900 */
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 222 84% 5%; /* slate-900 */
+    --primary: 198 93% 60%; /* blue-500 */
+    --primary-foreground: 0 0% 98%; /* white */
+    --secondary: 214 32% 91%; /* blue-100 */
+    --secondary-foreground: 222 84% 5%; /* slate-900 */
+    --muted: 214 32% 91%; /* blue-100 */
+    --muted-foreground: 215 16% 47%; /* slate-600 */
+    --accent: 180 78% 87%; /* teal-200 */
+    --accent-foreground: 222 84% 5%; /* slate-900 */
+    --destructive: 0 84% 60%; /* red-500 */
+    --destructive-foreground: 0 0% 98%; /* white */
+    --border: 214 32% 91%; /* blue-100 */
+    --input: 214 32% 91%; /* blue-100 */
+    --ring: 198 93% 60%; /* blue-500 */
+    --chart-1: 198 93% 60%; /* blue-500 */
+    --chart-2: 180 78% 60%; /* teal-500 */
+    --chart-3: 142 71% 45%; /* green-600 */
+    --chart-4: 48 96% 53%; /* yellow-400 */
+    --chart-5: 262 83% 58%; /* purple-500 */
+  }
+
   * {
     @apply border-border;
   }
