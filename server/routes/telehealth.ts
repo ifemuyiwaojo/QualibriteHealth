@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@db';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
 import axios, { AxiosError } from 'axios';
+import { generateTelehealthImage, TELEHEALTH_PROMPTS } from '../lib/image-generator';
 
 const router = express.Router();
 
@@ -131,6 +132,105 @@ router.post('/visit', authenticateToken, authorizeRoles('provider', 'patient'), 
     res.status(400).json({
       success: false,
       error: handledError.message
+    });
+  }
+});
+
+// Image generation endpoints for the platform
+router.post('/generate-hero-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const imagePath = await generateTelehealthImage({
+      prompt: TELEHEALTH_PROMPTS.heroImage,
+      filename: `hero-image-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Hero image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate hero image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-services-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image for a mental health services page showing a diverse, professional therapy consultation. Show a licensed therapist conducting an individual therapy session with a patient in a modern, luxurious mental health office. The scene should convey trust, professionalism, and quality care. Include modern office furnishings, natural lighting, comfortable seating, and subtle decorative elements that create a calming, therapeutic environment. The therapist should appear highly competent and empathetic. Studio-quality photography with professional lighting, shot with 85mm lens, shallow depth of field, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `services-consultation-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Services consultation image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate services image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-faq-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image for an FAQ page of a premium mental health platform. Show a friendly, professional mental health support specialist sitting at a modern desk, ready to assist with questions. The person should have a warm, approachable expression while maintaining professional credibility. Include modern office technology, multiple communication devices (phone, computer, tablet), organized documentation, and a clean, contemporary workspace that conveys expertise and accessibility. Natural lighting with professional photography quality, shot with 85mm lens, perfect focus, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `faq-support-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'FAQ support image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate FAQ image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/generate-contact-image', async (req, res) => {
+  try {
+    const timestamp = Date.now();
+    const prompt = `Create a BOLD, photorealistic image for a contact page showing a professional mental health customer service team. Show diverse, friendly professionals in a modern call center or support office environment, wearing headsets and working at contemporary workstations. The scene should convey 24/7 availability, professional support, and immediate assistance. Include multiple workstations, modern technology, comfortable office lighting, and team members actively engaged in helping patients. Professional office photography with excellent lighting, shot with wide-angle lens, deep focus, ultra-high resolution.`;
+    
+    const imagePath = await generateTelehealthImage({
+      prompt,
+      filename: `contact-support-${timestamp}.png`,
+      directory: 'attached_assets/generated_images'
+    });
+    
+    res.json({
+      success: true,
+      imagePath,
+      message: 'Contact support image generated successfully'
+    });
+  } catch (error: any) {
+    console.error('Failed to generate contact image:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });
