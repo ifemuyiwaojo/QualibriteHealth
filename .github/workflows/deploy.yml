@@ -1,0 +1,58 @@
+name: Deploy to Production
+
+on:
+  # Manual trigger - the "Deploy" button
+  workflow_dispatch:
+
+  # Auto-deploy when pushing to main (optional - remove if you only want manual deploys)
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 178.156.218.90 >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            dist/ root@178.156.218.90:/var/www/qualibritehealth/dist/
+
+      - name: Restart application
+        run: |
+          ssh -i ~/.ssh/deploy_key root@178.156.218.90 "pm2 restart qualibritehealth"
+
+      - name: Verify deployment
+        run: |
+          sleep 5
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://qualibritehealth.com)
+          if [ "$STATUS" = "200" ]; then
+            echo "Deployment successful! Site returned HTTP $STATUS"
+          else
+            echo "Warning: Site returned HTTP $STATUS - please check manually"
+          fi
