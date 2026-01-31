@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import authRoutes from "./routes/auth";
-import telehealthRoutes from "./routes/telehealth";
+
 import providerRoutes from "./routes/provider";
 import setupRoutes from "./routes/setup";
 import adminRoutes from "./routes/admin";
@@ -21,9 +21,6 @@ export function registerRoutes(app: Express): Server {
   
   // Authentication routes - without CSRF for initial login
   app.use("/api/auth", authRoutes);
-
-  // Telehealth routes (sensitive medical data) - apply general API rate limiting
-  app.use("/api/telehealth", limitAPI, telehealthRoutes);
 
   // Provider routes (sensitive patient info) - apply general API rate limiting
   app.use("/api/provider", limitAPI, providerRoutes);
